@@ -4,10 +4,195 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="style.css">
 
-    <title>Bienvenue sur EcoRide</title>
+    <title>EcoRide - Covoiturage écologique</title>
 </head>
 <body>
-<h1>Eco Ride</h1>
+<!--Navbar-->
+<nav>
+    <img src="pictures/logo1.png" alt="logo EcoRide">
+    <button type="button">Connexion</button>
+</nav>
+
+<!--Main content-->
+<main>
+
+    <!--Picture section-->
+    <section>
+        <div>
+            <img src="pictures/voitures.jpg" alt="Many cars driving on the road">
+            <h1>Voyagez vert, voyagez ensemble</h1>
+            <p>Réduisez votre empreinte carbone avec EcoRide</p>
+        </div>
+    </section>
+
+    <!--Search section-->
+    <section>
+        <h2>Trouvez votre trajet</h2>
+        <div>
+            <input type="text" placeholder="Départ">
+            <input type="text" placeholder="Destination">
+            <input type="date" value="today">
+            <button type="submit">Rechercher</button>
+        </div>
+    </section>
+
+    <!--Stats section-->
+    <section>
+        <div class="containerStat">
+            <div class="stat1">
+                <img src="pictures/stats.jpg" alt="Stats">
+                <p>Trajets verts</p>
+                <p class="statTrajetVert">1245<span>km</span></p>
+            </div>
+            <div class="stat2">
+                <img src="pictures/stats.jpg" alt="Stats">
+                <p>Utilisateurs</p>
+                <p class="statTrajetVert">8246</p>
+            </div>
+            <div class="stat3">
+                <img src="pictures/stats.jpg" alt="Stats">
+                <p>CO2 économisé</p>
+                <p class="statTrajetVert">56t</p>
+            </div>
+        </div>
+    </section>
+
+    <!--Popular destinations-->
+    <section>
+        <div class="container destination populaire">
+            <h2>Destinations populaires</h2>
+            <p>Voir tout</p>
+            <div>
+                <div class="destination1">
+                    <img src="pictures/paris.jpg" alt="" class="Paris">
+                    <p>Paris</p>
+                </div>
+                <div class="destination2">
+                    <img src="pictures/lyon.jpg" alt="" class="Lyon">
+                    <p>Lyon</p>
+                </div>
+                <div class="destination3">
+                    <img src="pictures/marseille.jpg" alt="" class="Marseille">
+                    <p>Marseille</p>
+                </div>
+                <div class="destination4">
+                    <img src="pictures/bordeaux.jpg" alt="" class="Bordeaux">
+                    <p>Bordeaux</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--Recent Rides-->
+    <section>
+        <div class="trajets récents">
+            <h2>Trajets récents</h2>
+            <p>Voir tout</p>
+            <div class="listeVoyageurRecent">
+                <div class="details">
+                    <img src="" alt="">
+                    <p class="travelersName">Sophie M.</p>
+                    <div class="stars"></div>
+                    <span>(4.5)</span>
+                    <div><span>Electrique</span></div>
+                    <p>Paris</p>
+                    <div>-></div>
+                    <p>Lyon</p>
+                    <div>
+                        <img src="" alt="">
+                        <p>5 mai, 10:00</p>
+                        <img src="" alt="">
+                        <p>2 places</p>
+                        <p>15€</p>
+                    </div>
+                </div>
+                <div>
+                    <div class="details">
+                        <img src="" alt="">
+                        <p class="travelersName">Sophie M.</p>
+                        <div class="stars"></div>
+                        <span>(4.5)</span>
+                        <div><span>Electrique</span></div>
+                        <p>Paris</p>
+                        <div>-></div>
+                        <p>Lyon</p>
+                        <div>
+                            <img src="" alt="">
+                            <p>5 mai, 10:00</p>
+                            <img src="" alt="">
+                            <p>2 places</p>
+                            <p>15€</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="details">
+                    <img src="" alt="">
+                    <p class="travelersName">Sophie M.</p>
+                    <div class="stars"></div>
+                    <span>(4.5)</span>
+                    <div><span>Electrique</span></div>
+                    <p>Paris</p>
+                    <div>-></div>
+                    <p>Lyon</p>
+                    <div>
+                        <img src="" alt="">
+                        <p>5 mai, 10:00</p>
+                        <img src="" alt="">
+                        <p>2 places</p>
+                        <p>15€</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--Eco Impact-->
+    <section>
+        <div>
+            <div>
+                <img src="" alt="">
+                <h2>Impact écologique</h2>
+            </div>
+            <div>
+                <p>En choisissant un trajet en covoiturage électrique, vous réduisez
+                    votre empreinte carbone de près de 75% par rapport à un voyage en
+                    voiture individuelle.</p>
+            </div>
+            <div>
+                <div>
+                    <p>CO2 économisé ce mois</p><span>4,8 tonnes</span>
+                    <img src="" alt="">
+                </div>
+                <div>
+                    <p>Trajets verts ce mois</p><span>325 trajets</span>
+                    <img src="" alt="">
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- Tab bar-->
+<section>
+    <div>
+        <div class="tabAccueil">
+            <img src="" alt="">
+            <p>Accueil</p>
+        </div>
+        <div class="tabSearch">
+            <img src="" alt="">
+            <p>Recherche</p>
+        </div>
+        <div class="tabSuggest">
+            <img src="" alt="">
+            <p>Proposer</p>
+        </div>
+        <div class="tabProfil">
+            <img src="" alt="">
+            <p>Profil</p>
+        </div>
+    </div>
+</section>
 
 <script src="javascript.js"></script>
 </body>
