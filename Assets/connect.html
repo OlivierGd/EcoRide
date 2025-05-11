@@ -8,11 +8,62 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <title>EcoRide - Connexion</title>
 </head>
-<body>
+<body class="bg-light">
 
+<!-- Header avec logo centré -->
+<header class="d-flex align-items-center justify-content-center p-3">
+    <a href="#">
+        <img class="img-fluid" src="pictures/logo1.png" alt="Logo EcoRide" style="height: 100px; width: auto">
+    </a>
+</header>
 
+<!-- Contenu principal -->
+<main class="d-flex flex-column align-items-center justify-content-center min-vh-100">
+    <div class="card p-4 shadow-sm" style="max-width: 400px; width: 100%;">
+        <h1 class="text-center mb-4">Connexion</h1>
 
+        <form action="connect.html" method="POST">
+            <div class="mb-3">
+                <label for="exampleInputEmail1" class="form-label">Adresse e-mail</label>
+                <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" required>
+                <div id="emailHelp" class="form-text">Nous ne partageons pas votre email.</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="exampleInputPassword1" class="form-label">Mot de passe</label>
+                <input type="password" class="form-control" id="exampleInputPassword1" required>
+            </div>
+
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                <label class="form-check-label" for="exampleCheck1">Se souvenir de moi</label>
+            </div>
+
+            <div class="mb-3 text-end">
+                <a class="link-secondary small" href="#">Mot de passe oublié ?</a>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">Se connecter</button>
+        </form>
+
+        <!-- Séparateur -->
+        <div class="d-flex align-items-center my-3">
+            <hr class="flex-grow-1">
+            <span class="px-2 text-muted">ou</span>
+            <hr class="flex-grow-1">
+        </div>
+
+        <!-- Option inscription -->
+        <div class="text-center">
+            <p class="mb-2">Pas encore de compte ?</p>
+            <a href="signup.html" class="btn btn-outline-secondary w-100">S'inscrire</a>
+        </div>
+    </div>
+</main>
+
+<!-- Scripts -->
 <script src="javascript/javascript.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
 </body>
+
 </html>
