@@ -64,46 +64,72 @@
 
     <!--Stats section-->
     <section>
-        <div class="containerStat">
-            <div class="stat1">
-                <img src="pictures/stats.jpg" alt="Stats">
-                <p>Trajets verts</p>
-                <p class="statTrajetVert">1245<span>km</span></p>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="col">
+                <div class="card h-80">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-ev-front"></i></h5>
+                        <p class="card-text">Trajets Verts</p>
+                        <p class="card-text">1,245</p>
+                    </div>
+                </div>
             </div>
-            <div class="stat2">
-                <img src="pictures/stats.jpg" alt="Stats">
-                <p>Utilisateurs</p>
-                <p class="statTrajetVert">8246</p>
+            <div class="col">
+                <div class="card h-80">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-person"></i></h5>
+                        <p class="card-text">Utilisateurs</p>
+                        <p class="card-text">8,732</p>
+                    </div>
+                </div>
             </div>
-            <div class="stat3">
-                <img src="pictures/stats.jpg" alt="Stats">
-                <p>CO2 économisé</p>
-                <p class="statTrajetVert">56t</p>
+            <div class="col">
+                <div class="card h-80">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-leaf"></i></h5>
+                        <p class="card-text">CO2 économisé</p>
+                        <p class="card-text">56 T</p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
     <!--Popular destinations-->
     <section>
-        <div class="container destination populaire">
-            <h2>Destinations populaires</h2>
-            <p>Voir tout</p>
-            <div>
-                <div class="destination1">
-                    <img src="pictures/paris.jpg" alt="" class="rounded mx-auto d-block">
-                    <p>Paris</p>
+        <h2>Destinations populaires</h2>
+        <span>Voir tout</span>
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            <div class="col">
+                <div class="card">
+                    <img src="pictures/paris.jpg" class="card-img-top" alt="Picture of Paris">
+                    <div class="card-body">
+                        <h5 class="card-title">Paris</h5>
+                    </div>
                 </div>
-                <div class="destination2">
-                    <img src="pictures/lyon.jpg" alt="" class="Lyon">
-                    <p>Lyon</p>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <img src="pictures/lyon.jpg" class="card-img-top" alt="Picture of Lyon">
+                    <div class="card-body">
+                        <h5 class="card-title">Lyon</h5>
+                    </div>
                 </div>
-                <div class="destination3">
-                    <img src="pictures/marseille.jpg" alt="" class="Marseille">
-                    <p>Marseille</p>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <img src="pictures/marseille.jpg" class="card-img-top" alt="Picture of Marseille">
+                    <div class="card-body">
+                        <h5 class="card-title">Marseille</h5>
+                    </div>
                 </div>
-                <div class="destination4">
-                    <img src="pictures/bordeaux.jpg" alt="" class="Bordeaux">
-                    <p>Bordeaux</p>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <img src="pictures/bordeaux.jpg" class="card-img-top" alt="Picture of Bordeaux">
+                    <div class="card-body">
+                        <h5 class="card-title">Bordeaux</h5>
+                    </div>
                 </div>
             </div>
         </div>
@@ -111,62 +137,91 @@
 
     <!--Recent Rides-->
     <section>
-        <div class="trajets récents">
-            <h2>Trajets récents</h2>
-            <p>Voir tout</p>
-            <div class="listeVoyageurRecent">
-                <div class="details">
-                    <img src="" alt="">
-                    <p class="travelersName">Sophie M.</p>
-                    <div class="stars"></div>
-                    <span>(4.5)</span>
-                    <div><span>Electrique</span></div>
-                    <p>Paris</p>
-                    <div>-></div>
-                    <p>Lyon</p>
+        <h2>Trajets récents</h2>
+        <p>Voir tout</p>
+        <div class="card-group">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Sophie M.</h5>
                     <div>
-                        <img src="" alt="">
-                        <p>5 mai, 10:00</p>
-                        <img src="" alt="">
-                        <p>2 places</p>
-                        <p>15€</p>
-                    </div>
-                </div>
-                <div>
-                    <div class="details">
-                        <img src="" alt="">
-                        <p class="travelersName">Sophie M.</p>
-                        <div class="stars"></div>
-                        <span>(4.5)</span>
-                        <div><span>Electrique</span></div>
-                        <p>Paris</p>
-                        <div>-></div>
-                        <p>Lyon</p>
-                        <div>
-                            <img src="" alt="">
-                            <p>5 mai, 10:00</p>
-                            <img src="" alt="">
-                            <p>2 places</p>
-                            <p>15€</p>
+                        <div class="float-start">
+                            <span class="text-gold">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-half"></i>
+                            </span>
+                            <span>
+                            (4.5)
+                        </span>
+                        </div>
+                        <div class="float-end">
+                            <button class="badge rounded-pill text-bg-success" type="button">Electrique</button>
                         </div>
                     </div>
+                    <p class="card-text"><span><i class="bi bi-geo-alt"></i>Paris -> <i class="bi bi-pin-map"></i>Lyon</span></p>
+                    <p class="card-text"><small class="text-body-secondary">
+                        <span><i class="bi bi-calendar-event"></i>10 mai, 10:00</span>
+                        <span><i class="bi bi-person-fill-add"></i>2 places</span>
+                    <span>15 €</span></small></p>
                 </div>
-                <div class="details">
-                    <img src="" alt="">
-                    <p class="travelersName">Sophie M.</p>
-                    <div class="stars"></div>
-                    <span>(4.5)</span>
-                    <div><span>Electrique</span></div>
-                    <p>Paris</p>
-                    <div>-></div>
-                    <p>Lyon</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Thomas D.</h5>
                     <div>
-                        <img src="" alt="">
-                        <p>5 mai, 10:00</p>
-                        <img src="" alt="">
-                        <p>2 places</p>
-                        <p>15€</p>
+                        <div class="float-start">
+                            <span class="text-gold">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-half"></i>
+                            </span>
+                            <span>
+                            (4.0)
+                        </span>
+                        </div>
+                        <div class="float-end">
+                            <button class="badge rounded-pill text-bg-success" type="button">Electrique</button>
+                        </div>
                     </div>
+                    <p class="card-text"><span><i class="bi bi-geo-alt"></i>Marseille -> <i class="bi bi-pin-map"></i>Nice</span></p>
+                    <p class="card-text"><small class="text-body-secondary">
+                        <span><i class="bi bi-calendar-event"></i>6 mai, 14:30</span>
+                        <span><i class="bi bi-person-fill-add"></i>2 places</span>
+                        <span>12 €</span></small></p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Camille B.</h5>
+                    <div>
+                        <div class="float-start">
+                            <span class="text-gold">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+
+                            </span>
+                            <span>
+                            (5.0)
+                        </span>
+                        </div>
+                        <div class="float-end">
+                            <button class="badge rounded-pill text-bg-success" type="button">Standard</button>
+                        </div>
+                    </div>
+                    <p class="card-text"><span><i class="bi bi-geo-alt"></i>Paris -> <i class="bi bi-pin-map"></i>Lyon</span></p>
+                    <p class="card-text"><small class="text-body-secondary">
+                        <span><i class="bi bi-calendar-event"></i>10 mai, 10:00</span>
+                        <span><i class="bi bi-person-fill-add"></i>2 places</span>
+                        <span>15 €</span></small></p>
                 </div>
             </div>
         </div>
@@ -184,14 +239,14 @@
                     votre empreinte carbone de près de 75% par rapport à un voyage en
                     voiture individuelle.</p>
             </div>
+            <p>CO2 économisé ce mois<span>4,8 tonnes</span></p>
+            <div class="progress" role="progressbar" aria-label="Animated striped example" aria-valuenow="55" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 55%"></div>
+            </div>
             <div>
-                <div>
-                    <p>CO2 économisé ce mois</p><span>4,8 tonnes</span>
-                    <img src="" alt="">
-                </div>
-                <div>
-                    <p>Trajets verts ce mois</p><span>325 trajets</span>
-                    <img src="" alt="">
+                <p>Trajets verts ce mois<span>325 trajets</span></p>
+                <div class="progress" role="progressbar" aria-label="Animated striped example" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 80%"></div>
                 </div>
             </div>
         </div>
@@ -200,24 +255,14 @@
 
 <!-- Tab bar-->
 <section>
-    <div>
-        <div class="tabAccueil">
-            <img src="" alt="">
-            <p>Accueil</p>
+    <nav class="navbar sticky-bottom bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"><i class="bi bi-house"></i>Accueil</a>
+            <a class="navbar-brand" href="#"><i class="bi bi-zoom-in"></i>Rechercher</a>
+            <a class="navbar-brand" href="#"><i class="bi bi-ev-front"></i>Proposer</a>
+            <a class="navbar-brand" href="#"><i class="bi bi-person"></i>Profil</a>
         </div>
-        <div class="tabSearch">
-            <img src="" alt="">
-            <p>Recherche</p>
-        </div>
-        <div class="tabSuggest">
-            <img src="" alt="">
-            <p>Proposer</p>
-        </div>
-        <div class="tabProfil">
-            <img src="" alt="">
-            <p>Profil</p>
-        </div>
-    </div>
+    </nav>
 </section>
 
 <script src="javascript/javascript.js"></script>
