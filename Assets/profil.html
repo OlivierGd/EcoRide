@@ -3,25 +3,312 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="CSS/style.css">
+    <link rel="stylesheet" href="css/style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <title>EcoRide - Mon profil</title>
 </head>
 <body>
-<nav>
-    <div>
-        <ul class="nav justify-content-center"></ul>
-        <button class="">Back</button>
-        <p>Mon profil</p>
-        <button type="submit">Settings</button>
+<nav class="navbar fixed-top bg-body-tertiary">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <img src="pictures/logo.svg" alt="Logo EcoRide" width="60">
+        </a>
+        <h2>Mon Profil</h2>
+        <a href="#"><i class="bi bi-gear"></i></a>
     </div>
 </nav>
 
 <main>
+    <!-- Data profil -->
+    <Section class="mt-5 pt-5">
+        <div class="card mb-3" style="max-width: 540px;">
+            <div class="row g-0">
+                <div class="col-md-4">
+                    <img src="#" class="img-fluid rounded-start" alt="Photo de profil">
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <h5 class="card-title">Thomas Dubois</h5>
+                        <p class="card-text">
+                        <div class="float-start">
+                            <span class="text-gold">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-half"></i>
+                            </span>
+                            <span>(4.5)</span><span>(32 avis)</span>
+                        </div>
+                        <p class="card-text">Membre depuis Mai 2023</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </Section>
 
+    <!-- Stats track done -->
+    <section>
+        <h2>Statistiques</h2>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="col">
+                <div class="card h-80">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-ev-front"></i></h5>
+                        <p class="card-text">Trajets effectués</p>
+                        <p class="card-text">47</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-80">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-person"></i></h5>
+                        <p class="card-text">Economies de CO2</p>
+                        <p class="card-text">128 kg</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-80">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-leaf"></i></h5>
+                        <p class="card-text">Economies</p>
+                        <p class="card-text">215 €</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Next Trip for connected user -->
+    <section>
+        <h2>Trajets à venir</h2>
+        <div class="px-5 mb-8">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="h5 font-weight-semibold text-dark">Trajets à venir</h3>
+                <a href="#" class="text-primary small font-weight-medium">Voir tout</a>
+            </div>
+
+            <div class="upcoming-trips d-flex overflow-auto pb-2">
+                <div class="min-vw-280 bg-white rounded shadow-sm p-4 border border-light">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <p class="small font-weight-medium text-dark">Lundi, 13 mai</p>
+                            <p class="small text-muted">Départ à 08:30</p>
+                        </div>
+                        <span class="px-2 py-1 bg-success text-white small rounded-pill">Confirmé</span>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="mr-3 d-flex flex-column align-items-center">
+                            <div class="rounded-circle bg-primary" style="width: 12px; height: 12px;"></div>
+                            <div class="bg-light" style="width: 2px; height: 40px;"></div>
+                            <div class="rounded-circle bg-secondary" style="width: 12px; height: 12px;"></div>
+                        </div>
+
+                        <div>
+                            <p class="small font-weight-medium text-dark">Lyon, Gare Part-Dieu</p>
+                            <p class="small font-weight-medium text-dark mt-2">Grenoble, Centre-ville</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle overflow-hidden mr-2" style="width: 32px; height: 32px;">
+                                <img src="#" alt="Conducteur" class="w-100 h-100">
+                            </div>
+                            <p class="small text-muted">Marie L.</p>
+                        </div>
+                        <p class="small font-weight-bold text-dark">12,50 €</p>
+                    </div>
+                </div>
+
+                <div class="min-vw-280 bg-white rounded shadow-sm p-4 border border-light">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <p class="small font-weight-medium text-dark">Vendredi, 17 mai</p>
+                            <p class="small text-muted">Départ à 17:15</p>
+                        </div>
+                        <span class="px-2 py-1 bg-warning text-dark small rounded-pill">En attente</span>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="mr-3 d-flex flex-column align-items-center">
+                            <div class="rounded-circle bg-primary" style="width: 12px; height: 12px;"></div>
+                            <div class="bg-light" style="width: 2px; height: 40px;"></div>
+                            <div class="rounded-circle bg-secondary" style="width: 12px; height: 12px;"></div>
+                        </div>
+
+                        <div>
+                            <p class="small font-weight-medium text-dark">Lyon, Part-Dieux</p>
+                            <p class="small font-weight-medium text-dark mt-2">Annecy, Gare</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle overflow-hidden mr-2" style="width: 32px; height: 32px;">
+                                <img src="#" alt="Conducteur" class="w-100 h-100">
+                            </div>
+                            <p class="small text-muted">Lucas B.</p>
+                        </div>
+                        <p class="small font-weight-bold text-dark">15,00 €</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--Preference de covoiturage-->
+    <section>
+        <div class="px-5 mb-8">
+            <h3 class="h6 mb-3">
+                Préférences de covoiturage
+            </h3>
+            <div class="bg-white rounded shadow-sm border border-light">
+                <div class="p-4 border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="mb-0 font-weight-medium">Conversation</p>
+                            <p class="mb-0 text-muted">Je préfère discuter pendant le trajet</p>
+                        </div>
+                        <label class="d-flex align-items-center cursor-pointer">
+                            <input type="checkbox" checked />
+                            <span class="custom-checkbox"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="p-4 border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="mb-0 font-weight-medium">Musique</p>
+                            <p class="mb-0 text-muted">J'aime écouter de la musique</p>
+                        </div>
+                        <label class="d-flex align-items-center cursor-pointer">
+                            <input type="checkbox" checked />
+                            <span class="custom-checkbox"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="p-4 border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="mb-0 font-weight-medium">Animaux acceptés</p>
+                            <p class="mb-0 text-muted">Petits animaux en cage uniquement</p>
+                        </div>
+                        <label class="d-flex align-items-center cursor-pointer">
+                            <input type="checkbox" />
+                            <span class="custom-checkbox"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="mb-0 font-weight-medium">Fumeur</p>
+                            <p class="mb-0 text-muted">Je préfère les trajets non-fumeur</p>
+                        </div>
+                        <label class="d-flex align-items-center cursor-pointer">
+                            <input type="checkbox" />
+                            <span class="custom-checkbox"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--Paramètres du compte-->
+    <section>
+
+        <div class="p-5 mb-8">
+            <h3 class="h5 font-weight-semibold text-dark mb-3">
+                Paramètres du compte
+            </h3>
+            <div class="bg-white rounded shadow-sm border border-light overflow-hidden">
+                <a href="#" class="p-4 border-bottom d-flex justify-content-between align-items-center cursor-pointer">
+                    <div class="d-flex align-items-center">
+                        <div class="w-10 h-10 d-flex align-items-center justify-content-center bg-light rounded mr-3">
+                            <i class="ri-user-settings-line text-secondary ri-lg"></i>
+                        </div>
+                        <p class="small font-weight-medium text-dark">
+                            Informations personnelles
+                        </p>
+                    </div>
+                    <i class="ri-arrow-right-s-line text-muted ri-lg"></i>
+                </a>
+
+                <a href="#" class="p-4 border-bottom d-flex justify-content-between align-items-center cursor-pointer">
+                    <div class="d-flex align-items-center">
+                        <div class="w-10 h-10 d-flex align-items-center justify-content-center bg-light rounded mr-3">
+                            <i class="ri-notification-3-line text-secondary ri-lg"></i>
+                        </div>
+                        <p class="small font-weight-medium text-dark">Notifications</p>
+                    </div>
+                    <i class="ri-arrow-right-s-line text-muted ri-lg"></i>
+                </a>
+
+                <a href="#" class="p-4 border-bottom d-flex justify-content-between align-items-center cursor-pointer">
+                    <div class="d-flex align-items-center">
+                        <div class="w-10 h-10 d-flex align-items-center justify-content-center bg-light rounded mr-3">
+                            <i class="ri-lock-line text-secondary ri-lg"></i>
+                        </div>
+                        <p class="small font-weight-medium text-dark">Confidentialité</p>
+                    </div>
+                    <i class="ri-arrow-right-s-line text-muted ri-lg"></i>
+                </a>
+
+                <a href="#" class="p-4 border-bottom d-flex justify-content-between align-items-center cursor-pointer">
+                    <div class="d-flex align-items-center">
+                        <div class="w-10 h-10 d-flex align-items-center justify-content-center bg-light rounded mr-3">
+                            <i class="ri-global-line text-secondary ri-lg"></i>
+                        </div>
+                        <p class="small font-weight-medium text-dark">Langue</p>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="small text-muted mr-2">Français</span>
+                        <i class="ri-arrow-right-s-line text-muted ri-lg"></i>
+                    </div>
+                </a>
+
+                <a href="#" class="p-4 border-bottom d-flex justify-content-between align-items-center cursor-pointer">
+                    <div class="d-flex align-items-center">
+                        <div class="w-10 h-10 d-flex align-items-center justify-content-center bg-light rounded mr-3">
+                            <i class="ri-question-line text-secondary ri-lg"></i>
+                        </div>
+                        <p class="small font-weight-medium text-dark">Aide et support</p>
+                    </div>
+                    <i class="ri-arrow-right-s-line text-muted ri-lg"></i>
+                </a>
+
+                <a href="#" class="p-4 d-flex justify-content-between align-items-center cursor-pointer">
+                    <div class="d-flex align-items-center">
+                        <div class="w-10 h-10 d-flex align-items-center justify-content-center bg-danger rounded mr-3">
+                            <i class="ri-logout-box-line text-danger ri-lg"></i>
+                        </div>
+                        <p class="small font-weight-medium text-danger">Se déconnecter</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
 </main>
 
+<footer>
+    <nav class="navbar fixed-bottom bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html"><i class="bi bi-house"></i>Accueil</a>
+            <a class="navbar-brand" href="proposer.html"><i class="bi bi-zoom-in"></i>Rechercher</a>
+            <a class="navbar-brand" href="proposer.html"><i class="bi bi-ev-front"></i>Proposer</a>
+            <a class="navbar-brand" href="profil.html"><i class="bi bi-person"></i>Profil</a>
+        </div>
+    </nav>
+</footer>
 
 
 <script src="js/script.js"></script>

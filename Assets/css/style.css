@@ -1,0 +1,14 @@
+
+body {
+    font-family: 'Poppins', sans-serif;
+
+}
+header, main, footer {
+    width: 95%;
+    margin: 0 auto;
+}
+
+    /*Color for stars ratting*/
+.text-gold {
+    color: #d4af37;
+}
