@@ -12,7 +12,7 @@
 <body>
 <!-- Navbar -->
 <header>
-    <nav class="navbar fixed-top bg-body-tertiary">
+    <nav class="navbar fixed-top bg-white shadow-sm">
         <div class="container-fluid">
             <a class="navbar-brand" href="index.html">
                 <img src="pictures/logo1.png" alt="logo EcoRide" class="d-inline-block align-text-center" width="60">
@@ -48,21 +48,24 @@
     <!--Form Search section-->
     <section>
         <h2 class="mt-5">Trouvez votre trajet</h2>
-        <div class="mb-3">
-            <label for="formSearchStart" class="form-label"><i class="bi bi-geo-alt"></i>Départ</label>
-            <input type="text" class="form-control ps-5" id="formSearchStart" placeholder="Ville de départ">
-        </div>
-        <div class="mb-3">
-            <label for="formSearchDestination" class="form-label"><i class="bi bi-pin-map"></i>Destination</label>
-            <input type="text" class="form-control ps-5" id="formSearchDestination" placeholder="Destination">
-        </div>
-        <div class="mb-3">
-            <label for="formSearchDate" class="form-label"></label>
-            <input type="date" class="form-control" id="formSearchDate" placeholder="jj/mm/aaaa">
-        </div>
-        <div class="d-grid gap-2 d-dm-block">
-        <button type="submit" class="btn btn-success btn-lg p-2 m-3"><i class="bi bi-search"> Rechercher</i></button>
-        </div>
+        <form id="formSearchDestination">
+            <div class="mb-3">
+                <label for="searchStartCity" class="form-label"><i class="bi bi-geo-alt"></i>Départ</label>
+                <input type="text" class="form-control ps-5" id="searchStartCity" placeholder="Ville de départ" required>
+            </div>
+            <div class="mb-3">
+                <label for="searchEndCity" class="form-label"><i class="bi bi-pin-map"></i>Destination</label>
+                <input type="text" class="form-control ps-5" id="searchEndCity" placeholder="Destination" required>
+            </div>
+            <div class="mb-3">
+                <label for="searchDate" class="form-label"></label>
+                <input type="date" class="form-control" id="searchDate" placeholder="jj/mm/aaaa" required>
+            </div>
+            <div class="d-grid gap-2 d-dm-block">
+                <button type="submit" class="btn btn-success btn-lg p-2 m-3"><i class="bi bi-search"> Rechercher</i>
+                </button>
+            </div>
+        </form>
     </section>
 
     <!--Stats section-->
@@ -259,12 +262,12 @@
 
 <!-- Tab bar-->
 <footer>
-    <nav class="navbar fixed-bottom bg-body-tertiary">
+    <nav class="navbar fixed-bottom bg-white shadow-lg px-4">
         <div class="container-fluid">
-            <a class="navbar-brand text-success" href="index.html"><i class="bi bi-house"></i>Accueil</a>
-            <a class="navbar-brand text-success" href="rechercher.html"><i class="bi bi-zoom-in"></i>Rechercher</a>
-            <a class="navbar-brand text-success" href="proposer.html"><i class="bi bi-ev-front"></i>Proposer</a>
-            <a class="navbar-brand text-success" href="profil.html"><i class="bi bi-person"></i>Profil</a>
+            <a class="navbar-brand" href="index.html"><i class="bi bi-house"></i>Accueil</a>
+            <a class="navbar-brand" href="rechercher.html"><i class="bi bi-zoom-in"></i>Rechercher</a>
+            <a class="navbar-brand" href="proposer.html"><i class="bi bi-ev-front"></i>Proposer</a>
+            <a class="navbar-brand" href="profil.html"><i class="bi bi-person"></i>Profil</a>
         </div>
     </nav>
 </footer>
