@@ -1,1 +1,15 @@
-Assets/pictures/
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Dossier temporaire
+node_modules/
+dist/
+build/
+tmp/
+
+# Logs
+*.log
+
+# Environnements
+.env
