@@ -1,4 +1,4 @@
-//Search form destination
+//Form search destination
 // Waitting DOM is completly charged
 document.addEventListener('DOMContentLoaded', () => {
     //Rechercher le formulaire
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dateInput.value = getTodayDate();
     }
 });
-
+//Fonction pour renvoyer un format de date jj/mm/yyyy en FO et un format de date yyyy-mm-dd en console
 function getTodayDate() {
     const today = new Date();
     const year = today.getFullYear();
@@ -38,3 +38,6 @@ function getTodayDate() {
     const day = String(today.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
 }
+
+//Suggest a trip for passenger
+
