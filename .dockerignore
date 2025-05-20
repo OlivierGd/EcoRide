@@ -1,0 +1,27 @@
+# flyctl launch added from .gitignore
+# Fichiers système
+**/.DS_Store
+**/Thumbs.db
+
+# Dossier temporaire
+**/node_modules
+**/dist
+**/build
+**/tmp
+
+# Logs
+**/*.log
+
+# Environnements
+**/.env
+
+# flyctl launch added from .idea/.gitignore
+# Default ignored files
+.idea/shelf
+.idea/workspace.xml
+# Editor-based HTTP Client requests
+.idea/httpRequests
+# Datasource local storage ignored files
+.idea/dataSources
+.idea/dataSources.local.xml
+fly.toml

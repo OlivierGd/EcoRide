@@ -23,123 +23,123 @@
     </div>
 </nav>
 
-<!-- Main Content -->
-<main>
-    <!-- Define step proposal for trip -->
-    <section>
-        <div class="pt-5"></div>
-        <ul class="nav nav-pills pt-5">
-            <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="#">1.</br>Itinéraire</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">2.</br>Date/Heure</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">3.</br>Prix/Places</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">4.</br>Options</a>
-        </ul>
-    </section>
+<!-- Formulaire Multi-Étapes -->
+<main class="pt-5 mt-5">
+    <form class="multi-step-form">
+        <!-- Étapes contrôlées par radio -->
+        <input type="radio" name="step" id="step1" checked hidden>
+        <input type="radio" name="step" id="step2" hidden>
+        <input type="radio" name="step" id="step3" hidden>
+        <input type="radio" name="step" id="step4" hidden>
 
-    <!-- Form to add start and end point -->
-    <section>
-        <h2 class="mt-5">Itinéraire</h2>
-        <div class="mb-3">
-            <label for="formSearchStart" class="form-label"><i class="bi bi-geo-alt"></i>Ville de départ</label>
-            <input type="text" class="form-control ps-5" id="formSearchStart" placeholder="Départ">
-        </div>
-        <div class="mb-3">
-            <label for="formSearchDestination" class="form-label"><i class="bi bi-pin-map"></i>Destination</label>
-            <input type="text" class="form-control ps-5" id="formSearchDestination" placeholder="Destination">
-        </div>
-        <p>+ Ajouter un arrêt supplémentaire</p>
-        <div class="estimateRange">
-            <p>Distance estimée : <span>465</span> Km</p>
-            <p>Durée approximative : <span>4h15</span></p>
-        </div>
-        <h2>Places et prix</h2>
-        <h3>Nombre de places disponibles</h3>
-        <input type="radio" class="btn-check" name="options-base" id="option1" autocomplete="off">
-        <label class="btn btn-outline-success" for="option1">1</label>
+        <div class="steps container py-4">
 
-        <input type="radio" class="btn-check" name="options-base" id="option2" autocomplete="off">
-        <label class="btn btn-outline-success" for="option2">2</label>
+            <!-- Barre de progression -->
+            <div class="progress mb-4">
+                <div class="progress-bar bg-success" role="progressbar" style="width: 25%;" id="progressBar"></div>
+            </div>
 
-        <input type="radio" class="btn-check" name="options-base" id="option3" autocomplete="off" checked>
-        <label class="btn btn-outline-success" for="option3">3</label>
+            <!-- Étape 1 : Itinéraire -->
+            <div class="step step1">
+                <h2>1. Itinéraire</h2>
+                <div class="mb-3">
+                    <label for="formSearchStart" class="form-label"><i class="bi bi-geo-alt"></i> Ville de départ</label>
+                    <input type="text" class="form-control ps-5" id="formSearchStart" placeholder="Départ">
+                </div>
+                <div class="mb-3">
+                    <label for="formSearchDestination" class="form-label"><i class="bi bi-pin-map"></i> Destination</label>
+                    <input type="text" class="form-control ps-5" id="formSearchDestination" placeholder="Destination">
+                </div>
+                <p>+ Ajouter un arrêt supplémentaire</p>
+            </div>
 
-        <input type="radio" class="btn-check" name="options-base" id="option4" autocomplete="off">
-        <label class="btn btn-outline-success" for="option4">4</label>
+            <!-- Étape 2 : Date/Heure -->
+            <div class="step step2">
+                <h2>2. Date et Heure</h2>
+                <div class="mb-3">
+                    <label for="date" class="form-label">Date</label>
+                    <input type="date" class="form-control" id="date">
+                </div>
+                <div class="mb-3">
+                    <label for="time" class="form-label">Heure</label>
+                    <input type="time" class="form-control" id="time">
+                </div>
+            </div>
 
-        <input type="radio" class="btn-check" name="options-base" id="option5" autocomplete="off">
-        <label class="btn btn-outline-success" for="option5">5</label>
+            <!-- Étape 3 : Places/Prix -->
+            <div class="step step3">
+                <h2>3. Places et Prix</h2>
+                <h3>Nombre de places disponibles</h3>
+                <div class="mb-3">
+                    <div class="btn-group" role="group">
+                        <input type="radio" class="btn-check" name="places" id="place1">
+                        <label class="btn btn-outline-success" for="place1">1</label>
+                        <input type="radio" class="btn-check" name="places" id="place2">
+                        <label class="btn btn-outline-success" for="place2">2</label>
+                        <input type="radio" class="btn-check" name="places" id="place3" checked>
+                        <label class="btn btn-outline-success" for="place3">3</label>
+                        <input type="radio" class="btn-check" name="places" id="place4">
+                        <label class="btn btn-outline-success" for="place4">4</label>
+                        <input type="radio" class="btn-check" name="places" id="place5">
+                        <label class="btn btn-outline-success" for="place5">5</label>
+                    </div>
+                </div>
+                <h3>Prix par passager</h3>
+                <div class="input-group flex-nowrap mb-3">
+                    <span class="input-group-text">€</span>
+                    <input type="number" class="form-control" placeholder="25">
+                </div>
+                <p>Jusqu'à <strong>75€</strong> pour ce trajet avec <strong>3</strong> passagers</p>
+                </div>
+            </div>
 
-        <h3>Prix par passager</h3>
-        <div class="input-group flex-nowrap">
-            <span class="input-group-text" id="addon-wrapping">€</span>
-            <input type="text" class="form-control" placeholder="25" aria-label="Prix du trajet" aria-describedby="addon-wrapping">
-        </div>
-        <div class="estimateBenefice">
-            <h2>Estimation des gains</h2>
-            <p>Jusqu'à <span>75</span>€ pour ce trajet avec <span>3</span> passagers</p>
-        </div>
-
-        <h2>Véhicule</h2>
-        <div class="card border-success mb-3" style="max-width: 18rem;">
-            <div class="card-body text-success">
-                <h5 class="card-title">Tesla Model 3</h5>
-                <p class="card-text">4 places</p>
-                <p class="card-text"><span class="badge text-bg-success">Électrique</span></p>
+            <!-- Étape 4 : Options -->
+            <div class="step step4">
+                <h2>4. Options</h2>
+                <h3>Préférences</h3>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="no-smoking" checked>
+                    <label class="form-check-label" for="no-smoking">Non-fumeur</label>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="musicPlay" checked>
+                    <label class="form-check-label" for="musicPlay">Musique autorisée</label>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="discussTogether" checked>
+                    <label class="form-check-label" for="discussTogether">Discussions bienvenues</label>
+                </div>
+                <h3>Commentaire pour les passagers</h3>
+                <div class="form-floating mb-3">
+                    <textarea class="form-control" id="floatingTextarea2" style="height: 100px"></textarea>
+                    <label for="floatingTextarea2">Ex: Je pars du parking de la gare de Lyon...</label>
+                </div>
             </div>
         </div>
-        <div class="card border-success mb-3" style="max-width: 18rem;">
-        <div class="card-body text-success">
-                <h5 class="card-title">Peugeot e-208</h5>
-                <p class="card-text">3 places</p>
-                <p class="card-text"><span class="badge text-bg-success">Électrique</span></p>
-            </div>
-        </div>
-        <h2>Options pour le trajet</h2>
-        <h3>Préférences</h3>
-        <div class="form-check form-switch">
-            <label class="form-check-label" for="no-smoking">Non-fumeur</label>
-            <input class="form-check-input" type="checkbox" role="switch" id="no-smoking" checked disabled>
-        </div>
-        <div class="form-check form-switch">
-            <label class="form-check-label" for="musicPlay">Musique autorisée</label>
-            <input class="form-check-input" type="checkbox" role="switch" id="musicPlay" checked disabled>
-        </div>
-        <div class="form-check form-switch">
-            <label class="form-check-label" for="discussTogether">Discussions bienvenues</label>
-            <input class="form-check-input" type="checkbox" role="switch" id="discussTogether" checked disabled>
-        </div>
-        <h3>Commentaire pour les passagers</h3>
-        <div>
-            <div class="form-floating">
-                <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea2" style="height: 100px"></textarea>
-                <label for="floatingTextarea2">Je pars du parking de la gare de Lyon. Je peux faire un petit détour pour
-                    récupérer des passagers. Arrivée prévue à Part-Dieu.</label>
-            </div>
-            <p>Maximum 200 caractères</p>
-        </div>
-        <div class="d-grid gap-2 d-dm-block">
-            <button type="submit" class="btn btn-success btn-lg p-2 m-3"><i class="bi bi-send"></i> Publier le trajet</i></button>
-        </div>
-        <div class="pb-5"></div>
-    </section>
-
+        <div class="p-5"></div>
+    </form>
 </main>
 
 <!-- Tab Bar -->
 <footer>
-    <nav class="navbar fixed-bottom bg-body-tertiary">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="index.html"><i class="bi bi-house"></i>Accueil</a>
-            <a class="navbar-brand" href="rechercher.html"><i class="bi bi-zoom-in"></i>Rechercher</a>
-            <a class="navbar-brand" href="proposer.html"><i class="bi bi-ev-front"></i>Proposer</a>
-            <a class="navbar-brand" href="profil.html"><i class="bi bi-person"></i>Profil</a>
+    <nav class="navbar fixed-bottom bg-body-tertiary px-4">
+        <div class="container-fluid d-flex justify-content-around text-center">
+            <a class="nav-item nav-link d-flex flex-column" href="index.html">
+                <i class="bi bi-house fs-4"></i>
+                <span>Accueil</span>
+            </a>
+            <a class="nav-item nav-link d-flex flex-column" href="rechercher.html">
+                <i class="bi bi-zoom-in fs-4"></i>
+                <span>Rechercher</span>
+            </a>
+            <a class="nav-item nav-link d-flex flex-column" href="proposer.html">
+                <i class="bi bi-ev-front fs-4"></i>
+                <span>Proposer</span>
+            </a>
+            <a class="nav-item nav-link d-flex flex-column" href="profil.html">
+                <i class="bi bi-person fs-4"></i>
+                <span>Profil</span>
+            </a>
         </div>
     </nav>
 </footer>
