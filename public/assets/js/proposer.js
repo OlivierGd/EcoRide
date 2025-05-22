@@ -38,17 +38,32 @@ document.getElementById('priceRequested').addEventListener('input', updateDispla
 //Affiche la valeur du prix selon le nombre de places sélectionnées
 document.addEventListener('DOMContentLoaded', updateDisplay);
 
-//Récupérer les données dans le formulaire
+//Fonction pour récupérer les données du formulaire
 
+const dataSuggestedForm = [];
 function getDataSuggestedForm() {
+    event.preventDefault(); //Empeche le rechargement du formaulaire
+
     const inputStartCity = document.getElementById('suggestedStartCity');
     const inputEndCity = document.getElementById('suggestedEndCity');
-    console.log(inputStartCity.value, inputEndCity.value);
-    inputStartCity.value.push(dataForm);
-    inputEndCity.value.push(dataForm);
-    console.log(dataForm);
-}
 
-const dataForm = [];
-const publishButton = document.getElementById('publishSuggestedForm');
-publishButton.addEventListener('click', getDataSuggestedForm);
+    const startCity = inputStartCity.value.trim();
+    const endCity = inputEndCity.value.trim();
+    console.log(startCity, endCity);
+
+    if (!startCity || !endCity) {  //Vérifie si les champs sont complétés
+        console.warn("Veuillez remplir tous les champs !");
+        return;
+    }
+    const formData = {
+        startCity: startCity,
+        endCity: endCity,
+    }
+    dataSuggestedForm.push(formData);
+    console.log("Données du formulaire : ",formData);
+    console.log("Tableau complet : ", dataSuggestedForm);
+}
+document.addEventListener('DOMContentLoaded', () => {
+    const publishButton = document.getElementById('publishSuggestedForm');
+    publishButton.addEventListener('click', getDataSuggestedForm);
+})
