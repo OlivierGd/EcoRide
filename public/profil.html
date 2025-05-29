@@ -20,29 +20,32 @@
     </div>
 </nav>
 
+
 <main>
-    <!-- Data profil -->
-    <Section class="mt-5 pt-5">
-        <div class="card mb-3" style="max-width: 540px;">
-            <div class="row g-0">
-                <div class="col-md-4">
-                    <img src="#" class="img-fluid rounded-start" alt="Photo de profil">
-                </div>
+    <!-- Section Profil personne connectée -->
+    <Section>
+        <div class="container mt-5 pt-5">
+            <div class="row justify-content-center">
                 <div class="col-md-8">
-                    <div class="card-body">
-                        <h5 class="card-title">Thomas Dubois</h5>
-                        <p class="card-text">
-                        <div class="float-start">
-                            <span class="text-gold">
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-half"></i>
-                            </span>
-                            <span>(4.5)</span><span>(32 avis)</span>
+                    <div class="profile-container">
+                        <div class="text-center">
+                            <img src="./assets/pictures/ThomasDubois.jpg" alt="Profile Picture" class="profile-picture rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover">
+                            <h3>Thomas Dubois</h3>
+                            <div class="d-flex align-items-center justify-content-center mb-3">
+                                <span class="text-gold">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-half"></i>
+                                </span>
+                                <span>(4.5)</span>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-center mb-3">
+                                <span class="badge bg-success text-white">Conducteur Vérifié</span>
+                            </div>
+                            <button class="btn btn-success btn-sm mt-2"><i class="fas fa-edit"></i> Modifier le profil</button>
                         </div>
-                        <p class="card-text">Membre depuis Mai 2023</p>
                     </div>
                 </div>
             </div>
@@ -52,31 +55,31 @@
     <!-- Stats track done -->
     <section>
         <h2>Statistiques</h2>
-        <div class="row row-cols-1 row-cols-md-3 g-4">
+        <div class="row row-cols-1 row-cols-md-3 g-4 mb-4">
             <div class="col">
                 <div class="card h-80">
-                    <div class="card-body">
-                        <h5 class="card-title"><i class="bi bi-ev-front"></i></h5>
+                    <div class="card-body d-flex align-items-center flex-column">
+                        <h5 class="card-title card-title rounded-circle bg-success d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;"><i class="bi bi-ev-front text-white"></i></h5>
                         <p class="card-text">Trajets effectués</p>
-                        <p class="card-text">47</p>
+                        <p class="card-text"><strong>47</strong></p>
                     </div>
                 </div>
             </div>
             <div class="col">
                 <div class="card h-80">
-                    <div class="card-body">
-                        <h5 class="card-title"><i class="bi bi-person"></i></h5>
+                    <div class="card-body d-flex align-items-center flex-column">
+                        <h5 class="card-title card-title rounded-circle bg-success d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;"><i class="bi bi-person text-white"></i></h5>
                         <p class="card-text">Economies de CO2</p>
-                        <p class="card-text">128 kg</p>
+                        <p class="card-text"><strong>128 kg</strong></p>
                     </div>
                 </div>
             </div>
             <div class="col">
                 <div class="card h-80">
-                    <div class="card-body">
-                        <h5 class="card-title"><i class="bi bi-leaf"></i></h5>
+                    <div class="card-body d-flex align-items-center flex-column">
+                        <h5 class="card-title rounded-circle bg-success d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;"><i class="bi bi-leaf text-white"></i></h5>
                         <p class="card-text">Economies</p>
-                        <p class="card-text">215 €</p>
+                        <p class="card-text"><strong>215 €</strong></p>
                     </div>
                 </div>
             </div>
@@ -299,6 +302,36 @@
         </div>
     </section>
 </main>
+
+<footer>
+    <nav class="navbar fixed-bottom bg-body-tertiary px-4">
+        <div class="container d-flex justify-content-around text-center" style="max-width: 900px">
+            <a class="nav-item nav-link d-flex flex-column" href="index.html">
+                <i class="bi bi-house fs-4"></i>
+                <span>Accueil</span>
+            </a>
+            <a class="nav-item nav-link d-flex flex-column" href="rechercher.html">
+                <i class="bi bi-zoom-in fs-4"></i>
+                <span>Rechercher</span>
+            </a>
+            <a class="nav-item nav-link d-flex flex-column" href="proposer.html">
+                <i class="bi bi-ev-front fs-4"></i>
+                <span>Proposer</span>
+            </a>
+            <a class="nav-item nav-link d-flex flex-column" href="profil.html">
+                <i class="bi bi-person fs-4"></i>
+                <span>Profil</span>
+            </a>
+        </div>
+    </nav>
+</footer>
+
+
+<script src="assets/js/script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
+</body>
+</html>
+
 
 <footer>
     <nav class="navbar fixed-bottom bg-body-tertiary px-4">
