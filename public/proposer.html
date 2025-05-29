@@ -44,11 +44,11 @@
                 <h2>1. Itinéraire</h2>
                 <div class="mb-3">
                     <label for="suggestedStartCity" class="form-label"><i class="bi bi-geo-alt"></i> Ville de départ</label>
-                    <input type="text" class="form-control ps-5" id="suggestedStartCity" placeholder="Départ">
+                    <input type="text" class="form-control ps-5" id="suggestedStartCity" placeholder="Départ" required>
                 </div>
                 <div class="mb-3">
                     <label for="suggestedEndCity" class="form-label"><i class="bi bi-pin-map"></i> Destination</label>
-                    <input type="text" class="form-control ps-5" id="suggestedEndCity" placeholder="Destination">
+                    <input type="text" class="form-control ps-5" id="suggestedEndCity" placeholder="Destination" required>
                 </div>
                 <p>+ Ajouter un arrêt supplémentaire</p>
             </div>
@@ -57,12 +57,12 @@
             <div class="step step2">
                 <h2>2. Date et Heure</h2>
                 <div class="mb-3">
-                    <label for="date" class="form-label">Date</label>
-                    <input type="date" class="form-control" id="date">
+                    <label for="proposalDate" class="form-label">Date</label>
+                    <input type="date" class="form-control" id="proposalDate" required>
                 </div>
                 <div class="mb-3">
-                    <label for="time" class="form-label">Heure</label>
-                    <input type="time" class="form-control" id="time">
+                    <label for="proposalTime" class="form-label">Heure</label>
+                    <input type="time" class="form-control" id="proposalTime" required>
                 </div>
             </div>
 
@@ -87,7 +87,7 @@
                 <h3>Prix par passager</h3>
                 <div class="input-group flex-nowrap mb-3">
                     <span class="input-group-text">€</span>
-                    <input type="number" class="form-control" id="priceRequested" placeholder="--" value="2">
+                    <input type="number" class="form-control" id="priceRequested" placeholder="--" value="2" min="0" step="1" required>
                 </div>
                 <p>Jusqu'à <strong id="totalPrice"></strong> crédits pour ce trajet avec <strong id="placeFree"></strong> passagers</p>
             </div>
@@ -118,6 +118,29 @@
         <button type="submit" class="btn btn-lg btn-success" id="publishSuggestedForm">Publier ce trajet</button>
         <div class="p-5"></div>
     </form>
+    <section>
+        <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmationModalLabel">Confirmer votre trajet</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <p id="modalText"></p>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="button" class="btn btn-primary" id="confirmSubmit">Confirmer</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
 </main>
 
 <!-- Tab Bar -->
