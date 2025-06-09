@@ -12,6 +12,5 @@ tmp/
 *.log
 
 # Environnements
-.env.DS_Store
-vendor/
 .env
+vendor/

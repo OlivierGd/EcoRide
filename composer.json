@@ -1,0 +1,21 @@
+{
+    "name": "olivierguissard/eco-ride",
+    "description": "Plateforme de covoiturage EcoRide",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Olivierguissard\\EcoRide\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "OlivierGd",
+            "email": "oguissard@yahoo.fr"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "vlucas/phpdotenv": "^5.6"
+    }
+}
