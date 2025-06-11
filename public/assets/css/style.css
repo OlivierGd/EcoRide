@@ -7,6 +7,12 @@ body {
     font-family: 'Poppins', sans-serif;
 }
 
+.main-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1rem; /*Evite que le contenu touche le bord sur mobile*/
+}
+
     /*Color for stars ratting*/
 .text-gold {
     color: #d4af37;
