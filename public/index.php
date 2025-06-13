@@ -1,6 +1,20 @@
 <?php
 $pageTitle = 'Accueil - EcoRide';
 require 'header.php';
+
+// chemin du dossier data
+$dataDir = __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'data';
+
+$file = $dataDir . DIRECTORY_SEPARATOR . date('Y-m-d') . '.txt';
+
+$searchForTrip = [];
+if(isset($_GET['villeDepart']) && isset($_GET['villeArrivee']) && isset($_GET['dateVoyage'])) {
+    $searchForTrip = [
+        'villeDepart' => $_GET['villeDepart'],
+        'villeArrivee' => $_GET['villeArrivee'],
+        'dateVoyage' => $_GET['dateVoyage']
+    ];
+}
 ?>
 
 <!-- Main content -->
@@ -13,7 +27,7 @@ require 'header.php';
             <div class="position-relative text-white">
                 <img src="assets/pictures/voitures.jpg" class="img-fluid w-100 rounded-3" alt="Réduisez votre empreinte carbone avec EcoRide">
 
-                <!-- Overlay sombre (facultatif) -->
+                <!-- Overlay sombre -->
                 <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-50 rounded-3"></div>
 
                 <!-- Texte centré et responsive -->
@@ -27,39 +41,43 @@ require 'header.php';
         <!-- Formulaire de recherche de trajet -->
         <section class="mt-5">
             <h2 class="fw-bold mb-4">Trouvez votre trajet</h2>
-            <form id="formSearchDestination" class="p-4 bg-white rounded-4 shadow-sm">
+            <form action="index.php" method="get" id="formSearchDestination" class="p-4 bg-white rounded-4 shadow-sm">
 
-                <!-- Départ -->
+               <!-- Départ -->
                 <div class="input-group mb-3 bg-light rounded-3">
                     <span class="input-group-text bg-transparent border-0">
-                        <i class="bi bi-geo-alt text secondary"></i>
-                    </span>
-                    <input type="text" class="form-control border-0 bg-transparent" id="searchStartCity" placeholder="Ville de départ" required>
+                       <i class="bi bi-geo-alt text-secondary"></i>
+                   </span>
+                   <input type="text" name="villeDepart" class="form-control border-0 bg-transparent" id="searchStartCity" placeholder="Ville de départ" required>
                 </div>
 
                 <!-- Destination -->
-                <div class="input-group mb-3 bg-light rounded-3">
+              <div class="input-group mb-3 bg-light rounded-3">
             <span class="input-group-text bg-transparent border-0">
                 <i class="bi bi-pin-map text-secondary"></i>
             </span>
-                    <input type="text" class="form-control border-0 bg-transparent" id="searchEndCity" placeholder="Destination" required>
+                    <input type="text" name="villeArrivee" class="form-control border-0 bg-transparent" id="searchEndCity" placeholder="Destination" required>
                 </div>
 
-                <!-- Date -->
+                <!-- Date du voyage -->
                 <div class="input-group mb-4 bg-light rounded-3">
             <span class="input-group-text bg-transparent border-0">
                 <i class="bi bi-calendar-event text-secondary"></i>
             </span>
-                    <input type="date" class="form-control border-0 bg-transparent" id="searchDate" required>
+                    <input type="date" name="dateVoyage" class="form-control border-0 bg-transparent" id="searchDate" required>
                 </div>
 
-                <!-- Bouton -->
+                <!-- Bouton de recherche -->
                 <div class="d-grid">
                     <button type="submit" class="btn btn-success d-flex justify-content-center align-items-center gap-2 rounded-3">
                         <i class="bi bi-search"></i> Rechercher
                     </button>
                 </div>
             </form>
+            <?php echo '<pre>';
+            print_r($searchForTrip);
+            echo '</pre>';
+            ?>
         </section>
 
         <!--Stats section-->
