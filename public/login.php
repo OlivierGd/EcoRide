@@ -2,8 +2,10 @@
 require 'header.php';
 ?>
 
+
 <body>
-<div class="min-vh-100 d-flex flex-column px-3 py-4">
+<div class="container py-5"></div>
+<div class="min-vh-100 d-flex flex-column px-3 py-5">
     <header class="d-flex justify-content-between align-items-center mb-4">
         <a href="index.php" class="btn btn-light p-2 rounded-circle">
             <i class="bi bi-arrow-left"></i>

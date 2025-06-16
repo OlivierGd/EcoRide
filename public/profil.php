@@ -1,4 +1,6 @@
 <?php
+require 'functions/auth.php';
+utilisateur_connecte();
 $pageTitle = 'Mon profil - EcoRide';
 require 'header.php';
 ?>
