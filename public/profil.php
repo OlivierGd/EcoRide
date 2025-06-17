@@ -1,5 +1,5 @@
 <?php
-require 'functions/auth.php';
+require __DIR__ . '/functions/auth.php';
 utilisateur_connecte();
 $pageTitle = 'Mon profil - EcoRide';
 require 'header.php';
@@ -12,7 +12,7 @@ require 'header.php';
             <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="60" class="rounded">
         </a>
         <h2>Mon Profil</h2>
-        <a href="#"><i class="bi bi-gear"></i></a>
+        <a href="../public/logout.php">Se déconnecter<i class="bi bi-box-arrow-right text-success"></i></a>
     </div>
 </nav>
 
@@ -287,6 +287,16 @@ require 'header.php';
                         <div>
                             <h6 class="mb-1 fw-semibold">Aide et Support</h6>
                             <small class="text-muted">Questions fréquentes et assistance</small>
+                        </div>
+                    </a>
+
+                    <a href="/public/dashboard.php" class="list-group-item list-group-item-action d-flex align-items-start">
+                        <div class="me-3 text-secondary">
+                            <i class="bi bi-question-circle-fill fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1 fw-semibold">Dashboard</h6>
+                            <small class="text-muted">Accès au tableau de suivis</small>
                         </div>
                     </a>
                 </div>

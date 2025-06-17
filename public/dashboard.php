@@ -1,7 +1,14 @@
 <?php
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'functions' . DIRECTORY_SEPARATOR . 'compteur.php';
 $annee = (int)date('Y');
 $annee_selection = empty($_GET['annee']) ? null : (int)$_GET['annee'];
 $mois_selection = empty($_GET['mois']) ? null : $_GET['mois'];
+if ($annee_selection !== null && $mois_selection !== null) {
+    $total = nombre_vue_mois($annee_selection, $mois_selection);
+} else {
+    $total = recuperer_vue();
+}
+
 $mois = [
         '01' => 'Janvier',
         '02' => 'Février',
@@ -48,3 +55,7 @@ require 'header.php';
         </div>
     </div>
 </div>
+
+<footer>
+    <?php require 'footer.php'; ?>
+</footer>
