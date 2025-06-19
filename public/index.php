@@ -1,6 +1,6 @@
 <?php
 $pageTitle = 'Accueil - EcoRide';
-require 'header.php';
+require_once 'header.php';
 
 // chemin du dossier data
 $dataDir = __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'data';
@@ -281,7 +281,7 @@ if(isset($_GET['villeDepart']) && isset($_GET['villeArrivee']) && isset($_GET['d
 
 <!-- Tab bar-->
 <footer>
-    <?php require 'footer.php'; ?>
+    <?php require_once 'footer.php'; ?>
 </footer>
 
 

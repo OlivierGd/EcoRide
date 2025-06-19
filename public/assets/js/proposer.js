@@ -68,7 +68,7 @@ function getDataSuggestedForm(e) {
     // Afficher la modale de confirmation des données du formulaire
     const modal = document.getElementById('confirmationModal');
     const modalText = document.getElementById('modalText');
-    modalText.innerHTML = `Vous proposez un trajet de <strong>${startCity} </strong> à <strong>${endCity} </strong>le <strong>${startDate}</strong>. Confirmez-vous ?`;
+    modalText.innerHTML = `Vous proposez un trajet de <strong>${startCity} </strong> à <strong>${endCity} </strong>le <strong>${startDate}</strong>. Voulez-vous le publier sur EcoRide ?`;
     const modalInstance = new bootstrap.Modal(modal);
     modalInstance.show();
 

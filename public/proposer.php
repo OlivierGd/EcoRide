@@ -1,10 +1,25 @@
 <?php
-    require 'header.php';
+
+use class\Travels;
+
+$pageTitle = 'Proposer un trajet - EcoRide';
+require_once 'header.php';
+require_once 'class/Travels.php';
+$errors = null;
+if (isset($_POST['suggestedStartCity'], $_POST['suggestedEndCity'], $_POST['proposalDate'],
+    $_POST['proposalTime'], $_POST['places'], $_POST['priceRequested'], $_POST['commentForPassenger'])) {
+    $voyage = new Travels($_POST['suggestedStartCity'], $_POST['suggestedEndCity'], $_POST['proposalDate'], $_POST['proposalTime'], $_POST['places'], $_POST['priceRequested'], $_POST['commentForPassenger']);
+    if ($voyage->isValid()) {
+
+    } else {
+        $errors = 'Formulaire invalide';
+    }
+}
 ?>
 
 <!-- Formulaire Multi-Étapes -->
 <main class="pt-5 mt-5">
-    <form class="multi-step-form">
+    <form action="" method="post" class="multi-step-form">
         <!-- Étapes contrôlées par radio -->
         <input type="radio" name="step" id="step1" checked hidden>
         <input type="radio" name="step" id="step2" hidden>
@@ -12,6 +27,12 @@
         <input type="radio" name="step" id="step4" hidden>
 
         <div class="steps container py-4">
+
+            <?php if ($errors): ?>
+            <div class="alert alert-danger" role="alert">
+                <?= $errors ?>
+            </div>
+            <?php endif; ?>
 
             <!-- Barre de progression -->
             <div class="progress mb-4">
@@ -23,11 +44,11 @@
                 <h2>1. Itinéraire</h2>
                 <div class="mb-3">
                     <label for="suggestedStartCity" class="form-label"><i class="bi bi-geo-alt"></i> Ville de départ</label>
-                    <input type="text" class="form-control ps-5" id="suggestedStartCity" placeholder="Départ" required>
+                    <input type="text" name="suggestedStartCity" class="form-control ps-5" id="suggestedStartCity" placeholder="Départ" required>
                 </div>
                 <div class="mb-3">
                     <label for="suggestedEndCity" class="form-label"><i class="bi bi-pin-map"></i> Destination</label>
-                    <input type="text" class="form-control ps-5" id="suggestedEndCity" placeholder="Destination" required>
+                    <input type="text" name="suggestedEndCity" class="form-control ps-5" id="suggestedEndCity" placeholder="Destination" required>
                 </div>
                 <p>+ Ajouter un arrêt supplémentaire</p>
             </div>
@@ -37,11 +58,11 @@
                 <h2>2. Date et Heure</h2>
                 <div class="mb-3">
                     <label for="proposalDate" class="form-label">Date</label>
-                    <input type="date" class="form-control" id="proposalDate" required>
+                    <input type="date" name="proposalDat" class="form-control" id="proposalDate" required>
                 </div>
                 <div class="mb-3">
                     <label for="proposalTime" class="form-label">Heure</label>
-                    <input type="time" class="form-control" id="proposalTime" required>
+                    <input type="time" name="proposalTime" class="form-control" id="proposalTime" required>
                 </div>
             </div>
 
@@ -66,7 +87,7 @@
                 <h3>Prix par passager</h3>
                 <div class="input-group flex-nowrap mb-3">
                     <span class="input-group-text">€</span>
-                    <input type="number" class="form-control" id="priceRequested" placeholder="--" value="2" min="0" step="1" required>
+                    <input type="number" class="form-control" name="priceRequested" id="priceRequested" placeholder="--" value="2" min="0" step="1" required>
                 </div>
                 <p>Jusqu'à <strong id="totalPrice"></strong> crédits pour ce trajet avec <strong id="placeFree"></strong> passagers</p>
             </div>
@@ -76,21 +97,21 @@
                 <h2>4. Options</h2>
                 <h3>Préférences</h3>
                 <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="no-smoking" checked>
+                    <input type="checkbox" name="no-smoking" class="form-check-input"  id="no-smoking" checked>
                     <label class="form-check-label" for="no-smoking">Non-fumeur</label>
                 </div>
                 <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="musicPlay" checked>
+                    <input type="checkbox" name="musicPlay" class="form-check-input"  id="musicPlay" checked>
                     <label class="form-check-label" for="musicPlay">Musique autorisée</label>
                 </div>
                 <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="discussTogether" checked>
+                    <input type="checkbox" name="discussTogether" class="form-check-input"  id="discussTogether" checked>
                     <label class="form-check-label" for="discussTogether">Discussions bienvenues</label>
                 </div>
                 <h3>Commentaire pour les passagers</h3>
                 <div class="form-floating mb-3">
-                    <textarea class="form-control" id="floatingTextarea2" style="height: 100px"></textarea>
-                    <label for="floatingTextarea2">Ex: Je pars du parking de la gare de Lyon...</label>
+                    <textarea name="commentForPassenger" class="form-control" id="commentForPassenger" style="height: 100px"></textarea>
+                    <label for="commentForPassenger">Ex: Je pars du parking de la gare de Lyon...</label>
                 </div>
             </div>
         </div>
@@ -103,7 +124,7 @@
                 <div class="modal-content">
 
                     <div class="modal-header">
-                        <h5 class="modal-title" id="confirmationModalLabel">Confirmer votre trajet</h5>
+                        <h5 class="modal-title" id="confirmationModalLabel">Publier votre trajet</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
                     </div>
 
@@ -112,8 +133,8 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                        <button type="button" class="btn btn-primary" id="confirmSubmit">Confirmer</button>
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Annuler</button>
+                        <button type="button" class="btn btn-success" id="confirmSubmit">Proposer</button>
                     </div>
 
                 </div>
