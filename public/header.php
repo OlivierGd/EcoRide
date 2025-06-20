@@ -21,4 +21,5 @@
             <a class="btn btn-success" role="button" href="/public/login.php">Connexion</a>
         </div>
     </nav>
+    <div class="<?= (isset($erreur) || ini_get('display_errors')) ? 'has-error' : '' ?>">
 </header>

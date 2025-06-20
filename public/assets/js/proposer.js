@@ -32,7 +32,7 @@ radios.forEach(radio => {
     radio.addEventListener('change', updateDisplay);
 })
 
-//Ajouter un écouteur lors du changement de prix proposé
+//Ajoute un écouteur lors du changement de prix proposé
 document.getElementById('priceRequested').addEventListener('input', updateDisplay);
 
 //Affiche la valeur du prix selon le nombre de places sélectionnées
@@ -41,57 +41,54 @@ document.addEventListener('DOMContentLoaded', updateDisplay);
 
 //Fonction pour récupérer les données du formulaire
 
-const dataSuggestedForm = [];
-function getDataSuggestedForm(e) {
-    e.preventDefault(); //Empeche le rechargement du formulaire
+document.addEventListener('DOMContentLoaded', () => {
+    const dataSuggestedForm = [];
 
-    const inputStartCity = document.getElementById('suggestedStartCity');
-    const inputEndCity = document.getElementById('suggestedEndCity');
-    const inputStartDate = document.getElementById('proposalDate');
-    const inputStartTime = document.getElementById('proposalTime');
-    const inputPlaceAvailable = getSelectedPlace();
-    const inputProposalCredits = document.getElementById('priceRequested');
-
-    const startCity = inputStartCity.value.trim();
-    const endCity = inputEndCity.value.trim();
-    const startDate = inputStartDate.value.trim();
-    const startTime = inputStartTime.value.trim();
-    const placeAvailable = getSelectedPlace();
-    const proposalCredits = parseInt(inputProposalCredits.value.trim());
-    console.log(startCity, endCity, startDate, startTime, placeAvailable, proposalCredits);
-
-    if (!startCity || !endCity || !startDate || !startTime || !placeAvailable || !proposalCredits) {  //Vérifie si les champs sont complétés
-        console.warn("Veuillez remplir tous les champs !");
-        return;
-    }
-
-    // Afficher la modale de confirmation des données du formulaire
+    const publishButton = document.getElementById('publishSuggestedForm');
+    const confirmButton = document.getElementById('confirmSubmit');
     const modal = document.getElementById('confirmationModal');
     const modalText = document.getElementById('modalText');
-    modalText.innerHTML = `Vous proposez un trajet de <strong>${startCity} </strong> à <strong>${endCity} </strong>le <strong>${startDate}</strong>. Voulez-vous le publier sur EcoRide ?`;
-    const modalInstance = new bootstrap.Modal(modal);
-    modalInstance.show();
+    const form = document.getElementById('suggestedTripForm');
 
-    // Réponse et validation de la confirmation
-    document.getElementById('confirmSubmit').onclick = () => {
-        const modaleValidation = bootstrap.Modal.getInstance(modal);
-        modaleValidation.hide();// Ferme la modale
-    }
+    publishButton.addEventListener('click', (e) => {
+        e.preventDefault();
 
-    const formData = {
-        startCity: startCity,
-        endCity: endCity,
-        startDate: startDate,
-        startTime: startTime,
-        placeAvailable: placeAvailable,
-        proposalCredits: proposalCredits,
-    }
-    dataSuggestedForm.push(formData);
-    console.log("Données du formulaire : ",formData);
-    console.log("Tableau complet : ", dataSuggestedForm);
+        const startCity = document.getElementById('suggestedStartCity').value.trim();
+        const endCity = document.getElementById('suggestedEndCity').value.trim();
+        const rawDate = document.getElementById('proposalDate').value.trim(); // la date reste YYYY-MM-DD
+        const [year, month, day] = rawDate.split('-');
+        const startDate = `${day}/${month}/${year}`; // pour affichage seulement de la date format DD-MM-YYYY
+        const startTime = document.getElementById('proposalTime').value.trim();
+        const placeAvailable = getSelectedPlace();
+        const proposalCredits = getPriceSuggested();
 
-}
-document.addEventListener('DOMContentLoaded', () => {
-    const publishButton = document.getElementById('publishSuggestedForm');
-    publishButton.addEventListener('click', getDataSuggestedForm);
-})
+        if (!startCity || !endCity || !startDate || !startTime || !placeAvailable || !proposalCredits) {
+            console.warn("Veuillez remplir tous les champs !");
+            return;
+        }
+
+        modalText.innerHTML = `Vous proposez un trajet de <strong>${startCity}</strong> à <strong>${endCity}</strong>
+            le <strong>${startDate}</strong> avec un départ à <strong>${startTime}</strong>.</br>Voulez-vous le proposer sur EcoRide ?`;
+
+        const modalInstance = new bootstrap.Modal(modal);
+        modalInstance.show();
+
+        confirmButton.onclick = () => {
+            const formData = {
+                startCity,
+                endCity,
+                startDate : rawDate, //format YYYY-MM-DD pour php
+                startTime,
+                placeAvailable,
+                proposalCredits
+            };
+
+            dataSuggestedForm.push(formData);
+            console.log("Données du formulaire : ", formData);
+            console.log("Tableau complet : ", dataSuggestedForm);
+
+            modalInstance.hide();
+            form.submit();
+        };
+    });
+});

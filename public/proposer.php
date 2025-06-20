@@ -5,21 +5,38 @@ use class\Travels;
 $pageTitle = 'Proposer un trajet - EcoRide';
 require_once 'header.php';
 require_once 'class/Travels.php';
+require_once 'class/SuggestTrip.php';
 $errors = null;
+$success = false;
 if (isset($_POST['suggestedStartCity'], $_POST['suggestedEndCity'], $_POST['proposalDate'],
     $_POST['proposalTime'], $_POST['places'], $_POST['priceRequested'], $_POST['commentForPassenger'])) {
-    $voyage = new Travels($_POST['suggestedStartCity'], $_POST['suggestedEndCity'], $_POST['proposalDate'], $_POST['proposalTime'], $_POST['places'], $_POST['priceRequested'], $_POST['commentForPassenger']);
-    if ($voyage->isValid()) {
 
+    $voyage = new Travels(
+            $_POST['suggestedStartCity'],
+            $_POST['suggestedEndCity'],
+            new DateTime($_POST['proposalDate']), // Conversion en DateTime
+            $_POST['proposalTime'],
+            $_POST['places'],
+            $_POST['priceRequested'],
+            $_POST['commentForPassenger']);
+
+
+    if ($voyage->isValid()) {
+        $suggestTrip = new SuggestTrip(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'voyages');
+        $suggestTrip->addVoyage($voyage);
+        $success = true;
+        $_POST = [];
     } else {
-        $errors = 'Formulaire invalide';
+        $errors = $voyage->getErrors();
     }
 }
+$voyage = $suggestTrip->getVoyages();
 ?>
+<body>
 
 <!-- Formulaire Multi-Étapes -->
 <main class="pt-5 mt-5">
-    <form action="" method="post" class="multi-step-form">
+    <form action="" method="post" id="suggestedTripForm" class="multi-step-form">
         <!-- Étapes contrôlées par radio -->
         <input type="radio" name="step" id="step1" checked hidden>
         <input type="radio" name="step" id="step2" hidden>
@@ -28,12 +45,16 @@ if (isset($_POST['suggestedStartCity'], $_POST['suggestedEndCity'], $_POST['prop
 
         <div class="steps container py-4">
 
-            <?php if ($errors): ?>
+            <?php if (!empty($errors)): ?>
             <div class="alert alert-danger" role="alert">
-                <?= $errors ?>
+                Formulaire invalide
             </div>
             <?php endif; ?>
-
+            <?php if ( $success): ?>
+                <div class="alert alert-success" role="alert">
+                    Merci d'avoir publié votre trajet !
+                </div>
+            <?php endif; ?>
             <!-- Barre de progression -->
             <div class="progress mb-4">
                 <div class="progress-bar bg-success" role="progressbar" style="width: 25%;" id="progressBar"></div>
@@ -44,11 +65,17 @@ if (isset($_POST['suggestedStartCity'], $_POST['suggestedEndCity'], $_POST['prop
                 <h2>1. Itinéraire</h2>
                 <div class="mb-3">
                     <label for="suggestedStartCity" class="form-label"><i class="bi bi-geo-alt"></i> Ville de départ</label>
-                    <input type="text" name="suggestedStartCity" class="form-control ps-5" id="suggestedStartCity" placeholder="Départ" required>
+                    <input type="text" name="suggestedStartCity"  class="form-control ps-5" id="suggestedStartCity" placeholder="Départ" required>
+                    <?php if (isset($errors['suggestedStartCity'])): ?>
+                    <div class="invalid-feedback"><?= $errors['suggestedStartCity'] ?></div>
+                    <?php endif; ?>
                 </div>
                 <div class="mb-3">
                     <label for="suggestedEndCity" class="form-label"><i class="bi bi-pin-map"></i> Destination</label>
                     <input type="text" name="suggestedEndCity" class="form-control ps-5" id="suggestedEndCity" placeholder="Destination" required>
+                    <?php if (isset($errors['suggestedEndCity'])): ?>
+                        <div class="invalid-feedback"><?= $errors['suggestedEndCity'] ?></div>
+                    <?php endif; ?>
                 </div>
                 <p>+ Ajouter un arrêt supplémentaire</p>
             </div>
@@ -58,11 +85,17 @@ if (isset($_POST['suggestedStartCity'], $_POST['suggestedEndCity'], $_POST['prop
                 <h2>2. Date et Heure</h2>
                 <div class="mb-3">
                     <label for="proposalDate" class="form-label">Date</label>
-                    <input type="date" name="proposalDat" class="form-control" id="proposalDate" required>
+                    <input type="date" name="proposalDate" class="form-control" id="proposalDate" required>
+                    <?php if (isset($errors['proposalDate'])): ?>
+                        <div class="invalid-feedback"><?= $errors['proposalDate'] ?></div>
+                    <?php endif; ?>
                 </div>
                 <div class="mb-3">
                     <label for="proposalTime" class="form-label">Heure</label>
                     <input type="time" name="proposalTime" class="form-control" id="proposalTime" required>
+                    <?php if (isset($errors['proposalTime'])): ?>
+                        <div class="invalid-feedback"><?= $errors['proposalTime'] ?></div>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -115,16 +148,15 @@ if (isset($_POST['suggestedStartCity'], $_POST['suggestedEndCity'], $_POST['prop
                 </div>
             </div>
         </div>
-        <button type="submit" class="btn btn-lg btn-success" id="publishSuggestedForm">Publier ce trajet</button>
+        <button type="button" class="btn btn-lg btn-success" id="publishSuggestedForm">Publier ce trajet</button> <!-- boutton de type button pour ne pas soumettre le formulaire. -->
         <div class="p-5"></div>
     </form>
     <section>
         <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
-
                     <div class="modal-header">
-                        <h5 class="modal-title" id="confirmationModalLabel">Publier votre trajet</h5>
+                        <h5 class="modal-title" id="confirmationModalLabel">Proposer un trajet :</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
                     </div>
 
@@ -136,12 +168,22 @@ if (isset($_POST['suggestedStartCity'], $_POST['suggestedEndCity'], $_POST['prop
                         <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Annuler</button>
                         <button type="button" class="btn btn-success" id="confirmSubmit">Proposer</button>
                     </div>
-
                 </div>
             </div>
         </div>
     </section>
 </main>
+<main>
+    <?php if(!empty($voyage)): ?>
+    <h1 class="mt-4">Les voyages proposés :</h1>
+
+        <?php foreach($voyage as $voyage): ?>
+        <?= $voyage->toHTML() ?>
+    <?php endforeach; ?>
+    <?php endif; ?>
+</main>
+
+</body>
 
 <!-- Tab Bar -->
 <footer>
