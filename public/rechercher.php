@@ -1,5 +1,6 @@
 <?php
     require 'header.php';
+    $pageTitle = 'Rechercher un voyage';
 ?>
 
 <body>

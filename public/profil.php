@@ -250,7 +250,7 @@ require 'header.php';
                         </div>
                     </a>
 
-                    <a href="vehicule.html" class="list-group-item list-group-item-action d-flex align-items-start">
+                    <a href="vehicule.php" class="list-group-item list-group-item-action d-flex align-items-start">
                         <div class="me-3 text-primary">
                             <i class="bi bi-car-front-fill fs-4"></i>
                         </div>

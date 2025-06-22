@@ -1,4 +1,5 @@
 <?php
+
 $pageTitle = 'Accueil - EcoRide';
 require_once 'header.php';
 
