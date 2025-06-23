@@ -80,7 +80,7 @@ require 'header.php';
         <!-- Sign up -->
         <div class="text-center">
             <p class="text-muted mb-3">Pas encore utilisateur EcoRide ?</p>
-            <button class="btn btn-outline-success w-100">Se créer un compte</button>
+            <a href="inscription.php" class="btn btn-outline-success w-100">Se créer un compte</a>
         </div>
     </main>
 </div>
