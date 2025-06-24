@@ -1,4 +1,6 @@
 <?php
+
+/*
 $password = '$2y$12$zxejas9ib5wXtFKt/erUi.Rwdr3FVrE7lhVmGvhaAW8Xfbs0GbKsa';
 $erreur = null;
 if (!empty($_POST['emailUser'] && !empty($_POST['passwordUser']))) {
@@ -18,9 +20,21 @@ if (est_connecte()) {
     exit;
 }
 
-require 'header.php';
+*/
 ?>
 
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" type="image/png" href="assets/pictures/logoEcoRide.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <title><?php if (isset($pageTitle)) { echo $pageTitle; } else { echo 'EcoRide - Covoiturage écologique';} ?></title>
+</head>
 
 <body>
 <div class="container py-5"></div>
@@ -29,18 +43,18 @@ require 'header.php';
         <a href="index.php" class="btn btn-light p-2 rounded-circle">
             <i class="bi bi-arrow-left"></i>
         </a>
-        <img src="/public/assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="logo rounded" width="90em">
+        <img src="assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="logo rounded" width="90em">
         <div style="width: 40px;"></div>
     </header>
 
     <!-- Main -->
     <main class="flex-fill">
         <h1 class="h4 fw-semibold text-center mb-4">Connexion</h1>
-        <?php if ($erreur) : ?>
+        <?php /*if ($erreur) : ?>
             <div class="alert alert-danger" role="alert">
                 <?= $erreur ?>
             </div>
-        <?php endif ?>
+        <?php endif */?>
         <form action="" method="post" id="loginForm" class="mb-4">
             <div class="mb-3 position-relative">
                 <span class="position-absolute top-50 translate-middle-y start-0 ps-3 text-secondary">
@@ -80,7 +94,7 @@ require 'header.php';
         <!-- Sign up -->
         <div class="text-center">
             <p class="text-muted mb-3">Pas encore utilisateur EcoRide ?</p>
-            <a href="inscription.php" class="btn btn-outline-success w-100">Se créer un compte</a>
+            <a href="../public/inscription.php" class="btn btn-outline-success w-100">Se créer un compte</a>
         </div>
     </main>
 </div>
