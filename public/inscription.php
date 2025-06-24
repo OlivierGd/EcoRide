@@ -18,22 +18,23 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); // Permet de reto
 $error = [];
 $success = false;
 
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validation des champs
     if (empty($_POST['firstName']) || strlen($_POST['firstName']) < 2) {
-        $error = 'Le prénom doit contenir au moins 2 caractères';
+        $error[] = 'Le prénom doit contenir au moins 2 caractères';
     }
     if (empty($_POST['lastName']) || strlen($_POST['lastName']) < 2) {
-        $error = 'Le nom doit contenir au moins 2 caractères';
+        $error[] = 'Le nom doit contenir au moins 2 caractères';
     }
-    if (empty($_POST_['email']) || !filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
-        $error = 'Email invalide';
+    if (empty($_POST['email']) || !filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
+        $error[] = 'Email invalide';
     }
     if (empty($_POST['password']) || strlen($_POST['password']) < 6) {
-        $error = 'Le mot de passe doit contenir au moins 6 caractères.';
+        $error[] = 'Le mot de passe doit contenir au moins 6 caractères.';
     }
     if ($_POST['password'] !== $_POST['confirmPassword']) {
-        $error = 'Les mots de passe ne correspondent pas.';
+        $error[] = 'Les mots de passe ne correspondent pas.';
     }
 
     // Si pas d'erreurs, on procède à l'inscription
@@ -46,12 +47,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($emailExist > 0) {
                 $error[] = 'Cette adresse email est déjà utilisée';
             } else {
-                $user = new Users(trim($_POST['firstName']),
+                $user = new Users(
+                    trim($_POST['firstName']),
                     trim($_POST['lastName']),
                     trim($_POST['email']),
                     password_hash($_POST['password'], PASSWORD_DEFAULT));
                 $user->saveToDatabase($pdo);
                 $success = true;
+                $_POST = [];
             }
         } catch (PDOException $e) {
             $error[] = 'Erreur lors de l\'inscription : ' . $e->getMessage();
@@ -64,6 +67,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Formulaire nouvelle inscription -->
     <section class="mt-5">
         <h2 class="fw-bold mb-4">Votre inscription</h2>
+        <?php if (!empty($error)) : ?>
+            <div class"alert alert-danger">
+                <?= is_array($error) ? implode('<br>', $error) : $error ?>
+            </div>
+        <?php elseif ($success) : ?>
+            <div class="alert alert-success">
+                Votre compte a bien été créé.
+            </div>
+        <?php endif; ?>
+        <div class="alert alert-success" role="alert">
         <form action="" method="post" id="formNewUser" class="p-4 bg-white rounded-4 shadow-sm">
 
             <!-- Prénom utilisateur -->
