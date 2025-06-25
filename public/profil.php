@@ -8,11 +8,11 @@ require 'header.php';
 <body>
 <nav class="navbar fixed-top bg-body-tertiary">
     <div class="container" style="max-width: 900px;">
-        <a class="navbar-brand" href="index.html">
+        <a class="navbar-brand" href="/public/index.html">
             <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="60" class="rounded">
         </a>
         <h2>Mon Profil</h2>
-        <a href="../public/logout.php">Se déconnecter<i class="bi bi-box-arrow-right text-success"></i></a>
+        <a href="/public/logout.php">Se déconnecter<i class="bi bi-box-arrow-right text-success"></i></a>
     </div>
 </nav>
 
