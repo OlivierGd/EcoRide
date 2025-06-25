@@ -1,23 +1,24 @@
 <?php
+session_start();
+require_once dirname(__DIR__) . '/vendor/autoload.php';
+
+use Olivierguissard\EcoRide\Config\Database;
+use class\Users;
+
+require_once 'functions/auth.php';
+if (est_connecte()) {
+    header('Location: ../public/profil.php');
+    exit;
+}
+
+$pdo = Database::getConnection();
+
 $pageTitle = 'Créer un compte - EcoRide';
 require_once 'header.php';
 require_once 'class/Users.php';
-require_once dirname(__DIR__) . '/vendor/autoload.php';
-
-use class\Users;
-use Dotenv\Dotenv;
-
-// Charge le fichier .env
-$dotenv = Dotenv::createImmutable(__DIR__ . '/../');
-$dotenv->load();
-$dotenv->required(['DB_USER', 'DB_PASSWORD'])->notEmpty();
-
-$pdo = new PDO("pgsql:host={$_ENV['DB_HOST']};dbname={$_ENV['DB_NAME']};user={$_ENV['DB_USER']};password={$_ENV['DB_PASSWORD']}");
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); // Permet de retourner l'erreur si problème
 
 $error = [];
 $success = false;
-
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validation des champs
@@ -41,24 +42,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($error)) {
         try {
             // Vérifie si l'email existe déjà
-            $stmt = $pdo->prepare('SELECT COUNT(*) FROM users WHERE email = ?');
-            $stmt->execute([$_POST['email']]);
-            $emailExist = $stmt->fetchColumn();
-            if ($emailExist > 0) {
-                $error[] = 'Cette adresse email est déjà utilisée';
+            $stmt = $pdo->prepare('SELECT user_id FROM users WHERE email = ?');
+            $stmt->execute([trim($_POST['email'])]);
+
+            if ($stmt->fetchColumn() > 0) {
+                $error[] = "Un compte avec cette adresse existe déjà";
             } else {
                 $user = new Users(
-                    trim($_POST['firstName']),
-                    trim($_POST['lastName']),
-                    trim($_POST['email']),
-                    password_hash($_POST['password'], PASSWORD_DEFAULT));
+                    ($_POST['firstName']),
+                    ($_POST['lastName']),
+                    ($_POST['email']),
+                    ($_POST['password']));
+                $user->setPassword();
                 $user->saveToDatabase($pdo);
-                $success = true;
-                $_POST = [];
+
+                $_SESSION['connecte'] = true;
+                $_SESSION['email'] = $user->getEmail();
+                $_SESSION['firstName'] = $user->getFirstName();
+                $_SESSION['lastName'] = $user->getLastName();
+                $_SESSION['status'] = $user->getStatus();
+                $_SESSION['role'] = $user->getRole();
+                $_SESSION['credits'] = $user->getCredits();
+                $_SESSION['ranking'] = $user->getRanking();
+                $_SESSION['profilePicture'] = $user->getProfilePicture();
+                $_SESSION['success_registration'] = true;
+
+                header('Location: ../public/profil.php');
+                exit;
             }
         } catch (PDOException $e) {
             $error[] = 'Erreur lors de l\'inscription : ' . $e->getMessage();
-            error_log($e->getMessage());
         }
     }
 }
@@ -68,12 +81,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <section class="mt-5">
         <h2 class="fw-bold mb-4">Votre inscription</h2>
         <?php if (!empty($error)) : ?>
-            <div class"alert alert-danger">
-                <?= is_array($error) ? implode('<br>', $error) : $error ?>
-            </div>
-        <?php elseif ($success) : ?>
-            <div class="alert alert-success">
-                Votre compte a bien été créé.
+            <div class="alert alert-danger">
+                <?= implode('<br>', array_map('htmlspecialchars', $error)) ?>
             </div>
         <?php endif; ?>
         <div class="alert alert-success" role="alert">

@@ -1,7 +1,6 @@
 <?php
 
 $pageTitle = 'Accueil - EcoRide';
-require_once 'header.php';
 
 // chemin du dossier data
 $dataDir = __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'data';
@@ -17,7 +16,31 @@ if(isset($_GET['villeDepart']) && isset($_GET['villeArrivee']) && isset($_GET['d
     ];
 }
 ?>
-
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="assets/pictures/logoEcoRide.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <title><?php if (isset($pageTitle)) { echo $pageTitle; } else { echo 'EcoRide - Covoiturage écologique';} ?></title>
+</head>
+<body>
+<!-- Navbar -->
+<header>
+    <nav class="navbar fixed-top bg-white shadow-sm">
+        <div class="container" style="max-width: 900px">
+            <a class="navbar-brand" href="/public/index.php">
+                <img src="assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="d-inline-block align-text-center rounded" width="60">
+                EcoRide
+            </a>
+            <a class="btn btn-success" role="button" href="../public/login.php">Connexion</a>
+        </div>
+    </nav>
+    <div class="<?= (isset($erreur) || ini_get('display_errors')) ? 'has-error' : '' ?>">
+</header>
 <!-- Main content -->
 <main>
     <div class="container" style="max-width: 900px;">

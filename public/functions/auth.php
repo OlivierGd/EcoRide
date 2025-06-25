@@ -8,7 +8,7 @@ function est_connecte(): bool { // vérifie si la session est active sinon activ
 
 function utilisateur_connecte(): void {
     if (!est_connecte()) {
-        header('Location: ../public/login.php');
+        header('Location: /public/login.php');
         exit;
     }
 }

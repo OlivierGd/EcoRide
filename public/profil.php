@@ -1,8 +1,15 @@
 <?php
-require __DIR__ . '/functions/auth.php';
+session_start();
+require_once 'functions/auth.php';
 utilisateur_connecte();
+require_once 'header.php';
 $pageTitle = 'Mon profil - EcoRide';
-require 'header.php';
+
+if (!empty($_SESSION['success_registration'])) {
+    echo '<div class="alert alert-success text-center" role="alert">Votre compte a bien été créé !</div>';
+    unset($_SESSION['success_registration']);
+}
+
 ?>
 
 <body>
@@ -24,29 +31,64 @@ require 'header.php';
         <div class="container mt-5 pt-5">
             <div class="row justify-content-center">
                 <div class="col-md-8">
-                    <div class="profile-container">
-                        <div class="text-center">
-                            <img src="./assets/pictures/ThomasDubois.jpg" alt="Photo du profil du conducteur" class="profile-picture rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover">
-                            <h3>Thomas Dubois</h3>
-                            <div class="d-flex align-items-center justify-content-center mb-3">
-                                <span class="text-gold">
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-half"></i>
-                                </span>
-                                <span>(4.5)</span>
-                            </div>
-                            <div class="d-flex align-items-center justify-content-center mb-3">
-                                <span class="badge bg-success text-white">Conducteur Vérifié</span>
-                            </div>
-                            <button class="btn btn-success btn-sm mt-2"><i class="fas fa-edit"></i> Modifier le profil</button>
+                    <div class="profile-container text-center">
+
+                        <!-- Cercle avec initiales ou photo -->
+                        <div class="rounded-circle d-flex justify-content-center align-items-center mx-auto bg-secondary text-white shadow mb-3"
+                             style="width: 100px; height: 100px; font-size: 32px; font-weight: bold; overflow: hidden;">
+                            <?php if (!empty($_SESSION['profilePicture'])) : ?>
+                                <img src="<?= htmlspecialchars($_SESSION['profilePicture']) ?>"
+                                     alt="Photo de profil"
+                                     class="img-fluid rounded-circle"
+                                     style="width: 100%; height: 100%; object-fit: cover;">
+                            <?php else : ?>
+                                <?= strtoupper($_SESSION['firstName'][0] . $_SESSION['lastName'][0]) ?>
+                            <?php endif; ?>
                         </div>
+
+                        <!-- Nom complet -->
+                        <h3><?= htmlspecialchars($_SESSION['firstName'] . ' ' . $_SESSION['lastName']) ?></h3>
+
+                        <!-- Affichage du ranking en étoiles -->
+                        <div class="d-flex justify-content-center align-items-center mb-2">
+                            <?php
+                            $fullStars = floor($_SESSION['ranking']);
+                            $halfStar = ($_SESSION['ranking'] - $fullStars) >= 0.5;
+                            for ($i = 0; $i < $fullStars; $i++) {
+                                echo '<i class="bi bi-star-fill text-warning"></i>';
+                            }
+                            if ($halfStar) {
+                                echo '<i class="bi bi-star-half text-warning"></i>';
+                            }
+                            $emptyStars = 5 - $fullStars - ($halfStar ? 1 : 0);
+                            for ($i = 0; $i < $emptyStars; $i++) {
+                                echo '<i class="bi bi-star text-warning"></i>';
+                            }
+                            ?>
+                            <span class="ms-2">(<?= number_format($_SESSION['ranking'], 1) ?>)</span>
+                        </div>
+
+                        <!-- Badge rôle -->
+                        <div class="mb-3">
+                            <?php
+                            $roles = [
+                                0 => 'Utilisateur',
+                                1 => 'Conducteur',
+                                2 => 'Gestionnaire',
+                                3 => 'Administrateur'
+                            ];
+                            $roleLabel = $roles[$_SESSION['role']] ?? 'Inconnu';
+                            ?>
+                            <span class="badge bg-success"><?= $roleLabel ?> vérifié</span>
+                        </div>
+
+                        <!-- Bouton modifier -->
+                        <button class="btn btn-success btn-sm"><i class="fas fa-edit"></i> Modifier le profil</button>
                     </div>
                 </div>
             </div>
         </div>
+
     </section>
 
     <!-- Stats track done -->

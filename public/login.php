@@ -1,26 +1,42 @@
 <?php
-
-/*
-$password = '$2y$12$zxejas9ib5wXtFKt/erUi.Rwdr3FVrE7lhVmGvhaAW8Xfbs0GbKsa';
+session_start();
+require_once 'functions/auth.php';
+require_once __DIR__ . '/../src/config/Database.php';
 $erreur = null;
-if (!empty($_POST['emailUser'] && !empty($_POST['passwordUser']))) {
-    if ($_POST['emailUser'] === 'oli@test.com' && password_verify($_POST['passwordUser'], $password)) {
-        session_start();
-        $_SESSION['connecte'] = 1;
-        header('Location: ../public/profil.php');
-        exit;
-    } else {
-        $erreur = 'Identifiants incorrects';
-    }
-}
 
-require 'functions/auth.php';
 if (est_connecte()) {
     header('Location: ../public/profil.php');
     exit;
 }
 
-*/
+if (!empty($_POST['emailUser']) && !empty($_POST['passwordUser'])) {
+    $email = $_POST['emailUser'];
+    $password = $_POST['passwordUser'];
+
+    // Requête pour récupérer l'email de l'utilisateur en db
+    $stmt = $pdo->prepare('SELECT * FROM users WHERE email = ?');
+    $stmt->execute([$email]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($user && password_verify($password, $user['password'])) {
+        $_SESSION['connecte'] = true;
+        $_SESSION['email'] = $user['email'];
+        $_SESSION['firstName'] = $user['firstName'];
+        $_SESSION['lastName'] = $user['lastName'];
+        $_SESSION['status'] = $user['status'];
+        $_SESSION['role'] = $user['role'];
+        $_SESSION['credits'] = $user['credits'];
+        $_SESSION['ranking'] = $user['ranking'];
+        $_SESSION['profilePicture'] = $user['profilePicture'];
+        header('Location: ../public/profil.php');
+        exit;
+    } else {
+        $erreur = 'Adresse e-mail ou mot de passe incorrect';
+    }
+
+}
+
+
 ?>
 
 
@@ -29,7 +45,6 @@ if (est_connecte()) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="assets/css/style.css">
     <link rel="icon" type="image/png" href="assets/pictures/logoEcoRide.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
@@ -40,7 +55,7 @@ if (est_connecte()) {
 <div class="container py-5"></div>
 <div class="min-vh-100 d-flex flex-column px-3 py-5">
     <header class="d-flex justify-content-between align-items-center mb-4">
-        <a href="index.php" class="btn btn-light p-2 rounded-circle">
+        <a href="../public/index.php" class="btn btn-light p-2 rounded-circle">
             <i class="bi bi-arrow-left"></i>
         </a>
         <img src="assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="logo rounded" width="90em">
@@ -50,11 +65,11 @@ if (est_connecte()) {
     <!-- Main -->
     <main class="flex-fill">
         <h1 class="h4 fw-semibold text-center mb-4">Connexion</h1>
-        <?php /*if ($erreur) : ?>
+        <?php if ($erreur) : ?>
             <div class="alert alert-danger" role="alert">
-                <?= $erreur ?>
+                <?= htmlspecialchars($erreur) ?>
             </div>
-        <?php endif */?>
+        <?php endif; ?>
         <form action="" method="post" id="loginForm" class="mb-4">
             <div class="mb-3 position-relative">
                 <span class="position-absolute top-50 translate-middle-y start-0 ps-3 text-secondary">
