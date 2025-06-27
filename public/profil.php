@@ -1,9 +1,14 @@
 <?php
-session_start();
 require_once 'functions/auth.php';
 utilisateur_connecte();
-require_once 'header.php';
+
 $pageTitle = 'Mon profil - EcoRide';
+
+// Vérification de la session
+if (!isset($_SESSION['connecte']) || !$_SESSION['connecte']) {
+    header('Location: login.php');
+    exit;
+}
 
 if (!empty($_SESSION['success_registration'])) {
     echo '<div class="alert alert-success text-center" role="alert">Votre compte a bien été créé !</div>';
@@ -11,15 +16,25 @@ if (!empty($_SESSION['success_registration'])) {
 }
 
 ?>
-
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="assets/pictures/logoEcoRide.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="assets/css/index.css">
+    <title><?php /*if (isset($pageTitle)) { echo $pageTitle; } else { echo 'EcoRide - Covoiturage écologique';} */?></title>
+</head>
 <body>
-<nav class="navbar fixed-top bg-body-tertiary">
+<nav class="navbar bg-body-tertiary">
     <div class="container" style="max-width: 900px;">
-        <a class="navbar-brand" href="/public/index.html">
+        <a class="navbar-brand" href="/index.php">
             <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="60" class="rounded">
         </a>
         <h2>Mon Profil</h2>
-        <a href="/public/logout.php">Se déconnecter<i class="bi bi-box-arrow-right text-success"></i></a>
+        <a href="/logout.php">Se déconnecter</a>
     </div>
 </nav>
 
@@ -83,11 +98,14 @@ if (!empty($_SESSION['success_registration'])) {
                         </div>
 
                         <!-- Bouton modifier -->
-                        <button class="btn btn-success btn-sm"><i class="fas fa-edit"></i> Modifier le profil</button>
+                        <button class="btn btn-sm" data-bs-toggle="modal" data-bs-target="#editProfileModal"><i class="fas fa-edit"></i><i class="bi bi-pencil"></i> Modifier le profil</button>
+                        <?php if (isset($_SESSION['update_success'])) {
+                            echo '<div class="alert alert-success mt-3" role="alert">' . $_SESSION['update_success'] . '</div>';
+                            unset($_SESSION['update_success']);
+                        }
+                        ?>
                     </div>
                 </div>
-            </div>
-        </div>
 
     </section>
 
@@ -345,10 +363,63 @@ if (!empty($_SESSION['success_registration'])) {
             </div>
         </div>
     </section>
+
+    <!-- Modale pour modifier le profil -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editProfileModalLabel">Modifier le Profil</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="updateProfile.php" id="editProfileForm" method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="firstName" class="form-label">Prénom</label>
+                            <input type="text" class="form-control" id="firstName" name="firstName" value="<?= htmlspecialchars($_SESSION['firstName']) ?>" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lastName" class="form-label">Nom</label>
+                            <input type="text" class="form-control" id="lastName" name="lastName" value="<?= htmlspecialchars($_SESSION['lastName']) ?>" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" value="<?= htmlspecialchars($_SESSION['email']) ?>" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="profilePicture" class="form-label">Photo de Profil</label>
+                            <input type="file" class="form-control" id="profilePicture" name="profilePicture">
+                        </div>
+                        <button type="submit" class="btn btn-success">Mettre à jour</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </main>
 
 <footer>
-    <?php require 'footer.php'; ?>
+    <nav class="navbar fixed-bottom bg-body-tertiary px-4">
+        <div class="container d-flex justify-content-around text-center" style="max-width: 900px">
+            <a class="nav-item nav-link d-flex flex-column" href="/public/index.php">
+                <i class="bi bi-house fs-4"></i>
+                <span>Accueil</span>
+            </a>
+            <a class="nav-item nav-link d-flex flex-column" href="/public/rechercher.php">
+                <i class="bi bi-zoom-in fs-4"></i>
+                <span>Rechercher</span>
+            </a>
+            <a class="nav-item nav-link d-flex flex-column" href="/public/proposer.php">
+                <i class="bi bi-ev-front fs-4"></i>
+                <span>Proposer</span>
+            </a>
+            <a class="nav-item nav-link d-flex flex-column" href="/public/profil.php">
+                <i class="bi bi-person fs-4"></i>
+                <span>Profil</span>
+            </a>
+        </div>
+    </nav>
 </footer>
 
 

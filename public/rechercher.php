@@ -1,17 +1,26 @@
 <?php
-    require 'header.php';
     $pageTitle = 'Rechercher un voyage';
 ?>
-
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="assets/pictures/logoEcoRide.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="assets/css/rechercher.css">
+    <title><?php if (isset($pageTitle)) { echo $pageTitle; } else { echo 'EcoRide - Covoiturage écologique';} ?></title>
+</head>
 <body>
 <!-- Navbar -->
 <nav class="navbar bg-white fixed-top shadow-sm">
     <div class="container px-3" style="max-width: 900px" >
-        <a href="#" class="navbar-brand d-flex align-items-center">
+        <a href="/index.php" class="navbar-brand d-flex align-items-center">
             <img src="assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="d-inline-block align-text-center rounded" width="60">
         </a>
         <span class="navbar-text fw-medium">Résultats de la recherche</span>
-        <a class="btn btn-success" role="button" href="connect.html">Connexion</a>
+        <a class="btn btn-success" role="button" href="/connect.html">Connexion</a>
     </div>
 </nav>
 
@@ -429,7 +438,26 @@
 
 <!-- Tab Bar -->
 <footer>
-    <?php require 'footer.php'; ?>
+    <nav class="navbar fixed-bottom bg-body-tertiary px-4">
+        <div class="container d-flex justify-content-around text-center" style="max-width: 900px">
+            <a class="nav-item nav-link d-flex flex-column" href="/index.php">
+                <i class="bi bi-house fs-4"></i>
+                <span>Accueil</span>
+            </a>
+            <a class="nav-item nav-link d-flex flex-column" href="/rechercher.php">
+                <i class="bi bi-zoom-in fs-4"></i>
+                <span>Rechercher</span>
+            </a>
+            <a class="nav-item nav-link d-flex flex-column" href="/proposer.php">
+                <i class="bi bi-ev-front fs-4"></i>
+                <span>Proposer</span>
+            </a>
+            <a class="nav-item nav-link d-flex flex-column" href="/profil.php">
+                <i class="bi bi-person fs-4"></i>
+                <span>Profil</span>
+            </a>
+        </div>
+    </nav>
 </footer>
 
 <script src="assets/js/script.js"></script>

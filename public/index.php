@@ -4,9 +4,7 @@ $pageTitle = 'Accueil - EcoRide';
 
 // chemin du dossier data
 $dataDir = __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'data';
-
 $file = $dataDir . DIRECTORY_SEPARATOR . date('Y-m-d') . '.txt';
-
 $searchForTrip = [];
 if(isset($_GET['villeDepart']) && isset($_GET['villeArrivee']) && isset($_GET['dateVoyage'])) {
     $searchForTrip = [
@@ -16,6 +14,7 @@ if(isset($_GET['villeDepart']) && isset($_GET['villeArrivee']) && isset($_GET['d
     ];
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -24,8 +23,8 @@ if(isset($_GET['villeDepart']) && isset($_GET['villeArrivee']) && isset($_GET['d
     <link rel="icon" type="image/png" href="assets/pictures/logoEcoRide.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <title><?php if (isset($pageTitle)) { echo $pageTitle; } else { echo 'EcoRide - Covoiturage écologique';} ?></title>
+    <link rel="stylesheet" href="assets/css/index.css">
+    <title>EcoRide - Covoiturage écologique</title>
 </head>
 <body>
 <!-- Navbar -->
@@ -36,7 +35,7 @@ if(isset($_GET['villeDepart']) && isset($_GET['villeArrivee']) && isset($_GET['d
                 <img src="assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="d-inline-block align-text-center rounded" width="60">
                 EcoRide
             </a>
-            <a class="btn btn-success" role="button" href="../public/login.php">Connexion</a>
+            <a class="btn btn-success" role="button" href="/login.php">Connexion</a>
         </div>
     </nav>
     <div class="<?= (isset($erreur) || ini_get('display_errors')) ? 'has-error' : '' ?>">
@@ -305,7 +304,26 @@ if(isset($_GET['villeDepart']) && isset($_GET['villeArrivee']) && isset($_GET['d
 
 <!-- Tab bar-->
 <footer>
-    <?php require_once 'footer.php'; ?>
+    <nav class="navbar fixed-bottom bg-body-tertiary px-4">
+        <div class="container d-flex justify-content-around text-center" style="max-width: 900px">
+            <a class="nav-item nav-link d-flex flex-column" href="/index.php">
+                <i class="bi bi-house fs-4"></i>
+                <span>Accueil</span>
+            </a>
+            <a class="nav-item nav-link d-flex flex-column" href="/rechercher.php">
+                <i class="bi bi-zoom-in fs-4"></i>
+                <span>Rechercher</span>
+            </a>
+            <a class="nav-item nav-link d-flex flex-column" href="/proposer.php">
+                <i class="bi bi-ev-front fs-4"></i>
+                <span>Proposer</span>
+            </a>
+            <a class="nav-item nav-link d-flex flex-column" href="/profil.php">
+                <i class="bi bi-person fs-4"></i>
+                <span>Profil</span>
+            </a>
+        </div>
+    </nav>
 </footer>
 
 
