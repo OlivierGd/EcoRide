@@ -10,7 +10,7 @@ require_once __DIR__ . '/../src/config/Database.php';
 $erreur = null;
 
 if (est_connecte()) {
-    header('Location: /profil.php');
+    header('Location: profil.php');
     exit;
 }
 
@@ -113,7 +113,7 @@ if (!empty($_POST['emailUser']) && !empty($_POST['passwordUser'])) {
             <!-- Sign up -->
             <div class="text-center">
                 <p class="text-muted mb-3">Pas encore utilisateur EcoRide ?</p>
-                <a href="../public/inscription.php" class="btn btn-outline-success w-100">Se créer un compte</a>
+                <a href="/inscription.php" class="btn btn-outline-success w-100">Se créer un compte</a>
             </div>
         </main>
     </div>
