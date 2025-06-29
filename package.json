@@ -1,0 +1,18 @@
+{
+  "name": "ecoride",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "esbuild public/assets/js/*.js --bundle --outdir=public/assets/js --allow-overwrite",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OlivierGd/EcoRide.git"
+  },
+  "private": true,
+  "devDependencies": {
+    "esbuild": "^0.17.19"
+  }
+}
