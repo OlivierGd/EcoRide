@@ -15,10 +15,10 @@
     <nav class="navbar fixed-top bg-white shadow-sm">
         <div class="container" style="max-width: 900px">
             <a class="navbar-brand" href="/index.php">
-                <img src="/public/assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="d-inline-block align-text-center rounded" width="60">
+                <img src="/assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="d-inline-block align-text-center rounded" width="60">
                 EcoRide
             </a>
-            <a class="btn btn-success" role="button" href="/public/login.php">Connexion</a>
+            <a class="btn btn-success" role="button" href="/login.php">Connexion</a>
         </div>
     </nav>
     <div class="<?= (isset($erreur) || ini_get('display_errors')) ? 'has-error' : '' ?>">
