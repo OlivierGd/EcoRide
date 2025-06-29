@@ -141,8 +141,8 @@ if (isset($_POST['suggestedStartCity'], $_POST['suggestedEndCity'], $_POST['prop
                     </div>
                     <h3>Prix par passager</h3>
                     <div class="input-group flex-nowrap mb-3">
-                        <span class="input-group-text">€</span>
-                        <input type="number" class="form-control" name="priceRequested" id="priceRequested" placeholder="--" value="2" min="0" step="1" required>
+                        <span class="input-group-text">Crédits</span>
+                        <input type="number" class="form-control" name="priceRequested" id="priceRequested" placeholder="--" value="20" min="0" step="1" required>
                     </div>
                     <p>Jusqu'à <strong id="totalPrice"></strong> crédits pour ce trajet avec <strong id="placeFree"></strong> passagers</p>
                 </div>
