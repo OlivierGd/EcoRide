@@ -15,7 +15,7 @@ class Database
         if (self::$pdo === null) {
             // Charge les variables d'environnement
             $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../../');
-            $dotenv->load();
+            $dotenv->safeLoad(); // safeLoad() à la place de load() permet de charger le fichier.env en local et passer outre en prod.
 
             $host = $_ENV['DB_HOST'];
             $port = $_ENV['DB_PORT'];
