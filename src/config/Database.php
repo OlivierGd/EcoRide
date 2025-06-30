@@ -17,6 +17,10 @@ class Database
             $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../../');
             $dotenv->safeLoad(); // safeLoad() à la place de load() permet de charger le fichier.env en local et passer outre en prod.
 
+            // Récupère la connexion complète
+            $databaseUrl = getenv('DATABASE_URL');
+            $pdo = new PDO($databaseUrl, null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,]);
+
             $host = $_ENV['DB_HOST'];
             $port = $_ENV['DB_PORT'];
             $dbname = $_ENV['DB_NAME'];
