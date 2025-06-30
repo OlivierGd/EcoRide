@@ -8,6 +8,14 @@ RUN npm run build
 
 # --- Étape 2 : image finale avec Apache + PHP 8.3 + pdo_pgsql ---
 FROM php:8.3-apache
+# Indiquer à Apache d'utiliser /var/www/html/public comme racine
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+
+# Remplacer dans la config Apache le DocumentRoot par la nouvelle valeur
+RUN sed -ri "s!DocumentRoot /var/www/html!DocumentRoot ${APACHE_DOCUMENT_ROOT}!g" \
+      /etc/apache2/sites-available/*.conf \
+ && sed -ri "s!<Directory /var/www/html>!<Directory ${APACHE_DOCUMENT_ROOT}>!g" \
+      /etc/apache2/apache2.conf
 
 # Installer les dépendances système, l’extension PostgreSQL et Composer
 RUN apt-get update \
