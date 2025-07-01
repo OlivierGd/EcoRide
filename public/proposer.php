@@ -1,6 +1,7 @@
 <?php
 
-use class\Travels;
+use Olivierguissard\EcoRide\Model\SuggestTrip;
+use Olivierguissard\EcoRide\Model\Travels;
 
 $pageTitle = 'Proposer un trajet - EcoRide';
 
@@ -48,12 +49,12 @@ if (isset($_POST['suggestedStartCity'], $_POST['suggestedEndCity'], $_POST['prop
 <body>
     <nav class="navbar bg-white fixed-top shadow-sm">
         <div class="container px-3" style="max-width: 900px">
-            <a href="#" class="navbar-brand d-flex align-items-center">
+            <a href="index.php" class="navbar-brand d-flex align-items-center">
                 <img src="assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="d-inline-block align-text-center rounded" width="60">
 
             </a>
             <span class="navbar-text fw-medium">Proposer un trajet</span>
-            <a class="btn btn-success" role="button" href="connect.html">Connexion</a>
+            <a class="btn btn-success" role="button" href="login.php">Connexion</a>
         </div>
     </nav>
 <!-- Formulaire Multi-Étapes -->

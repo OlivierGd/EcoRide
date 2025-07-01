@@ -1,9 +1,11 @@
 <?php
 
-namespace class;
+namespace Olivierguissard\EcoRide\Model;
 
-use Olivierguissard\EcoRide\Config\Database;
+use class\PDOException;
+use Olivierguissard\EcoRide\config\Database;
 use PDO;
+
 class Car
 {
     public ?int $id;

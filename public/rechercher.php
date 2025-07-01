@@ -16,11 +16,11 @@
 <!-- Navbar -->
 <nav class="navbar bg-white fixed-top shadow-sm">
     <div class="container px-3" style="max-width: 900px" >
-        <a href="/index.php" class="navbar-brand d-flex align-items-center">
+        <a href="index.php" class="navbar-brand d-flex align-items-center">
             <img src="assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="d-inline-block align-text-center rounded" width="60">
         </a>
         <span class="navbar-text fw-medium">Résultats de la recherche</span>
-        <a class="btn btn-success" role="button" href="/connect.html">Connexion</a>
+        <a class="btn btn-success" role="button" href="login.php">Connexion</a>
     </div>
 </nav>
 

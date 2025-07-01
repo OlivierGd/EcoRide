@@ -1,9 +1,11 @@
 <?php
+
+require __DIR__ . '/../vendor/autoload.php';
+
 session_start();
-require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 use Olivierguissard\EcoRide\Config\Database;
-use class\Users;
+use Olivierguissard\EcoRide\Model\Users;
 
 require_once 'functions/auth.php';
 if (est_connecte()) {
@@ -14,7 +16,7 @@ if (est_connecte()) {
 $pdo = Database::getConnection();
 
 $pageTitle = 'Créer un compte - EcoRide';
-require_once 'class/Users.php';
+
 
 $error = [];
 $success = false;

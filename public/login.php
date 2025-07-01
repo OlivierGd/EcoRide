@@ -1,11 +1,11 @@
 <?php
-session_start();
 
 use Olivierguissard\EcoRide\Config\Database;
 
-require_once 'functions/auth.php';
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../src/config/Database.php';
+require_once 'functions/auth.php';
+
+session_start();
 
 $erreur = null;
 
@@ -59,7 +59,7 @@ if (!empty($_POST['emailUser']) && !empty($_POST['passwordUser'])) {
 <div class="container py-5">
     <div class="min-vh-100 d-flex flex-column px-3 py-5 main-wrapper">
         <header class="d-flex justify-content-between align-items-center mb-4">
-            <a href="../public/index.php" class="btn btn-light p-2 rounded-circle">
+            <a href="index.php" class="btn btn-light p-2 rounded-circle">
                 <i class="bi bi-arrow-left"></i>
             </a>
             <img src="assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="logo rounded" width="90em">

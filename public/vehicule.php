@@ -4,9 +4,9 @@ require_once 'functions/auth.php';
 utilisateur_connecte();
 
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/class/Car.php';
+require_once __DIR__ . '/../src/Model/Car.php';
 
-use class\Car;
+use Olivierguissard\EcoRide\Model\Car;
 
 // Si le formulaire est soumis
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

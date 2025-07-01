@@ -1,9 +1,14 @@
 <?php
+
+namespace Olivierguissard\EcoRide\Model;
+use Olivierguissard\EcoRide\config\DateTime;
+
 require_once 'Travels.php';
-use class\Travels;
+
 class SuggestTrip
 {
     private $file;
+
     public function __construct(string $file)
     {
         $directory = dirname($file);
@@ -18,7 +23,7 @@ class SuggestTrip
 
     public function addVoyage(Travels $voyage): void
     {
-        file_put_contents($this->file, $voyage->toJSON() . PHP_EOL,  FILE_APPEND);
+        file_put_contents($this->file, $voyage->toJSON() . PHP_EOL, FILE_APPEND);
     }
 
     public function getVoyages(): array

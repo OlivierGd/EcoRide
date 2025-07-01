@@ -1,6 +1,8 @@
 <?php
 
-namespace class;
+namespace Olivierguissard\EcoRide\Model;
+
+use const class\results;
 
 class GeoApi
 {

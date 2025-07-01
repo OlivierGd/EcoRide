@@ -1,6 +1,6 @@
 <?php
 
-namespace class;
+namespace Olivierguissard\EcoRide\Model;
 
 use DateTime;
 use DateTimeZone;

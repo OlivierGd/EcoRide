@@ -1,11 +1,11 @@
 <?php
 
-namespace class;
+namespace Olivierguissard\EcoRide\Model;
 
-use DateTimeZone;
-use PDOException;
-use Exception;
 use DateTime;
+use DateTimeZone;
+use Exception;
+use PDOException;
 
 class Users
 {
