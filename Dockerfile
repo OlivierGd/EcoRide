@@ -28,15 +28,18 @@ RUN apt-get update \
  && apt-get purge -y --auto-remove curl unzip \
  && rm -rf /var/lib/apt/lists/*
 
-# Copier les bundles JS depuis le builder
-COPY --from=builder /app/public/assets/js /var/www/html/public/assets/js
-
-# Copier tout le code PHP
-COPY . /var/www/html
-WORKDIR /var/www/html
+COPY composer.json composer.lock ./
 
 # Installer les dépendances PHP en production
 RUN composer install --no-dev --optimize-autoloader
+
+# Copier tout le code PHP
+COPY . /var/www/html
+
+# Copier les bundles JS depuis le builder
+COPY --from=builder /app/public/assets/js /var/www/html/public/assets/js
+
+WORKDIR /var/www/html
 
 # Exposer le port HTTP (Apache écoute déjà sur 80)
 EXPOSE 80
