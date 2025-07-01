@@ -97,10 +97,10 @@ if(isset($_GET['villeDepart']) && isset($_GET['villeArrivee']) && isset($_GET['d
                     </button>
                 </div>
             </form>
-            <?php echo '<pre>';
+            <?php /*echo '<pre>';
             print_r($searchForTrip);
             echo '</pre>';
-            ?>
+            */ ?>
         </section>
 
         <!--Stats section-->

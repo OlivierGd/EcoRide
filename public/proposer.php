@@ -5,8 +5,8 @@ use Olivierguissard\EcoRide\Model\Travels;
 
 $pageTitle = 'Proposer un trajet - EcoRide';
 
-require_once 'class/Travels.php';
-require_once 'class/SuggestTrip.php';
+require_once __DIR__ . '/../vendor/autoload.php';;
+require_once __DIR__ . '/../src/Model/SuggestTrip.php';
 $errors = null;
 $success = false;
 if (isset($_POST['suggestedStartCity'], $_POST['suggestedEndCity'], $_POST['proposalDate'],
