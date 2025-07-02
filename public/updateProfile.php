@@ -7,7 +7,7 @@ session_start();
 require_once __DIR__ . '/../vendor/autoload.php';
 
 require_once __DIR__ . '/functions/auth.php';
-utilisateur_connecte();
+requireAuth();
 
 require_once __DIR__ . '/../src/config/Database.php';
 

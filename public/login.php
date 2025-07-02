@@ -9,7 +9,7 @@ session_start();
 
 $erreur = null;
 
-if (est_connecte()) {
+if (isAuthenticated()) {
     header('Location: profil.php');
     exit;
 }

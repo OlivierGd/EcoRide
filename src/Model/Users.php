@@ -92,20 +92,25 @@ class Users
     {
         return $this->firstName[0] . $this->lastName[0];
     }
-    public function saveToDatabase($pdo) : bool
+    public function saveToDatabase($pdo) : int|false
     {
         try {
-            $sql = "INSERT INTO users (firstName, lastName, email, password, credits, status, role, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO users (firstName, lastName, email, password, ranking, credits, status, role, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $pdo->prepare($sql);
-            return $stmt->execute([
+            $success = $stmt->execute([
                 $this->firstName,
                 $this->lastName,
                 $this->email,
                 $this->password,
+                $this->ranking,
                 $this->credits,
                 $this->status,
                 $this->role,
                 $this->created_at->format('Y-m-d H:i:s')]);
+            if ($success) {
+                return (int)$pdo->lastInsertId(); // permet de récupérer user_id
+            }
+            return false;
         } catch (PDOException $e) {
             throw new Exception("Erreur lors de l'enregistrement : " . $e->getMessage());
         }

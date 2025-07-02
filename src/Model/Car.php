@@ -40,13 +40,13 @@ class Car
         if ($this->modele === '') {
             $this->errors['modele'] = 'Le modèle de la voiture est requis.';
         }
-        if (!in_array($this->carburant, ['electrique', 'hybride', 'essence', 'gazole'], true)) {
+        if (!in_array(trim($this->carburant), ['Electrique', 'Hybride', 'Essence', 'Gasoil'], true)) {
             $this->errors['carburant'] = 'Le carburant de la voiture est invalide. Sélectionnez un carburant dans la liste';
         }
         if (!preg_match('/^[A-Z0-9-]{2,10}$/', $this->immatriculation)) {
             $this->errors['immatriculation'] = 'Plaque invalide.';
         }
-        if ($this->places < 1 && $this->places > 5) {
+        if ($this->places < 1 || $this->places > 5) {
             $this->errors['places'] = 'Le nombre de places de la voiture doit-être compris entre 1 et 5.';
         }
         return empty($this->errors);

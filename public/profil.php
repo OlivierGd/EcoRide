@@ -1,8 +1,9 @@
 <?php
 require_once 'functions/auth.php';
-utilisateur_connecte();
+startSession();
+requireAuth();
 
-$pageTitle = 'Mon profil - EcoRide';
+require_once __DIR__ . '/../src/Helpers/helpers.php';
 
 // Vérification de la session
 if (!isset($_SESSION['connecte']) || !$_SESSION['connecte']) {
@@ -10,10 +11,12 @@ if (!isset($_SESSION['connecte']) || !$_SESSION['connecte']) {
     exit;
 }
 
-if (!empty($_SESSION['success_registration'])) {
-    echo '<div class="alert alert-success text-center" role="alert">Votre compte a bien été créé !</div>';
-    unset($_SESSION['success_registration']);
-}
+    // Affiche une alerte une fois si le compte est créé
+    if (isset($_SESSION['update_success'])) {
+        echo '<div class="alert alert-success mt-5" role="alert">' . $_SESSION['update_success'] . '</div>';
+        unset($_SESSION['update_success']);
+    }
+$pageTitle = 'Mon profil - EcoRide';
 
 ?>
 <!DOCTYPE html>
@@ -25,7 +28,7 @@ if (!empty($_SESSION['success_registration'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="assets/css/index.css">
-    <title><?php /*if (isset($pageTitle)) { echo $pageTitle; } else { echo 'EcoRide - Covoiturage écologique';} */?></title>
+    <title><?php if (isset($pageTitle)) { echo $pageTitle; } else { echo 'EcoRide - Covoiturage écologique';} ?></title>
 </head>
 <body>
 <nav class="navbar bg-body-tertiary">
@@ -34,12 +37,13 @@ if (!empty($_SESSION['success_registration'])) {
             <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="60" class="rounded">
         </a>
         <h2>Mon Profil</h2>
-        <a href="/logout.php">Se déconnecter</a>
+        <?= displayInitialsButton(); ?>
     </div>
 </nav>
 
 
 <main>
+
 
     <!-- Section Profil personne connectée -->
     <section>
@@ -67,7 +71,10 @@ if (!empty($_SESSION['success_registration'])) {
                         <!-- Affichage du ranking en étoiles -->
                         <div class="d-flex justify-content-center align-items-center mb-2">
                             <?php
-                            $fullStars = floor($_SESSION['ranking']);
+                            $ranking = $_SESSION['ranking'] ?? 0;
+                            $ranking = (float) $ranking;
+                            $fullStars = floor($ranking);
+                            $halfStar = ($ranking - $fullStars) >= 0.5;
                             $halfStar = ($_SESSION['ranking'] - $fullStars) >= 0.5;
                             for ($i = 0; $i < $fullStars; $i++) {
                                 echo '<i class="bi bi-star-fill text-warning"></i>';
@@ -80,7 +87,7 @@ if (!empty($_SESSION['success_registration'])) {
                                 echo '<i class="bi bi-star text-warning"></i>';
                             }
                             ?>
-                            <span class="ms-2">(<?= number_format($_SESSION['ranking'], 1) ?>)</span>
+                            <span class="ms-2">(<?= number_format($ranking, 1) ?>)</span>
                         </div>
 
                         <!-- Badge rôle -->
@@ -369,25 +376,25 @@ if (!empty($_SESSION['success_registration'])) {
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editProfileModalLabel">Modifier le Profil</h5>
+                    <h5 class="modal-title" id="editProfileModalLabel">Modifier vos données</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form action="updateProfile.php" id="editProfileForm" method="POST" enctype="multipart/form-data">
                         <div class="mb-3">
-                            <label for="firstName" class="form-label">Prénom</label>
+                            <label for="firstName" class="form-label"><b>Prénom :</b></label>
                             <input type="text" class="form-control" id="firstName" name="firstName" value="<?= htmlspecialchars($_SESSION['firstName']) ?>" required>
                         </div>
                         <div class="mb-3">
-                            <label for="lastName" class="form-label">Nom</label>
+                            <label for="lastName" class="form-label"><b>Nom :</b></label>
                             <input type="text" class="form-control" id="lastName" name="lastName" value="<?= htmlspecialchars($_SESSION['lastName']) ?>" required>
                         </div>
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
+                            <label for="email" class="form-label"><b>Email :</b></label>
                             <input type="email" class="form-control" id="email" name="email" value="<?= htmlspecialchars($_SESSION['email']) ?>" required>
                         </div>
                         <div class="mb-3">
-                            <label for="profilePicture" class="form-label">Photo de Profil</label>
+                            <label for="profilePicture" class="form-label"><b>Photo de Profil :</b></label>
                             <input type="file" class="form-control" id="profilePicture" name="profilePicture">
                         </div>
                         <button type="submit" class="btn btn-success">Mettre à jour</button>
@@ -402,19 +409,19 @@ if (!empty($_SESSION['success_registration'])) {
 <footer>
     <nav class="navbar fixed-bottom bg-body-tertiary px-4">
         <div class="container d-flex justify-content-around text-center" style="max-width: 900px">
-            <a class="nav-item nav-link d-flex flex-column" href="/public/index.php">
+            <a class="nav-item nav-link d-flex flex-column" href="/index.php">
                 <i class="bi bi-house fs-4"></i>
                 <span>Accueil</span>
             </a>
-            <a class="nav-item nav-link d-flex flex-column" href="/public/rechercher.php">
+            <a class="nav-item nav-link d-flex flex-column" href="/rechercher.php">
                 <i class="bi bi-zoom-in fs-4"></i>
                 <span>Rechercher</span>
             </a>
-            <a class="nav-item nav-link d-flex flex-column" href="/public/proposer.php">
+            <a class="nav-item nav-link d-flex flex-column" href="/proposer.php">
                 <i class="bi bi-ev-front fs-4"></i>
                 <span>Proposer</span>
             </a>
-            <a class="nav-item nav-link d-flex flex-column" href="/public/profil.php">
+            <a class="nav-item nav-link d-flex flex-column" href="/profil.php">
                 <i class="bi bi-person fs-4"></i>
                 <span>Profil</span>
             </a>

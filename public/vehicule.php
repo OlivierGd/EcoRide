@@ -1,12 +1,15 @@
 <?php
-session_start();
+
+use Olivierguissard\EcoRide\Model\Car;
+
 require_once 'functions/auth.php';
-utilisateur_connecte();
+startSession();
+requireAuth();
 
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../src/Model/Car.php';
+require_once __DIR__ . '/../src/Helpers/helpers.php';
 
-use Olivierguissard\EcoRide\Model\Car;
 
 // Si le formulaire est soumis
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -23,7 +26,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $voiture->immatriculation = trim($data['plaque_immatriculation']);
 
         if ($voiture->validateCar()) {
-            $_SESSION['flash_success'] = 'Véhicule modifié !';
+            if ($voiture->saveToDatabase()) {
+                $_SESSION['flash_success'] = 'Véhicule modifié !';
+            } else {
+                $_SESSION['flash_error'] = 'Erreur lors de la modification du véhicule';
+            }
         } else {
             $_SESSION['flash_error'] = implode('<br>', $voiture->errors);
         }
@@ -82,7 +89,7 @@ $pageTitle = 'Mes véhicules';
                 <img src="/assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="d-inline-block align-text-center rounded" width="60">
                 EcoRide
             </a>
-            <a class="btn btn-success" role="button" href="/login.php">Connexion</a>
+            <?= displayInitialsButton(); ?>
         </div>
     </nav>
     <div class="<?= (isset($erreur) || ini_get('display_errors')) ? 'has-error' : '' ?>">
@@ -92,9 +99,9 @@ $pageTitle = 'Mes véhicules';
     <div class="container my-3">
 
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <button class="btn btn-link text-dark p-0"><i class="bi bi-chevron-left fs-5"></i></button>
+            <button class="btn btn-link text-dark p-0"><a href="/profil.php"><i class="bi bi-chevron-left fs-5"></i></a></button>
             <h5 class="fw-bold m-0">Mes Véhicules</h5>
-            <button class="btn btn-link text-success p-0"><i class="bi bi-plus fs-4"></i></button>
+            <button class="btn btn-link text-success p-0" data-bs-toggle="modal" data-bs-target="#ajoutVehiculeModal"><i class="bi bi-plus fs-4"></i></button>
         </div>
 
         <!-- Affiche la liste des véhicules enregistrés par l'utilisateur -->
@@ -146,7 +153,7 @@ $pageTitle = 'Mes véhicules';
 
 
         <!-- Bouton flottant pour ajouter un véhicule -->
-        <button class="btn btn-success rounded-circle position-fixed bottom-1 end-0 m-4 shadow" data-bs-toggle="modal" data-bs-target="#ajoutVehiculeModal" style="width: 56px; height: 56px;">
+        <button class="btn btn-success rounded-circle position-fixed start-50 translate-middle-x bottom-1 end-0 m-4 shadow" data-bs-toggle="modal" data-bs-target="#ajoutVehiculeModal" style="width: 56px; height: 56px;">
             <i class="bi bi-plus-lg fs-4"></i>
         </button>
 
@@ -175,13 +182,13 @@ $pageTitle = 'Mes véhicules';
 
                             <!-- Type -->
                             <div class="mb-3">
-                                <label for="typeVehicule" class="form-label">Énergie utilisé :</label>
+                                <label for="typeVehicule" class="form-label">Énergie utilisée :</label>
                                 <select class="form-select" id="typeVehicule" name="type_carburant">
                                     <option value="" selected disabled>Type d'énergie</option>
-                                    <option value="electrique">Électrique</option>
-                                    <option value="hybride">Hybride</option>
-                                    <option value="essence">Essence</option>
-                                    <option value="gasoil">Gasoil</option>
+                                    <option value="Electrique">Électrique</option>
+                                    <option value="Hybride">Hybride</option>
+                                    <option value="Essence">Essence</option>
+                                    <option value="Gasoil">Gasoil</option>
                                 </select>
                             </div>
 

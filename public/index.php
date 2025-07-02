@@ -1,6 +1,10 @@
 <?php
 
-$pageTitle = 'Accueil - EcoRide';
+require_once 'functions/auth.php';
+startSession();
+isAuthenticated();
+
+require_once __DIR__ . '/../src/Helpers/helpers.php';
 
 // chemin du dossier data
 $dataDir = __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'data';
@@ -13,6 +17,7 @@ if(isset($_GET['villeDepart']) && isset($_GET['villeArrivee']) && isset($_GET['d
         'dateVoyage' => $_GET['dateVoyage']
     ];
 }
+$pageTitle = 'Accueil - EcoRide';
 ?>
 
 <!DOCTYPE html>
@@ -29,13 +34,14 @@ if(isset($_GET['villeDepart']) && isset($_GET['villeArrivee']) && isset($_GET['d
 <body>
 <!-- Navbar -->
 <header>
-    <nav class="navbar fixed-top bg-white shadow-sm">
-        <div class="container" style="max-width: 900px">
-            <a class="navbar-brand" href="/public/index.php">
+    <nav class="navbar bg-white fixed-top shadow-sm">
+        <div class="container px-3" style="max-width: 900px">
+            <a href="index.php" class="navbar-brand d-flex align-items-center">
                 <img src="assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="d-inline-block align-text-center rounded" width="60">
-                EcoRide
+
             </a>
-            <a class="btn btn-success" role="button" href="/login.php">Connexion</a>
+            <h1>EcoRide</h1>
+            <div><?= displayInitialsButton(); ?></div>
         </div>
     </nav>
     <div class="<?= (isset($erreur) || ini_get('display_errors')) ? 'has-error' : '' ?>">

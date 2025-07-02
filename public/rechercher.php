@@ -1,5 +1,15 @@
 <?php
-    $pageTitle = 'Rechercher un voyage';
+
+require_once 'functions/auth.php';
+startSession();
+isAuthenticated();
+
+require_once __DIR__ . '/../src/Helpers/helpers.php';
+require_once __DIR__ . '/../vendor/autoload.php';;
+require_once __DIR__ . '/../src/Model/SuggestTrip.php';
+
+
+$pageTitle = 'Rechercher un voyage';
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -20,7 +30,7 @@
             <img src="assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="d-inline-block align-text-center rounded" width="60">
         </a>
         <span class="navbar-text fw-medium">Résultats de la recherche</span>
-        <a class="btn btn-success" role="button" href="login.php">Connexion</a>
+        <?= displayInitialsButton(); ?>
     </div>
 </nav>
 

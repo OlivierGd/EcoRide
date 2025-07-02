@@ -3,10 +3,14 @@
 use Olivierguissard\EcoRide\Model\SuggestTrip;
 use Olivierguissard\EcoRide\Model\Travels;
 
-$pageTitle = 'Proposer un trajet - EcoRide';
+require_once 'functions/auth.php';
+startSession();
+isAuthenticated();
 
+require_once __DIR__ . '/../src/Helpers/helpers.php';
 require_once __DIR__ . '/../vendor/autoload.php';;
 require_once __DIR__ . '/../src/Model/SuggestTrip.php';
+
 $errors = null;
 $success = false;
 if (isset($_POST['suggestedStartCity'], $_POST['suggestedEndCity'], $_POST['proposalDate'],
@@ -31,7 +35,7 @@ if (isset($_POST['suggestedStartCity'], $_POST['suggestedEndCity'], $_POST['prop
         $errors = $voyage->getErrors();
     }
 }
-//$voyage = $suggestTrip->getVoyages();
+$pageTitle = 'Proposer un trajet - EcoRide';
 ?>
 
 <!DOCTYPE html>
@@ -53,8 +57,8 @@ if (isset($_POST['suggestedStartCity'], $_POST['suggestedEndCity'], $_POST['prop
                 <img src="assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="d-inline-block align-text-center rounded" width="60">
 
             </a>
-            <span class="navbar-text fw-medium">Proposer un trajet</span>
-            <a class="btn btn-success" role="button" href="login.php">Connexion</a>
+            <h2>Proposer un trajet</h2>
+            <div><?= displayInitialsButton(); ?></div>
         </div>
     </nav>
 <!-- Formulaire Multi-Étapes -->

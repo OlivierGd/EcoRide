@@ -1,14 +1,14 @@
 <?php
 
+use Olivierguissard\EcoRide\Config\Database;
+use Olivierguissard\EcoRide\Model\Users;
+
 require __DIR__ . '/../vendor/autoload.php';
 
 session_start();
 
-use Olivierguissard\EcoRide\Config\Database;
-use Olivierguissard\EcoRide\Model\Users;
-
 require_once 'functions/auth.php';
-if (est_connecte()) {
+if (isAuthenticated()) {
     header('Location: /profil.php');
     exit;
 }
@@ -55,23 +55,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ($_POST['firstName']),
                     ($_POST['lastName']),
                     ($_POST['email']),
-                    ($_POST['password']));
+                    ($_POST['password'])
+                );
                 $user->setPassword();
-                $user->saveToDatabase($pdo);
+                $user_id = $user->saveToDatabase($pdo);
 
-                $_SESSION['connecte'] = true;
-                $_SESSION['email'] = $user->getEmail();
-                $_SESSION['firstName'] = $user->getFirstName();
-                $_SESSION['lastName'] = $user->getLastName();
-                $_SESSION['status'] = $user->getStatus();
-                $_SESSION['role'] = $user->getRole();
-                $_SESSION['credits'] = $user->getCredits();
-                $_SESSION['ranking'] = $user->getRanking();
-                $_SESSION['profilePicture'] = $user->getProfilePicture();
-                $_SESSION['success_registration'] = true;
+                if ($user_id) {
+                    $_SESSION['user_id'] = $user_id;
+                    $_SESSION['connecte'] = true;
+                    $_SESSION['email'] = $user->getEmail();
+                    $_SESSION['firstName'] = $user->getFirstName();
+                    $_SESSION['lastName'] = $user->getLastName();
+                    $_SESSION['status'] = $user->getStatus();
+                    $_SESSION['role'] = $user->getRole();
+                    $_SESSION['credits'] = $user->getCredits();
+                    $_SESSION['ranking'] = $user->getRanking();
+                    $_SESSION['profilePicture'] = $user->getProfilePicture();
+                    $_SESSION['success_registration'] = true;
 
-                header('Location: /profil.php');
-                exit;
+                    header('Location: /profil.php');
+                    exit;
+                } else {
+                    $error[] = 'Erreur lors de la création du compte';
+                }
             }
         } catch (PDOException $e) {
             $error[] = 'Erreur lors de l\'inscription : ' . $e->getMessage();
