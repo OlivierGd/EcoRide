@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data = array_intersect_key($_POST, array_flip(['id_vehicule', 'marque', 'modele', 'type_carburant', 'nbr_places', 'plaque_immatriculation']));
         $voiture = Car::find((int)$data['id_vehicule']);
 
-        $voiture->marque = trim($data['marque']);
+        $voiture->marque = htmlspecialchars(trim($data['marque']));
         $voiture->modele = trim($data['modele']);
         $voiture->carburant = trim($data['type_carburant']);
         $voiture->places = (int)$data['nbr_places'];

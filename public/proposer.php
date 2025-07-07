@@ -1,40 +1,67 @@
 <?php
 
-use Olivierguissard\EcoRide\Model\SuggestTrip;
-use Olivierguissard\EcoRide\Model\Travels;
+use Olivierguissard\EcoRide\Model\Trip;
+use Olivierguissard\EcoRide\Model\Car;
 
 require_once 'functions/auth.php';
 startSession();
 isAuthenticated();
 
+require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../src/Helpers/helpers.php';
-require_once __DIR__ . '/../vendor/autoload.php';;
-require_once __DIR__ . '/../src/Model/SuggestTrip.php';
 
-$errors = null;
-$success = false;
-if (isset($_POST['suggestedStartCity'], $_POST['suggestedEndCity'], $_POST['proposalDate'],
-    $_POST['proposalTime'], $_POST['places'], $_POST['priceRequested'], $_POST['commentForPassenger'])) {
+// Soumettre le formulaire
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    error_log('Données POST reçues : ' . print_r($_POST, true));
+    $keys = [
+        'trip_id',
+        'driver_id',
+        'start-city',
+        'end-city',
+        'departure_at',
+        'price_per_passenger',
+        'comment',
+        'no-smoking',
+        'music_allowed',
+        'discuss_allowed'
+    ];
+    $data = array_intersect_key($_POST, array_flip($keys));
 
-    $voyage = new Travels(
-            $_POST['suggestedStartCity'],
-            $_POST['suggestedEndCity'],
-            new DateTime($_POST['proposalDate']), // Conversion en DateTime
-            $_POST['proposalTime'],
-            $_POST['places'],
-            $_POST['priceRequested'],
-            $_POST['commentForPassenger']);
+    if (!empty($data['trip_id'])) {
+        $voyage = Trip::find((int)$data['trip_id']);
 
-
-    if ($voyage->isValid()) {
-        $suggestTrip = new SuggestTrip(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'voyages');
-        $suggestTrip->addVoyage($voyage);
-        $success = true;
-        $_POST = [];
+        $voyage->setDriverId((int)$data['driver_id']);
+        $voyage->setStartCity($data['start-city']);
+        $voyage->setEndCity($data['end-city']);
+        $voyage->setDepartureAt(new DateTime($data['departure_at']));
+        $voyage->setPricePerPassenger($data['price_per_passenger']);
+        $voyage->setComment($data['comment']);
+        $voyage->setNoSmoking($data['no-smoking']);
+        $voyage->setMusicAllowed($data['music_allowed']);
+        $voyage->setDiscussAllowed($data['discuss_allowed']);
     } else {
-        $errors = $voyage->getErrors();
+        $data['driver_id'] = $_SESSION['user_id'];
+        $voyage = new Trip($data);
     }
+
+    if ($voyage->validateTrip()) {
+        if ($voyage->saveToDatabase()) {
+            $_SESSION['flash_success'] = 'Le voyage est enregistré !';
+        } else {
+            $_SESSION['flash_error'] = 'Une erreur est survenue lors de l\'enregistrement du voyage.';
+        }
+    } else {
+        $_SESSION['flash_error'] = 'Le voyage n\'est pas valide.';
+    }
+    header('Location: /rechercher.php');
+    exit;
 }
+$voyage = Trip::findByUser($_SESSION['user_id']);
+
+// Récupère la liste des véhicules de l'utilisateur connecté
+$vehicles = Car::findByUser($_SESSION['user_id']);
+
+$success = false;
 $pageTitle = 'Proposer un trajet - EcoRide';
 ?>
 
@@ -74,7 +101,7 @@ $pageTitle = 'Proposer un trajet - EcoRide';
 
                 <?php if (!empty($errors)): ?>
                 <div class="alert alert-danger" role="alert">
-                    Formulaire invalide
+                    Formulaire invalidegfhd
                 </div>
                 <?php endif; ?>
                 <?php if ($success): ?>
@@ -91,17 +118,17 @@ $pageTitle = 'Proposer un trajet - EcoRide';
                 <div class="step step1">
                     <h2>1. Itinéraire</h2>
                     <div class="mb-3">
-                        <label for="suggestedStartCity" class="form-label"><i class="bi bi-geo-alt"></i> Ville de départ</label>
-                        <input type="text" name="suggestedStartCity"  class="form-control ps-5" id="suggestedStartCity" placeholder="Départ" required>
-                        <?php if (isset($errors['suggestedStartCity'])): ?>
-                        <div class="invalid-feedback"><?= $errors['suggestedStartCity'] ?></div>
+                        <label for="startCity" class="form-label"><i class="bi bi-geo-alt"></i> Ville de départ</label>
+                        <input type="text" name="start_city"  class="form-control ps-5" id="startCity" placeholder="Départ" required>
+                        <?php if (isset($errors['startCity'])): ?>
+                        <div class="invalid-feedback"><?= $errors['startCity'] ?></div>
                         <?php endif; ?>
                     </div>
                     <div class="mb-3">
-                        <label for="suggestedEndCity" class="form-label"><i class="bi bi-pin-map"></i> Destination</label>
-                        <input type="text" name="suggestedEndCity" class="form-control ps-5" id="suggestedEndCity" placeholder="Destination" required>
-                        <?php if (isset($errors['suggestedEndCity'])): ?>
-                            <div class="invalid-feedback"><?= $errors['suggestedEndCity'] ?></div>
+                        <label for="endCity" class="form-label"><i class="bi bi-pin-map"></i> Destination</label>
+                        <input type="text" name="end_city" class="form-control ps-5" id="endCity" placeholder="Destination" required>
+                        <?php if (isset($errors['endCity'])): ?>
+                            <div class="invalid-feedback"><?= $errors['endCity'] ?></div>
                         <?php endif; ?>
                     </div>
                     <p>+ Ajouter un arrêt supplémentaire</p>
@@ -111,10 +138,10 @@ $pageTitle = 'Proposer un trajet - EcoRide';
                 <div class="step step2">
                     <h2>2. Date et Heure</h2>
                     <div class="mb-3">
-                        <label for="proposalDate" class="form-label">Date</label>
-                        <input type="date" name="proposalDate" class="form-control" id="proposalDate" required>
-                        <?php if (isset($errors['proposalDate'])): ?>
-                            <div class="invalid-feedback"><?= $errors['proposalDate'] ?></div>
+                        <label for="departureDateTime" class="form-label">Date</label>
+                        <input type="date" name="departure_at" class="form-control" id="departureDateTime" required>
+                        <?php if (isset($errors['departureDateTime'])): ?>
+                            <div class="invalid-feedback"><?= $errors['departureDateTime'] ?></div>
                         <?php endif; ?>
                     </div>
                     <div class="mb-3">
@@ -129,6 +156,18 @@ $pageTitle = 'Proposer un trajet - EcoRide';
                 <!-- Étape 3 : Places/Prix -->
                 <div class="step step3">
                     <h2>3. Places et Prix</h2>
+                    <h3>Véhicule utilisé</h3>
+                    <div class="mb-3">
+                        <label for="vehiclesUser">Véhicule</label>
+                        <select class="form-select" id="vehiclesUser" name="vehicle_id" required>
+                            <option value="" disabled selected>Choisissez votre véhicule</option>
+                            <?php foreach ($vehicles as $veh): ?>
+                                <option value="<?= htmlspecialchars($veh->id) ?>">
+                                    <?= htmlspecialchars($veh->marque . ' ' . $veh->modele) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                     <h3>Nombre de places disponibles</h3>
                     <div class="mb-3">
                         <div class="btn-group" role="group">
@@ -147,7 +186,7 @@ $pageTitle = 'Proposer un trajet - EcoRide';
                     <h3>Prix par passager</h3>
                     <div class="input-group flex-nowrap mb-3">
                         <span class="input-group-text">Crédits</span>
-                        <input type="number" class="form-control" name="priceRequested" id="priceRequested" placeholder="--" value="20" min="0" step="1" required>
+                        <input type="number" class="form-control" name="price_per_passenger" id="pricePerPassenger" placeholder="--" value="20" min="0" step="1" required>
                     </div>
                     <p>Jusqu'à <strong id="totalPrice"></strong> crédits pour ce trajet avec <strong id="placeFree"></strong> passagers</p>
                 </div>
@@ -157,20 +196,20 @@ $pageTitle = 'Proposer un trajet - EcoRide';
                     <h2>4. Options</h2>
                     <h3>Préférences</h3>
                     <div class="form-check form-switch">
-                        <input type="checkbox" name="no-smoking" class="form-check-input"  id="no-smoking" checked>
+                        <input type="checkbox" name="no_smoking" class="form-check-input"  id="no-smoking" checked>
                         <label class="form-check-label" for="no-smoking">Non-fumeur</label>
                     </div>
                     <div class="form-check form-switch">
-                        <input type="checkbox" name="musicPlay" class="form-check-input"  id="musicPlay" checked>
+                        <input type="checkbox" name="music_allowed" class="form-check-input"  id="musicPlay" checked>
                         <label class="form-check-label" for="musicPlay">Musique autorisée</label>
                     </div>
                     <div class="form-check form-switch">
-                        <input type="checkbox" name="discussTogether" class="form-check-input"  id="discussTogether" checked>
+                        <input type="checkbox" name="discuss_allowed" class="form-check-input"  id="discussTogether" checked>
                         <label class="form-check-label" for="discussTogether">Discussions bienvenues</label>
                     </div>
                     <h3>Commentaire pour les passagers</h3>
                     <div class="form-floating mb-3">
-                        <textarea name="commentForPassenger" class="form-control" id="commentForPassenger" style="height: 100px"></textarea>
+                        <textarea name="comment" class="form-control" id="commentForPassenger" style="height: 100px"></textarea>
                         <label for="commentForPassenger">Ex: Je pars du parking de la gare de Lyon...</label>
                     </div>
                 </div>
@@ -179,6 +218,7 @@ $pageTitle = 'Proposer un trajet - EcoRide';
             <div class="p-5"></div>
         </form>
         <section>
+            // Modale de validation du formulaire de trajet
             <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
