@@ -6,11 +6,9 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 use PDO;
 use PDOException;
 use Dotenv\Dotenv;
-
 class Database
 {
     private static ?PDO $pdo = null;
-
     public static function getConnection(): PDO
     {
         if (self::$pdo !== null) {
@@ -64,15 +62,14 @@ class Database
                 $user,
                 $pass,
                 [
-                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION, // lance les exceptions en cas d'erreur SQL
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, // Récupère les résultats dans un tableau associatif
                     PDO::ATTR_EMULATE_PREPARES   => false,
                 ]
             );
         } catch (PDOException $e) {
             die('Erreur de connexion à la BDD : ' . $e->getMessage());
         }
-
         return self::$pdo;
     }
 }

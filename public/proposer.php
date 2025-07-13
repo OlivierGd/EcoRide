@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../vendor/autoload.php';;
+
 use Olivierguissard\EcoRide\Model\Trip;
 use Olivierguissard\EcoRide\Model\Car;
 
@@ -7,7 +9,6 @@ require_once 'functions/auth.php';
 startSession();
 isAuthenticated();
 
-require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../src/Helpers/helpers.php';
 
 // Soumettre le formulaire
@@ -16,16 +17,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $keys = [
         'trip_id',
         'driver_id',
-        'start-city',
-        'end-city',
-        'departure_at',
+        'start_city',
+        'end_city',
+        'departure_date',
+        'departure_time',
+        'vehicle_id',
+        'available_seats',
         'price_per_passenger',
         'comment',
-        'no-smoking',
+        'no_smoking',
         'music_allowed',
         'discuss_allowed'
     ];
     $data = array_intersect_key($_POST, array_flip($keys));
+
+    // Gere la date et l'heure dans un seul champ "departure_at"
+    if (!empty($data['departure_date']) && !empty($data['departure_time'])) {
+        $data['departure_at'] = $data['departure_date'] . ' ' . $data['departure_time'];
+    } else {
+        // valeur par défaut ou gestion d’erreur
+        $data['departure_at'] = date('Y-m-d H:i:s');
+    }
 
     if (!empty($data['trip_id'])) {
         $voyage = Trip::find((int)$data['trip_id']);
@@ -45,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($voyage->validateTrip()) {
+
         if ($voyage->saveToDatabase()) {
             $_SESSION['flash_success'] = 'Le voyage est enregistré !';
         } else {
@@ -56,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Location: /rechercher.php');
     exit;
 }
-$voyage = Trip::findByUser($_SESSION['user_id']);
+$voyage = Trip::findTripsByDriver($_SESSION['user_id']);
 
 // Récupère la liste des véhicules de l'utilisateur connecté
 $vehicles = Car::findByUser($_SESSION['user_id']);
@@ -138,17 +151,17 @@ $pageTitle = 'Proposer un trajet - EcoRide';
                 <div class="step step2">
                     <h2>2. Date et Heure</h2>
                     <div class="mb-3">
-                        <label for="departureDateTime" class="form-label">Date</label>
-                        <input type="date" name="departure_at" class="form-control" id="departureDateTime" required>
-                        <?php if (isset($errors['departureDateTime'])): ?>
-                            <div class="invalid-feedback"><?= $errors['departureDateTime'] ?></div>
+                        <label for="departureDate" class="form-label">Date</label>
+                        <input type="date" name="departure_date" class="form-control" id="departureDate" required>
+                        <?php if (isset($errors['departureDate'])): ?>
+                            <div class="invalid-feedback"><?= $errors['departureDate'] ?></div>
                         <?php endif; ?>
                     </div>
                     <div class="mb-3">
-                        <label for="proposalTime" class="form-label">Heure</label>
-                        <input type="time" name="proposalTime" class="form-control" id="proposalTime" required>
-                        <?php if (isset($errors['proposalTime'])): ?>
-                            <div class="invalid-feedback"><?= $errors['proposalTime'] ?></div>
+                        <label for="departureTime" class="form-label">Heure</label>
+                        <input type="time" name="departure_time" class="form-control" id="departureTime" required>
+                        <?php if (isset($errors['departureTime'])): ?>
+                            <div class="invalid-feedback"><?= $errors['departureTime'] ?></div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -171,15 +184,15 @@ $pageTitle = 'Proposer un trajet - EcoRide';
                     <h3>Nombre de places disponibles</h3>
                     <div class="mb-3">
                         <div class="btn-group" role="group">
-                            <input type="radio" class="btn-check placeAvailable" name="places" id="place1" value="1">
+                            <input type="radio" class="btn-check placeAvailable" name="available_seats" id="place1" value="1">
                             <label class="btn btn-outline-success" for="place1">1</label>
-                            <input type="radio" class="btn-check placeAvailable" name="places" id="place2" value="2">
+                            <input type="radio" class="btn-check placeAvailable" name="available_seats" id="place2" value="2">
                             <label class="btn btn-outline-success" for="place2">2</label>
-                            <input type="radio" class="btn-check placeAvailable" name="places" id="place3" value="3" checked>
+                            <input type="radio" class="btn-check placeAvailable" name="available_seats" id="place3" value="3" checked>
                             <label class="btn btn-outline-success" for="place3">3</label>
-                            <input type="radio" class="btn-check placeAvailable" name="places" id="place4" value="4">
+                            <input type="radio" class="btn-check placeAvailable" name="available_seats" id="place4" value="4">
                             <label class="btn btn-outline-success" for="place4">4</label>
-                            <input type="radio" class="btn-check placeAvailable" name="places" id="place5" value="5">
+                            <input type="radio" class="btn-check placeAvailable" name="available_seats" id="place5" value="5">
                             <label class="btn btn-outline-success" for="place5">5</label>
                         </div>
                     </div>

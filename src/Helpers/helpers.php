@@ -21,3 +21,43 @@ function displayInitialsButton(): string
     return '<a href="/login.php" class="btn btn-success" role="button">Connexion</a>';
     }
 }
+
+function renderStarsAndRanking(float $ranking, int $max = 5): string
+{
+    $fullStars = floor($ranking);
+    $halfStar = ($ranking - $fullStars) >= 0.5;
+    $emptyStars = $max - $fullStars - ($halfStar ? 1 : 0);
+    $html = '';
+
+    for ($i = 0; $i < $fullStars; $i++) {
+        $html .= '<i class="bi bi-star-fill text-warning"></i>';
+    }
+    if ($halfStar) {
+        $html .= '<i class="bi bi-star-half text-warning"></i>';
+    }
+    for ($i = 0; $i < $emptyStars; $i++) {
+        $html .= '<i class="bi bi-star text-warning"></i>';
+    }
+    // affiche la valeur du ranking
+    $html .= ' <span class="ms-2">(' . number_format($ranking, 1) . ')</span>';
+
+    return $html;
+}
+
+function renderStars(float $ranking, int $max = 5): string
+{
+    $fullStars = floor($ranking);
+    $halfStar = ($ranking - $fullStars) >= 0.5;
+    $emptyStars = $max - $fullStars - ($halfStar ? 1 : 0);
+    $html = '';
+    for ($i = 0; $i < $fullStars; $i++) {
+        $html .= '<i class="bi bi-star-fill text-warning"></i>';
+    }
+    if ($halfStar) {
+        $html .= '<i class="bi bi-star-half text-warning"></i>';
+    }
+    for ($i = 0; $i < $emptyStars; $i++) {
+        $html .= '<i class="bi bi-star text-warning"></i>';
+    }
+    return $html;
+}

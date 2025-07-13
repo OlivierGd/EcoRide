@@ -58,18 +58,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ($_POST['password'])
                 );
                 $user->setPassword();
-                $user_id = $user->saveToDatabase($pdo);
+                $user_id = $user->saveUserToDatabase($pdo);
 
                 if ($user_id) {
-                    $_SESSION['user_id'] = $user_id;
-                    $_SESSION['connecte'] = true;
-                    $_SESSION['email'] = $user->getEmail();
-                    $_SESSION['firstName'] = $user->getFirstName();
-                    $_SESSION['lastName'] = $user->getLastName();
-                    $_SESSION['status'] = $user->getStatus();
-                    $_SESSION['role'] = $user->getRole();
-                    $_SESSION['credits'] = $user->getCredits();
-                    $_SESSION['ranking'] = $user->getRanking();
+                    $_SESSION['user_id']    = $user_id;
+                    $_SESSION['connecte']   = true;
+                    $_SESSION['email']      = $user->getEmail();
+                    $_SESSION['firstName']  = $user->getFirstName();
+                    $_SESSION['lastName']   = $user->getLastName();
+                    $_SESSION['status']     = $user->getStatus();
+                    $_SESSION['role']       = $user->getRole();
+                    $_SESSION['credits']    = $user->getCredits();
+                    $_SESSION['ranking']    = $user->getRanking();
                     $_SESSION['profilePicture'] = $user->getProfilePicture();
                     $_SESSION['success_registration'] = true;
 
@@ -174,9 +174,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
         </section>
     </main>
+    <footer>
     <?php
     include 'footer.php';
     ?>
+    </footer>
 </body>
 
 

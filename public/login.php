@@ -25,15 +25,15 @@ if (!empty($_POST['emailUser']) && !empty($_POST['passwordUser'])) {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($user && password_verify($password, $user['password'])) {
-        $_SESSION['connecte'] = true;
-        $_SESSION['email'] = $user['email'];
-        $_SESSION['firstName'] = $user['firstname'];
-        $_SESSION['lastName'] = $user['lastname'];
-        $_SESSION['status'] = $user['status'];
-        $_SESSION['role'] = $user['role'];
-        $_SESSION['credits'] = $user['credits'];
-        $_SESSION['ranking'] = $user['ranking'];
-        $_SESSION['user_id'] = $user['user_id'];
+        $_SESSION['connecte']   = true;
+        $_SESSION['email']      = $user['email'];
+        $_SESSION['firstName']  = $user['firstname'];
+        $_SESSION['lastName']   = $user['lastname'];
+        $_SESSION['status']     = $user['status'];
+        $_SESSION['role']       = $user['role'];
+        $_SESSION['credits']    = $user['credits'];
+        $_SESSION['ranking']    = $user['ranking'];
+        $_SESSION['user_id']    = $user['user_id'];
 
         header('Location: profil.php');
         exit;

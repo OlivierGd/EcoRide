@@ -1,10 +1,13 @@
 <?php
 
+require __DIR__ . '/../vendor/autoload.php';
+
 require_once 'functions/auth.php';
 startSession();
 isAuthenticated();
 
 require_once __DIR__ . '/../src/Helpers/helpers.php';
+
 
 // chemin du dossier data
 $dataDir = __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'data';
@@ -182,97 +185,44 @@ $pageTitle = 'Accueil - EcoRide';
             </div>
         </section>
 
-        <!--Recent Rides-->
         <section>
-            <h2 class="pt-5">Trajets récents</h2>
-            <p>Voir tout</p>
-            <div class="card-group">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Sophie M.</h5>
-                        <div>
-                            <div class="float-start">
-                                <span class="text-gold">
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-half"></i>
-                                </span>
-                                <span>
-                                (4.5)
-                                </span>
-                            </div>
-                            <div class="float-end">
-                                <button class="badge rounded-pill text-bg-success" type="button">Électrique</button>
-                            </div>
-                        </div>
-                        <p class="card-text"><span><i class="bi bi-geo-alt"></i>Paris -> <i class="bi bi-pin-map"></i>Lyon</span></p>
-                        <p class="card-text"><small class="text-body-secondary">
-                                <span><i class="bi bi-calendar-event"></i>10 mai, 10:00</span>
-                                <span><i class="bi bi-person-fill-add"></i>2 places</span>
-                                <span>15 crédits</span></small></p>
-                    </div>
-                </div>
+            <div class="d-flex justify-content-between align-items-center pt-5 mb-3">
+                <h2 class="mb-0">Trajets récents</h2>
+                <a href="/rechercher.php" class="text-primary fw-semibold small">Voir tout</a>
             </div>
-            <div class="card">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Thomas D.</h5>
-                        <div>
-                            <div class="float-start">
-                                <span class="text-gold">
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-half"></i>
-                                </span>
-                                <span>
-                                (4.0)
-                            </span>
-                            </div>
-                            <div class="float-end">
-                                <button class="badge rounded-pill text-bg-success" type="button">Électrique</button>
-                            </div>
-                        </div>
-                        <p class="card-text"><span><i class="bi bi-geo-alt"></i>Marseille -> <i class="bi bi-pin-map"></i>Nice</span></p>
-                        <p class="card-text"><small class="text-body-secondary">
-                                <span><i class="bi bi-calendar-event"></i>6 mai, 14:30</span>
-                                <span><i class="bi bi-person-fill-add"></i>2 places</span>
-                                <span>12 crédits</span></small></p>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Camille B.</h5>
-                        <div>
-                            <div class="float-start">
-                                <span class="text-gold">
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
 
-                                </span>
-                                <span>
-                                (5.0)
-                            </span>
+            <div class="container p-0">
+                <!-- Carte trajet -->
+                <div class="card shadow-sm mb-3 rounded-4">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="fw-bold me-2">Sophie M.</div>
+                            <div class="d-flex align-items-center small text-warning me-2">
+                                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-half"></i>
+                                <span class="ms-1 text-secondary">(4.5)</span>
                             </div>
-                            <div class="float-end">
-                                <button class="badge rounded-pill text-bg-success" type="button">Standard</button>
-                            </div>
+                            <span class="badge rounded-pill bg-success ms-auto">Électrique</span>
                         </div>
-                        <p class="card-text"><span><i class="bi bi-geo-alt"></i>Paris -> <i class="bi bi-pin-map"></i>Lyon</span></p>
-                        <p class="card-text"><small class="text-body-secondary">
-                                <span><i class="bi bi-calendar-event"></i>10 mai, 10:00</span>
-                                <span><i class="bi bi-person-fill-add"></i>2 places</span>
-                                <span>15 crédits</span></small></p>
+                        <div class="mb-2">
+                            <i class="bi bi-geo-alt me-1"></i> <strong>Paris</strong>
+                            <span class="mx-2 text-muted">→</span>
+                            <i class="bi bi-pin-map me-1"></i> <strong>Lyon</strong>
+                        </div>
+                        <div class="d-flex align-items-center text-secondary small mb-2">
+                            <div class="me-3"><i class="bi bi-calendar-event me-1"></i>10 mai, 10:00</div>
+                            <div class="me-3"><i class="bi bi-person-fill-add me-1"></i>2 places</div>
+                            <div><i class="bi bi-currency-euro me-1"></i>15 crédits</div>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button class="btn btn-primary btn-sm rounded-pill">Réserver</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
+
 
         <!-- Eco Impact -->
         <section>

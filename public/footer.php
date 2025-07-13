@@ -1,4 +1,4 @@
-<footer>
+
     <nav class="navbar fixed-bottom bg-body-tertiary px-4">
         <div class="container d-flex justify-content-around text-center" style="max-width: 900px">
             <a class="nav-item nav-link d-flex flex-column" href="/index.php">
@@ -19,4 +19,3 @@
             </a>
         </div>
     </nav>
-</footer>

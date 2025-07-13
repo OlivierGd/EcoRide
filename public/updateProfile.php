@@ -15,23 +15,11 @@ require_once __DIR__ . '/../src/config/Database.php';
 $pdo = Database::getConnection();
 
 // Recupere les données de la modale
-$firstName = $_POST['firstName'];
-$lastName = $_POST['lastName'];
-$email = $_POST['email'];
+$firstName  = $_POST['firstName'];
+$lastName   = $_POST['lastName'];
+$email      = $_POST['email'];
 $profilePicture = $_SESSION['profilePicture'] ?? '';
-$user_id = $_SESSION['user_id'];
-
-/*// ─── DÉBUT DÉBOGAGE ───
-var_dump([
-    'firstName'                  => $_POST['firstName']           ?? null,
-    'lastName'                   => $_POST['lastName']            ?? null,
-    'email'                      => $_POST['email']               ?? null,
-    'uploaded_file_name'         => $_FILES['profilePicture']['name'] ?? null,
-    'profilePicture_from_SESSION'=> $_SESSION['profilePicture']    ?? null,
-    'user_id'                    => $_SESSION['user_id']          ?? null,
-]);
-exit;*/
-// ─── FIN DÉBOGAGE ───
+$user_id    = $_SESSION['user_id'];
 
 // Vérifie si les champs sont complétés :
 if (empty($firstName) || empty($lastName) || empty($email)) {

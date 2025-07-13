@@ -12,7 +12,7 @@ class Trip
     private int $vehicleId;
     private string $startCity;
     private string $endCity;
-    private string $departureDateTime;
+    private DateTime $departureAt;
     private int $availableSeats;
     private int $pricePerPassenger;
     private ?string $comment;
@@ -29,7 +29,7 @@ class Trip
         $this->vehicleId    = (int)($data['vehicle_id'] ?? 0);
         $this->startCity    = trim($data['start_city'] ?? '');
         $this->endCity      = trim($data['end_city'] ?? '');
-        $this->departureDateTime  = $data['departure_at'] ?? date('Y-m-d H:i:s');
+        $this->departureAt  = new DateTime($data['departure_at'] ?? 'now');
         $this->availableSeats = (int)($data['available_seats'] ?? 1);
         $this->pricePerPassenger = (int)($data['price_per_passenger'] ?? 0);
         $this->comment      = $data['comment'] ?? '';
@@ -58,13 +58,21 @@ class Trip
     {
         return $this->endCity;
     }
+    public function getDepartureDateAndTime(): string
+    {
+        return $this->departureAt->format('Y-m-d H:i');
+    }
     public function getDepartureDate(): string
     {
-        return $this->departureDateTime->format('Y-m-d');
+        return $this->departureAt->format('Y-m-d');
+    }
+    public function getDepartureDateFr(): string
+    {
+        return $this->departureAt->format('d/m/Y');
     }
     public function getDepartureTime(): string
     {
-        return $this->departureDateTime->format('H:i');
+        return $this->departureAt->format('H:i');
     }
     public function getAvailableSeats(): int
     {
@@ -103,16 +111,16 @@ class Trip
         if ($this->endCity === '') {
             $this->errors['end_city'] = 'Ville de destination requise.';
         }
-        if ($this->departureDateTime < new \DateTime('now')) {
-            $this->errors['departureDateTime'] = 'La date/heure doit être dans le futur.';
+        if ($this->departureAt < new \DateTime('now')) {
+            $this->errors['departure_at'] = 'La date/heure doit être dans le futur.';
         }
         if ($this->pricePerPassenger < 1) {
             $this->errors['price_per_passenger'] = 'Le prix ne peut-être négatif.';
         }
         return empty($this->errors);
     }
-    // Enregistrement du trajet
-    public function saveToDatabase($pdo) : bool
+    // Enregistrement du trajet : update et sauvegarde
+    public function saveToDatabase() : bool
     {
         try {
             if (!$this->validateTrip()) {
@@ -121,29 +129,31 @@ class Trip
             }
 
             $pdo = Database::getConnection();
-            if ($this->tripId) {
-                $sql = "UPDATE trips SET vehicle_id=?, start_city=?, end_city=?, departure_at=?, available_seats=?, price_per_passenger=?, comment=?, no_smoking=?, music_allowed=?, discuss_allowed=?, created_at=? WHERE id_voyage = ? ";
+            if ($this->tripId !== null) {
+                $sql = "UPDATE trips SET vehicle_id=?, start_city=?, end_city=?, departure_at=?, available_seats=?, price_per_passenger=?, comment=?, no_smoking=?, music_allowed=?, discuss_allowed=? WHERE trip_id = ? ";
                 $stmt = $pdo->prepare($sql);
-                $success = $stmt->execute([
+                return $stmt->execute([
+                    $this->vehicleId,
                     $this->startCity,
                     $this->endCity,
-                    $this->departureDateTime->format('Y-m-d H:i:s'),
+                    $this->departureAt->format('Y-m-d H:i:s'),
                     $this->availableSeats,
                     $this->pricePerPassenger,
                     $this->comment,
                     $this->noSmoking,
                     $this->musicAllowed,
-                    $this->discussAllowed
+                    $this->discussAllowed,
+                    $this->tripId
                 ]);
             } else {
-                $sql = "INSERT INTO trips (driver_id, vehicle_id, start_city, end_city, departure_at, available_seats, price_per_passenger, comment, no_smoking, music_allowed, discuss_allowed, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                $sql = "INSERT INTO trips (driver_id, vehicle_id, start_city, end_city, departure_at, available_seats, price_per_passenger, comment, no_smoking, music_allowed, discuss_allowed, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING trip_id";
                 $stmt = $pdo->prepare($sql);
-                $success = $stmt->execute([
+                $stmt->execute([
                     $this->driverId,
                     $this->vehicleId,
                     $this->startCity,
                     $this->endCity,
-                    $this->departureDateTime->format('Y-m-d H:i:s'),
+                    $this->departureAt->format('Y-m-d H:i:s'),
                     $this->availableSeats,
                     $this->pricePerPassenger,
                     $this->comment,
@@ -152,17 +162,26 @@ class Trip
                     $this->discussAllowed,
                     $this->createdAt
                 ]);
+                // Récupère l'ID généré
+                $this->tripId = (int)$stmt->fetchColumn();
+                return true;
             }
-
-            if ($success) {
-                $this->tripId = (int)$pdo->lastInsertId();
-            }
-            return false;
         } catch (\PDOException $e) {
             throw new \Exception("Erreur lors de l'enregistrement : " . $e->getMessage());
         }
     }
-    public static function findByUser(int $driverId): array
+
+    public static function findTripsByTripId(int $tripId): ?self
+    {
+        $pdo = Database::getConnection();
+        $sql = "SELECT * FROM trips WHERE trip_id = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$tripId]);
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return $data ? new self($data) : null;
+    }
+
+    public static function findTripsByDriver(int $driverId): array
     {
         $pdo = Database::getConnection();
         $sql = "SELECT * FROM trips WHERE driver_id = ? ORDER BY departure_at DESC";
@@ -171,5 +190,76 @@ class Trip
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         // Hydrate chaque ligne dans un objet Trip
         return array_map(fn($r) => new self($r), $rows);
+    }
+
+    // Renvoie les trajets dont je suis le chauffeur et dont la date de départ est > maintenant.
+    public static function findUpcomingByDriver(int $driverId): array
+    {
+        $pdo = Database::getConnection();
+        $sql = "SELECT * FROM trips WHERE driver_id = ? AND departure_at > now() ORDER BY departure_at ASC";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$driverId]);
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return array_map(fn($r) => new self($r), $rows);
+    }
+
+    // REnvoi les trajets à venir dont je suis passager
+    public static function findTripsUpcomingByPassenger(int $userId): array
+    {
+       $pdo = Database::getConnection();
+       $sql = "SELECT t.* FROM trips t JOIN bookings b ON b.trip_id = t.trip_id WHERE b.user_id = ? AND t.departure_at > now() ORDER BY t.departure_at ASC";
+       $stmt = $pdo->prepare($sql);
+       $stmt->execute([$userId]);
+       $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+       return array_map(fn($r) => new self($r), $rows);
+    }
+
+    public static function findTripsUpcoming(int $limit = null): array
+    {
+        $pdo = Database::getConnection();
+        $sql = "SELECT * FROM trips WHERE departure_at > now() ORDER BY departure_at ASC";
+        if ($limit !== null) {
+            $sql .= " LIMIT " . (int)$limit;
+        }
+        $stmt = $pdo->query($sql);
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return array_map(fn($r) => new self($r), $rows);
+    }
+
+    /**
+     * Récupère les prochains trajet où je suis passager
+     */
+    public static function findTripAsPassenger(int $userId): array
+    {
+        $pdo = Database::getConnection();
+        $sql = "SELECT t.* FROM trips AS t JOIN bookings AS b ON t.trip_id = b.trip_id WHERE b.user_id = :u";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(['u' => $userId]);
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return array_map(fn($r) => new self($r), $rows);
+    }
+
+    // Calcul du nombre de place encore disponible (=initial - réservées)
+    public function getRemainingSeats(): int
+    {
+        $pdo = Database::getConnection();
+        $sql = "SELECT COALESCE(SUM(seats_reserved),0) FROM bookings WHERE trip_id = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$this->tripId]);
+        $reservedSeats = $stmt->fetchColumn();
+        return max(0, $this->availableSeats - $reservedSeats);
+    }
+
+    /**
+     * Charge un objet Trip par son ID, ou null s’il n’existe pas
+     */
+    public static function find(int $tripId): ?self
+    {
+        $pdo = Database::getConnection();
+        $sql = "SELECT * FROM trips WHERE trip_id = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$tripId]);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return $row ? new self($row) : null;
     }
 }

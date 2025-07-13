@@ -1,4 +1,9 @@
 <?php
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use Olivierguissard\EcoRide\Model\Trip;
+
 require_once 'functions/auth.php';
 startSession();
 requireAuth();
@@ -16,6 +21,11 @@ if (!isset($_SESSION['connecte']) || !$_SESSION['connecte']) {
         echo '<div class="alert alert-success mt-5" role="alert">' . $_SESSION['update_success'] . '</div>';
         unset($_SESSION['update_success']);
     }
+
+$passengerTrips = Trip::findTripsUpcoming();
+$driverTrips = Trip::findUpcomingByDriver($_SESSION['user_id']);
+$passengerTrips = Trip::findTripsUpcomingByPassenger($_SESSION['user_id']);
+$allTrips = array_merge(array_map(fn($t)=>['trip'=>$t, 'role'=>'chauffeur'], $driverTrips), array_map(fn($t)=>['trip'=>$t, 'role'=>'passager'], $passengerTrips));
 $pageTitle = 'Mon profil - EcoRide';
 
 ?>
@@ -27,7 +37,7 @@ $pageTitle = 'Mon profil - EcoRide';
     <link rel="icon" type="image/png" href="assets/pictures/logoEcoRide.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="assets/css/index.css">
+    <link rel="stylesheet" href="assets/css/profil.css">
     <title><?php if (isset($pageTitle)) { echo $pageTitle; } else { echo 'EcoRide - Covoiturage écologique';} ?></title>
 </head>
 <body>
@@ -41,10 +51,7 @@ $pageTitle = 'Mon profil - EcoRide';
     </div>
 </nav>
 
-
 <main>
-
-
     <!-- Section Profil personne connectée -->
     <section>
         <div class="container mt-5 pt-5">
@@ -70,31 +77,14 @@ $pageTitle = 'Mon profil - EcoRide';
 
                         <!-- Affichage du ranking en étoiles -->
                         <div class="d-flex justify-content-center align-items-center mb-2">
-                            <?php
-                            $ranking = $_SESSION['ranking'] ?? 0;
-                            $ranking = (float) $ranking;
-                            $fullStars = floor($ranking);
-                            $halfStar = ($ranking - $fullStars) >= 0.5;
-                            $halfStar = ($_SESSION['ranking'] - $fullStars) >= 0.5;
-                            for ($i = 0; $i < $fullStars; $i++) {
-                                echo '<i class="bi bi-star-fill text-warning"></i>';
-                            }
-                            if ($halfStar) {
-                                echo '<i class="bi bi-star-half text-warning"></i>';
-                            }
-                            $emptyStars = 5 - $fullStars - ($halfStar ? 1 : 0);
-                            for ($i = 0; $i < $emptyStars; $i++) {
-                                echo '<i class="bi bi-star text-warning"></i>';
-                            }
-                            ?>
-                            <span class="ms-2">(<?= number_format($ranking, 1) ?>)</span>
+                            <?= renderStarsAndRanking((float)($_SESSION['ranking'] ?? 0)); ?>
                         </div>
 
                         <!-- Badge rôle -->
                         <div class="mb-3">
                             <?php
                             $roles = [
-                                0 => 'Utilisateur',
+                                0 => 'Passager',
                                 1 => 'Conducteur',
                                 2 => 'Gestionnaire',
                                 3 => 'Administrateur'
@@ -153,7 +143,51 @@ $pageTitle = 'Mon profil - EcoRide';
     <!-- Next Trip for connected user -->
     <section>
         <h2>Trajets à venir</h2>
-        <div class="px-5 mb-8">
+        <?php if (empty($allTrips)): ?>
+            <p class="text-center text-muted">Aucun trajet à venir.</p>
+        <?php else: ?>
+            <div class="row gx-3 gy-4 pb-5">
+                <?php foreach($allTrips as $item):
+                    $t    = $item['trip'];
+                    $role = $item['role'];
+                    ?>
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <small class="text-secondary">
+                                            <?= $t->getDepartureDateFr() ?>
+                                        </small><br>
+                                        <small class="text-secondary">
+                                            Départ à <?= $t->getDepartureTime() ?>
+                                        </small>
+                                    </div>
+                                    <span class="badge <?= $role==='chauffeur' ? 'bg-primary' : 'bg-success' ?>">
+                                        <?= $role==='chauffeur' ? 'Je conduis' : 'Passager' ?>
+                                    </span>
+                                </div>
+
+                                <h6 class="card-title">
+                                    <i class="bi bi-geo-alt me-1"></i>
+                                    <?= htmlspecialchars($t->getStartCity()) ?>
+                                    <i class="bi bi-arrow-right mx-1"></i>
+                                    <i class="bi bi-pin-map me-1"></i>
+                                    <?= htmlspecialchars($t->getEndCity()) ?>
+                                </h6>
+
+                                <p class="mt-auto fw-semibold">
+                                    <?= $t->getPricePerPassenger() ?> crédits
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+
+
+        <!--<div class="px-5 mb-8">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h3 class="h5 font-weight-semibold text-dark">Trajets à venir</h3>
                 <a href="#" class="text-primary small font-weight-medium">Voir tout</a>
@@ -168,7 +202,6 @@ $pageTitle = 'Mon profil - EcoRide';
                         </div>
                         <span class="px-2 py-1 bg-success text-white small rounded-pill">Confirmé</span>
                     </div>
-
                     <div class="d-flex align-items-center mb-3">
                         <div class="mr-3 d-flex flex-column align-items-center">
                             <div class="rounded-circle bg-primary" style="width: 12px; height: 12px;"></div>
@@ -226,7 +259,7 @@ $pageTitle = 'Mon profil - EcoRide';
                     </div>
                 </div>
             </div>
-        </div>
+        </div>-->
     </section>
 
     <!--Preference de covoiturage-->
@@ -366,10 +399,19 @@ $pageTitle = 'Mon profil - EcoRide';
                             <small class="text-muted">Accès au tableau de suivis</small>
                         </div>
                     </a>
+                    <a href="/logout.php" class="list-group-item list-group-item-action d-flex align-items-start bg-danger text-white">
+                        <div class="me-3 text-secondary">
+                            <i class="bi bi-question-circle-fill fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1 fw-semibold">Se déconnecter</h6>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
     </section>
+    <div class="container" style="height: 10px"></div>
 
     <!-- Modale pour modifier le profil -->
     <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
@@ -407,28 +449,8 @@ $pageTitle = 'Mon profil - EcoRide';
 </main>
 
 <footer>
-    <nav class="navbar fixed-bottom bg-body-tertiary px-4">
-        <div class="container d-flex justify-content-around text-center" style="max-width: 900px">
-            <a class="nav-item nav-link d-flex flex-column" href="/index.php">
-                <i class="bi bi-house fs-4"></i>
-                <span>Accueil</span>
-            </a>
-            <a class="nav-item nav-link d-flex flex-column" href="/rechercher.php">
-                <i class="bi bi-zoom-in fs-4"></i>
-                <span>Rechercher</span>
-            </a>
-            <a class="nav-item nav-link d-flex flex-column" href="/proposer.php">
-                <i class="bi bi-ev-front fs-4"></i>
-                <span>Proposer</span>
-            </a>
-            <a class="nav-item nav-link d-flex flex-column" href="/profil.php">
-                <i class="bi bi-person fs-4"></i>
-                <span>Profil</span>
-            </a>
-        </div>
-    </nav>
+    <?php include 'footer.php'; ?>
 </footer>
-
 
 <script src="assets/js/profil.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
