@@ -31,10 +31,10 @@ class Users
         $this->email        = trim($data['email']);
         $this->password     = trim($data['password']);
         $this->profilePicture = $data['profile_picture'] ?? null;
-        $this->ranking      = (float)$data['ranking'] ?? 5;
-        $this->credits      = (int)$data['credits'] ?? 20;
+        $this->ranking      = (float)($data['ranking'] ?? 5);
+        $this->credits      = (int)($data['credits'] ?? 20);
         $this->status       = $data['status'] ?? 'actif';
-        $this->role         = (int)$data['role'] ?? 0;
+        $this->role         = (int)($data['role'] ?? 0);
         $this->created_at   = new DateTime('now', new DateTimeZone('Europe/Paris'));
     }
 

@@ -24,6 +24,13 @@ $error = [];
 $success = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Récupération des POST
+    $firstName  = trim($_POST['firstName'] ?? '');
+    $lastName   = trim($_POST['lastName'] ?? '');
+    $email      = trim($_POST['email'] ?? '');
+    $password   = $_POST['password'] ?? '';
+    $confirmPassword = $_POST['confirmPassword'] ?? '';
+
     // Validation des champs
     if (empty($_POST['firstName']) || strlen($_POST['firstName']) < 2) {
         $error[] = 'Le prénom doit contenir au moins 2 caractères';
@@ -51,12 +58,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stmt->fetchColumn() > 0) {
                 $error[] = "Un compte avec cette adresse existe déjà";
             } else {
-                $user = new Users(
-                    ($_POST['firstName']),
-                    ($_POST['lastName']),
-                    ($_POST['email']),
-                    ($_POST['password'])
-                );
+                $user = new Users([
+                    'firstname' => $firstName,
+                    'lastname'  => $lastName,
+                    'email'     => $email,
+                    'password'  => $password
+                ]);
                 $user->setPassword();
                 $user_id = $user->saveUserToDatabase($pdo);
 
