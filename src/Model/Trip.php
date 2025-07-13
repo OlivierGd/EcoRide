@@ -21,6 +21,7 @@ class Trip
     private bool $discussAllowed;
     private string $createdAt;
     private array $errors = [];
+    private ?string $roleForTrip = null;
 
     public function __construct(array $data = [])
     {
@@ -101,6 +102,12 @@ class Trip
     public function getCreatedAt(): string
     {
         return $this->createdAt;
+    }
+    public function getRoleForTrip(): ?string {
+        return $this->roleForTrip;
+    }
+    public function setRoleForTrip(string $roleForTrip): void {
+        $this->roleForTrip = $roleForTrip;
     }
 
     public function validateTrip(): bool
@@ -226,10 +233,17 @@ class Trip
         return array_map(fn($r) => new self($r), $rows);
     }
 
+    public function isTripUpcoming(): bool
+    {
+        $now = new \DateTime('now', new \DateTimeZone('Europe/Paris') );
+        $departure = new \DateTime($this->getDepartureDate() . ' ' . $this->getDepartureTime(), new \DateTimeZone('Europe/Paris') );
+        return $departure > $now;
+    }
+
     /**
      * Récupère les prochains trajet où je suis passager
      */
-    public static function findTripAsPassenger(int $userId): array
+    public static function findTripsAsPassenger(int $userId): array
     {
         $pdo = Database::getConnection();
         $sql = "SELECT t.* FROM trips AS t JOIN bookings AS b ON t.trip_id = b.trip_id WHERE b.user_id = :u";

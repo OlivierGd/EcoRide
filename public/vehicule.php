@@ -95,7 +95,7 @@ $pageTitle = 'Mes véhicules';
     <div class="<?= (isset($erreur) || ini_get('display_errors')) ? 'has-error' : '' ?>">
 </header>
 
-<main xmlns="http://www.w3.org/1999/html">
+<main>
     <div class="container my-3">
 
         <div class="d-flex justify-content-between align-items-center mb-3">

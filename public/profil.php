@@ -340,7 +340,7 @@ $pageTitle = 'Mon profil - EcoRide';
                         </div>
                     </a>
 
-                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-start">
+                    <a href="historique.php" class="list-group-item list-group-item-action d-flex align-items-start">
                         <div class="me-3 text-success">
                             <i class="bi bi-geo-alt-fill fs-4"></i>
                         </div>

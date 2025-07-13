@@ -38,6 +38,22 @@ class Users
         $this->created_at   = new DateTime('now', new DateTimeZone('Europe/Paris'));
     }
 
+    public const ROLE_PASSAGER      = 0;
+    public const ROLE_CHAUFFEUR     = 1;
+    public const ROLE_GESTIONNAIRE  = 2;
+    public const ROLE_ADMIN         = 3;
+    public const STATUS_ACTIF       = 'actif';
+    public const STATUS_INACTIF     = 'inactif';
+    public function getRoleLabel() : string
+    {
+        return match ($this->role) {
+             self::ROLE_PASSAGER   => 'Passager',
+             self::ROLE_CHAUFFEUR  => 'Passager / Chauffeur',
+             self::ROLE_GESTIONNAIRE => 'Gestionnaire',
+             self::ROLE_ADMIN      => 'Administrateur'
+        };
+    }
+
     public function getUserId(): ?int
     {
         return $this->userId;

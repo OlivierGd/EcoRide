@@ -1,0 +1,43 @@
+html {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+}
+
+div.has-error {
+    margin-top: 100px;
+}
+
+.main-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1rem; /*Evite que le contenu touche le bord sur mobile*/
+}
+
+/*Color for stars ratting*/
+.text-gold {
+    color: #d4af37;
+}
+
+.card {
+    transition: box-shadow 0.15s;
+}
+.card:hover {
+    box-shadow: 0 0.5rem 1.2rem rgba(0,0,0,0.09);
+}
+.main-content {
+    padding-bottom: 70px;
+}
+@media (max-width: 768px) {
+    .main-content {
+        padding-bottom: 64px;
+    }
+}
+@media (max-width: 576px) {
+    .main-content {
+        padding-bottom: 56px;
+    }
+}
