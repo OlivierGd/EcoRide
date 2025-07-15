@@ -133,13 +133,22 @@ $pageTitle = 'Rechercher un voyage';
                         </div>
                         <div class="d-flex align-items-center text-secondary small mb-2">
                             <div class="me-3"><i class="bi bi-calendar-event me-1"></i><?= $date ?>, <?= $time ?></div>
-                            <div class="me-3"><i class="bi bi-person-fill-add me-1"></i><?= $remainingSeats ?> place<?= $remainingSeats > 1 ? 's' : '' ?></div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span>
+                                    <i class="bi bi-people-fill me-1"></i>
+                                    <?= $remainingSeats ?> place<?= $remainingSeats > 1 ? 's' : '' ?> restante<?= $remainingSeats > 1 ? 's' : '' ?>
+                                </span>
+                            </div>
                             <div><i class="bi bi-currency-euro me-1"></i><?= $price ?> crédits</div>
                         </div>
                         <form method="post" action="reserve.php" style="display:inline">
                             <input type="hidden" name="trip_id" value="<?= htmlspecialchars($trip->getTripId()) ?>">
                             <input type="hidden" name="seats_reserved" value="1">
+                            <?php if ($remainingSeats > 0): ?>
                             <button type="submit" class="btn btn-primary">Réserver</button>
+                            <?php else: ?>
+                            <button type="submit" class="btn btn-secondary disabled" disabled>Complet</button>
+                            <?php endif; ?>
                         </form>
                     </div>
                 </div>

@@ -22,6 +22,8 @@ class Trip
     private string $createdAt;
     private array $errors = [];
     private ?string $roleForTrip = null;
+    private ?int $bookingId = null;
+    private ?string $bookingStatus = null;
 
     public function __construct(array $data = [])
     {
@@ -38,6 +40,22 @@ class Trip
         $this->musicAllowed = $data['music_allowed'] ?? false;
         $this->discussAllowed = $data['discuss_allowed'] ?? false;
         $this->createdAt    = $data['created_at'] ?? date('Y-m-d H:i:s');
+    }
+    public function setBookingStatus(?string $status): void
+    {
+        $this->bookingStatus = $status;
+    }
+    public function getBookingStatus(): ?string
+    {
+        return $this->bookingStatus;
+    }
+    public function getBookingId(): ?int
+    {
+        return $this->bookingId;
+    }
+    public function setBookingId(?int $bookingId): void
+    {
+        $this->bookingId = $bookingId;
     }
     public function getTripId(): ?int
     {
@@ -253,11 +271,11 @@ class Trip
         return array_map(fn($r) => new self($r), $rows);
     }
 
-    // Calcul du nombre de place encore disponible (=initial - réservées)
+    // Calcul du nombre de place encore disponible (=initial - réservées && !annulée)
     public function getRemainingSeats(): int
     {
         $pdo = Database::getConnection();
-        $sql = "SELECT COALESCE(SUM(seats_reserved),0) FROM bookings WHERE trip_id = ?";
+        $sql = "SELECT COALESCE(SUM(seats_reserved),0) FROM bookings WHERE trip_id = ? AND status != 'annule'";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$this->tripId]);
         $reservedSeats = $stmt->fetchColumn();
