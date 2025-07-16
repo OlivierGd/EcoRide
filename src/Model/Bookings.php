@@ -322,6 +322,35 @@ class Bookings
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
         return $result ? new self($result) : null;
     }
+// Retourne les bookings qui ne sont pas annulés
+    public static function findBookingsByTripId(int $tripId): array
+    {
+        $pdo = \Olivierguissard\EcoRide\Config\Database::getConnection();
+        $sql = "SELECT * FROM bookings WHERE trip_id = ? AND status != 'annule' ORDER BY created_at DESC";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$tripId]);
+        $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return array_map(fn($row) => new self($row), $result);
+    }
+
+    // Trouve une réservation par son bookingId
+    public static function findBookingByBookingId(int $bookingId): ?self
+    {
+        $pdo = \Olivierguissard\EcoRide\Config\Database::getConnection();
+        $sql = "SELECT * FROM bookings WHERE booking_id = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$bookingId]);
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return $result ? new self($result) : null;
+    }
+
+    public function updateStatusValidation(string $newStatus): bool
+    {
+        $pdo = \Olivierguissard\EcoRide\Config\Database::getConnection();
+        $sql = "UPDATE bookings SET status = ? WHERE booking_id = ?";
+        $stmt = $pdo->prepare($sql);
+        return $stmt->execute([$newStatus, $this->bookingId]);
+    }
 
 }
 

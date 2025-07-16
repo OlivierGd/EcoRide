@@ -24,6 +24,7 @@ class Trip
     private ?string $roleForTrip = null;
     private ?int $bookingId = null;
     private ?string $bookingStatus = null;
+    private string $tripStatus;
 
     public function __construct(array $data = [])
     {
@@ -40,6 +41,7 @@ class Trip
         $this->musicAllowed = $data['music_allowed'] ?? false;
         $this->discussAllowed = $data['discuss_allowed'] ?? false;
         $this->createdAt    = $data['created_at'] ?? date('Y-m-d H:i:s');
+        $this->tripStatus   = $data['status'] ?? 'a_venir';
     }
     public function setBookingStatus(?string $status): void
     {
@@ -127,6 +129,15 @@ class Trip
     public function setRoleForTrip(string $roleForTrip): void {
         $this->roleForTrip = $roleForTrip;
     }
+    public function getTripStatus(): string
+    {
+        return $this->tripStatus;
+    }
+    public function setTripStatus(string $tripStatus): void
+    {
+        $this->tripStatus = $tripStatus;
+    }
+
 
     public function validateTrip(): bool
     {
@@ -294,4 +305,24 @@ class Trip
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
         return $row ? new self($row) : null;
     }
+
+    /**
+     * Met à jour le statut d'un voyage spécifique.
+     *
+     * @param string $newStatus Le nouveau statut à définir pour le voyage.
+     * @return bool Retourne true si la mise à jour a réussi, sinon false.
+     */
+    public function updateTripStatus(string $newStatus): bool
+    {
+        $pdo = Database::getConnection();
+        $sql = "UPDATE trips SET status = ? WHERE trip_id = ?";
+        $stmt = $pdo->prepare($sql);
+        $result = $stmt->execute([$newStatus, $this->tripId]);
+        if ($result) {
+            $this->tripStatus = $newStatus;
+        }
+        return $result;
+    }
+
+
 }
