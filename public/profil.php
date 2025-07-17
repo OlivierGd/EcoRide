@@ -16,11 +16,20 @@ if (!isset($_SESSION['connecte']) || !$_SESSION['connecte']) {
     exit;
 }
 
-    // Affiche une alerte une fois si le compte est créé
-    if (isset($_SESSION['update_success'])) {
-        echo '<div class="alert alert-success mt-5" role="alert">' . $_SESSION['update_success'] . '</div>';
-        unset($_SESSION['update_success']);
-    }
+// Affiche une alerte une fois si le compte est créé
+if (isset($_SESSION['update_success'])) {
+    echo '<div class="alert alert-success mt-5" role="alert">' . $_SESSION['update_success'] . '</div>';
+    unset($_SESSION['update_success']);
+}
+
+// Rôles user :
+$roles = [
+        0 => 'Passager',
+        1 => 'Chauffeur',
+        2 => 'Gestionnaire',
+        3 => 'Administrateur',
+];
+$roleLabel = $roles[$_SESSION['role']] ?? 'Passager';
 
 $passengerTrips = Trip::findTripsUpcoming();
 $driverTrips = Trip::findUpcomingByDriver($_SESSION['user_id']);
@@ -54,272 +63,149 @@ $pageTitle = 'Mon profil - EcoRide';
     </header>
 
 <main>
-    <!-- Section Profil personne connectée -->
+    <!-- Profil utilisateur -->
     <section>
         <div class="container mt-5 pt-5">
             <div class="row justify-content-center">
                 <div class="col-md-8">
-                    <div class="profile-container text-center">
-
+                    <div class="profile-container text-center pb-4 border-bottom">
                         <!-- Cercle avec initiales ou photo -->
-                        <div class="rounded-circle d-flex justify-content-center align-items-center mx-auto bg-secondary text-white shadow mb-3"
-                             style="width: 100px; height: 100px; font-size: 32px; font-weight: bold; overflow: hidden;">
+                        <div class="rounded-circle mx-auto mb-3 d-flex justify-content-center align-items-center shadow"
+                             style="width: 110px; height: 110px; background: linear-gradient(135deg, #4ade80, #22c55e);">
                             <?php if (!empty($_SESSION['profilePicture'])) : ?>
                                 <img src="<?= htmlspecialchars($_SESSION['profilePicture']) ?>"
-                                     alt="Photo de profil"
-                                     class="img-fluid rounded-circle"
+                                     alt="Photo de profil" class="img-fluid rounded-circle"
                                      style="width: 100%; height: 100%; object-fit: cover;">
                             <?php else : ?>
-                                <?= strtoupper($_SESSION['firstName'][0] . $_SESSION['lastName'][0]) ?>
+                                <span class="fs-1 fw-bold text-white">
+                                    <?= strtoupper($_SESSION['firstName'][0] . $_SESSION['lastName'][0]) ?>
+                                </span>
                             <?php endif; ?>
                         </div>
-
-                        <!-- Nom complet -->
-                        <h3><?= htmlspecialchars($_SESSION['firstName'] . ' ' . $_SESSION['lastName']) ?></h3>
-
-                        <!-- Affichage du ranking en étoiles -->
+                        <h3 class="fw-bold mt-2"><?= htmlspecialchars($_SESSION['firstName'] . ' ' . $_SESSION['lastName']) ?></h3>
+                        <!-- Stars + badge -->
                         <div class="d-flex justify-content-center align-items-center mb-2">
                             <?= renderStarsAndRanking((float)($_SESSION['ranking'] ?? 0)); ?>
                         </div>
-
-                        <!-- Badge rôle -->
-                        <div class="mb-3">
-                            <?php
-                            $roles = [
-                                0 => 'Passager',
-                                1 => 'Conducteur',
-                                2 => 'Gestionnaire',
-                                3 => 'Administrateur'
-                            ];
-                            $roleLabel = $roles[$_SESSION['role']] ?? 'Inconnu';
-                            ?>
-                            <span class="badge bg-success"><?= $roleLabel ?> vérifié</span>
-                        </div>
-
-                        <!-- Bouton modifier -->
-                        <button class="btn btn-sm" data-bs-toggle="modal" data-bs-target="#editProfileModal"><i class="fas fa-edit"></i><i class="bi bi-pencil"></i> Modifier le profil</button>
-                        <?php if (isset($_SESSION['update_success'])) {
-                            echo '<div class="alert alert-success mt-3" role="alert">' . $_SESSION['update_success'] . '</div>';
-                            unset($_SESSION['update_success']);
-                        }
-                        ?>
-                    </div>
-                </div>
-
-    </section>
-
-    <!-- Stats track done -->
-    <section>
-        <h2>Statistiques</h2>
-        <div class="row row-cols-1 row-cols-md-3 g-4 mb-4">
-            <div class="col">
-                <div class="card h-80">
-                    <div class="card-body d-flex align-items-center flex-column">
-                        <h5 class="card-title card-title rounded-circle bg-success d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;"><i class="bi bi-ev-front text-white"></i></h5>
-                        <p class="card-text">Trajets effectués</p>
-                        <p class="card-text"><strong>47</strong></p>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card h-80">
-                    <div class="card-body d-flex align-items-center flex-column">
-                        <h5 class="card-title card-title rounded-circle bg-success d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;"><i class="bi bi-person text-white"></i></h5>
-                        <p class="card-text">Economies de CO2</p>
-                        <p class="card-text"><strong>128 kg</strong></p>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card h-80">
-                    <div class="card-body d-flex align-items-center flex-column">
-                        <h5 class="card-title rounded-circle bg-success d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;"><i class="bi bi-leaf text-white"></i></h5>
-                        <p class="card-text">Economies</p>
-                        <p class="card-text"><strong>215 €</strong></p>
+                        <span class="badge bg-success mb-2"><?= $roleLabel ?> vérifié</span><br>
+                        <button class="btn btn-outline-success btn-sm mt-1" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                            <i class="bi bi-pencil"></i> Modifier le profil
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Next Trip for connected user -->
-    <section>
-        <h2>Trajets à venir</h2>
-        <?php if (empty($allTrips)): ?>
-            <p class="text-center text-muted">Aucun trajet à venir.</p>
-        <?php else: ?>
-            <div class="row gx-3 gy-4 pb-5">
-                <?php foreach($allTrips as $item):
-                    $t    = $item['trip'];
-                    $role = $item['role'];
-                    ?>
-                    <div class="col-12 col-md-6 col-lg-4">
-                        <div class="card h-100 shadow-sm">
-                            <div class="card-body d-flex flex-column">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div>
-                                        <small class="text-secondary">
-                                            <?= $t->getDepartureDateFr() ?>
-                                        </small><br>
-                                        <small class="text-secondary">
-                                            Départ à <?= $t->getDepartureTime() ?>
-                                        </small>
-                                    </div>
-                                    <span class="badge <?= $role==='chauffeur' ? 'bg-primary' : 'bg-success' ?>">
-                                        <?= $role==='chauffeur' ? 'Je conduis' : 'Passager' ?>
-                                    </span>
-                                </div>
-
-                                <h6 class="card-title">
-                                    <i class="bi bi-geo-alt me-1"></i>
-                                    <?= htmlspecialchars($t->getStartCity()) ?>
-                                    <i class="bi bi-arrow-right mx-1"></i>
-                                    <i class="bi bi-pin-map me-1"></i>
-                                    <?= htmlspecialchars($t->getEndCity()) ?>
-                                </h6>
-
-                                <p class="mt-auto fw-semibold">
-                                    <?= $t->getPricePerPassenger() ?> crédits
-                                </p>
-                            </div>
+    <!-- Statistiques -->
+    <section class="bg-light py-4">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <i class="bi bi-ev-front text-success fs-2"></i>
+                            <div class="fw-bold mt-2">47</div>
+                            <div class="text-muted small">Trajets effectués</div>
                         </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-
-
-        <!--<div class="px-5 mb-8">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3 class="h5 font-weight-semibold text-dark">Trajets à venir</h3>
-                <a href="#" class="text-primary small font-weight-medium">Voir tout</a>
-            </div>
-
-            <div class="upcoming-trips d-flex overflow-auto pb-2">
-                <div class="min-vw-280 bg-white rounded shadow-sm p-4 border border-light">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div>
-                            <p class="small font-weight-medium text-dark">Lundi, 13 mai</p>
-                            <p class="small text-muted">Départ à 08:30</p>
-                        </div>
-                        <span class="px-2 py-1 bg-success text-white small rounded-pill">Confirmé</span>
-                    </div>
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="mr-3 d-flex flex-column align-items-center">
-                            <div class="rounded-circle bg-primary" style="width: 12px; height: 12px;"></div>
-                            <div class="bg-light" style="width: 2px; height: 40px;"></div>
-                            <div class="rounded-circle bg-secondary" style="width: 12px; height: 12px;"></div>
-                        </div>
-
-                        <div>
-                            <p class="small font-weight-medium text-dark">Lyon, Gare Part-Dieu</p>
-                            <p class="small font-weight-medium text-dark mt-2">Grenoble, Centre-ville</p>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
-                            <div class="rounded-circle overflow-hidden mr-2" style="width: 32px; height: 32px;">
-                                <img src="#" alt="Conducteur" class="w-100 h-100">
-                            </div>
-                            <p class="small text-muted">Marie L.</p>
-                        </div>
-                        <p class="small font-weight-bold text-dark">12,50 €</p>
                     </div>
                 </div>
-
-                <div class="min-vw-280 bg-white rounded shadow-sm p-4 border border-light">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div>
-                            <p class="small font-weight-medium text-dark">Vendredi, 17 mai</p>
-                            <p class="small text-muted">Départ à 17:15</p>
-                        </div>
-                        <span class="px-2 py-1 bg-warning text-dark small rounded-pill">En attente</span>
-                    </div>
-
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="mr-3 d-flex flex-column align-items-center">
-                            <div class="rounded-circle bg-primary" style="width: 12px; height: 12px;"></div>
-                            <div class="bg-light" style="width: 2px; height: 40px;"></div>
-                            <div class="rounded-circle bg-secondary" style="width: 12px; height: 12px;"></div>
-                        </div>
-
-                        <div>
-                            <p class="small font-weight-medium text-dark">Lyon, Part-Dieux</p>
-                            <p class="small font-weight-medium text-dark mt-2">Annecy, Gare</p>
+                <div class="col-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <i class="bi bi-leaf text-success fs-2"></i>
+                            <div class="fw-bold mt-2">128 kg</div>
+                            <div class="text-muted small">CO₂ économisés</div>
                         </div>
                     </div>
-
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
-                            <div class="rounded-circle overflow-hidden mr-2" style="width: 32px; height: 32px;">
-                                <img src="#" alt="Conducteur" class="w-100 h-100">
-                            </div>
-                            <p class="small text-muted">Lucas B.</p>
+                </div>
+                <div class="col-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <i class="bi bi-currency-euro text-success fs-2"></i>
+                            <div class="fw-bold mt-2">215 €</div>
+                            <div class="text-muted small">Économies réalisées</div>
                         </div>
-                        <p class="small font-weight-bold text-dark">15,00 €</p>
                     </div>
                 </div>
             </div>
-        </div>-->
+        </div>
     </section>
 
-    <!--Preference de covoiturage-->
+    <!-- Trajets à venir -->
     <section>
-        <div class="px-5 mb-8">
-            <h3 class="h6 mb-3">
-                Préférences de covoiturage
-            </h3>
-            <div class="bg-white rounded shadow-sm border border-light">
-                <div class="p-4 border-bottom">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="mb-0 font-weight-medium">Conversation</p>
-                            <p class="mb-0 text-muted">Je préfère discuter pendant le trajet</p>
+        <div class="container mt-4">
+            <h4 class="mb-3 text-success"><i class="bi bi-calendar-event"></i> Trajets à venir</h4>
+            <?php if (empty($allTrips)): ?>
+                <div class="alert alert-light text-center">Aucun trajet à venir.</div>
+            <?php else: ?>
+                <div class="row g-3">
+                    <?php foreach($allTrips as $item):
+                        $t = $item['trip'];
+                        $role = $item['role'];
+                        ?>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 border-0 shadow">
+                                <div class="card-body d-flex flex-column">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <small class="text-muted"><?= $t->getDepartureDateFr() ?> · <?= $t->getDepartureTime() ?></small>
+                                        <span class="badge <?= $role==='chauffeur' ? 'bg-primary' : 'bg-success' ?>">
+                                            <?= $role==='chauffeur' ? 'Je conduis' : 'Passager' ?>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span class="fw-semibold"><?= htmlspecialchars($t->getStartCity()) ?></span>
+                                        <i class="bi bi-arrow-right mx-1"></i>
+                                        <span class="fw-semibold"><?= htmlspecialchars($t->getEndCity()) ?></span>
+                                    </div>
+                                    <div class="mt-auto text-end">
+                                        <span class="fw-bold"><?= $t->getPricePerPassenger() ?> crédits</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <label class="d-flex align-items-center cursor-pointer">
-                            <input type="checkbox" checked />
-                            <span class="custom-checkbox"></span>
-                        </label>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
+            <?php endif; ?>
+        </div>
+    </section>
 
-                <div class="p-4 border-bottom">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="mb-0 font-weight-medium">Musique</p>
-                            <p class="mb-0 text-muted">J'aime écouter de la musique</p>
+    <!-- Préférences écologiques -->
+    <section>
+        <div class="container my-5">
+            <h4 class="mb-3 text-success"><i class="bi bi-leaf"></i> Préférences écologiques</h4>
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="row gy-3">
+                        <!-- Par préférence -->
+                        <div class="col-6 col-md-3">
+                            <div class="d-flex flex-column align-items-center">
+                                <i class="bi bi-chat-left-dots-fill text-success fs-3"></i>
+                                <div class="mt-1 fw-semibold">Conversation</div>
+                                <span class="small text-muted">J'aime discuter</span>
+                            </div>
                         </div>
-                        <label class="d-flex align-items-center cursor-pointer">
-                            <input type="checkbox" checked />
-                            <span class="custom-checkbox"></span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="p-4 border-bottom">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="mb-0 font-weight-medium">Animaux acceptés</p>
-                            <p class="mb-0 text-muted">Petits animaux en cage uniquement</p>
+                        <div class="col-6 col-md-3">
+                            <div class="d-flex flex-column align-items-center">
+                                <i class="bi bi-music-note-beamed text-success fs-3"></i>
+                                <div class="mt-1 fw-semibold">Musique</div>
+                                <span class="small text-muted">Ambiance musicale</span>
+                            </div>
                         </div>
-                        <label class="d-flex align-items-center cursor-pointer">
-                            <input type="checkbox" />
-                            <span class="custom-checkbox"></span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="p-4">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="mb-0 font-weight-medium">Fumeur</p>
-                            <p class="mb-0 text-muted">Je préfère les trajets non-fumeur</p>
+                        <div class="col-6 col-md-3">
+                            <div class="d-flex flex-column align-items-center">
+                                <i class="bi bi-github text-success fs-3"></i>
+                                <div class="mt-1 fw-semibold">Animaux</div>
+                                <span class="small text-muted">Petits animaux ok</span>
+                            </div>
                         </div>
-                        <label class="d-flex align-items-center cursor-pointer">
-                            <input type="checkbox" />
-                            <span class="custom-checkbox"></span>
-                        </label>
+                        <div class="col-6 col-md-3">
+                            <div class="d-flex flex-column align-items-center">
+                                <i class="bi bi-slash-circle text-success fs-3"></i>
+                                <div class="mt-1 fw-semibold">Non-fumeur</div>
+                                <span class="small text-muted">Trajet sain</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -328,92 +214,49 @@ $pageTitle = 'Mon profil - EcoRide';
 
     <!-- Paramètres du compte -->
     <section>
-        <div class="pb-5">
-            <h3>Paramètres du compte</h3>
-            <div class="container my-4">
-                <div class="list-group">
-                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-start">
-                        <div class="me-3 text-success">
-                            <i class="bi bi-geo-alt-fill fs-4"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-1 fw-semibold">Informations personnelles</h6>
-                            <small class="text-muted">Mes préférences</small>
-                        </div>
-                    </a>
-
-                    <a href="historique.php" class="list-group-item list-group-item-action d-flex align-items-start">
-                        <div class="me-3 text-success">
-                            <i class="bi bi-geo-alt-fill fs-4"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-1 fw-semibold">Mes Trajets</h6>
-                            <small class="text-muted">Trajets à venir et historique</small>
-                        </div>
-                    </a>
-
-                    <a href="vehicule.php" class="list-group-item list-group-item-action d-flex align-items-start">
-                        <div class="me-3 text-primary">
-                            <i class="bi bi-car-front-fill fs-4"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-1 fw-semibold">Mes Véhicules</h6>
-                            <small class="text-muted">Gérer vos véhicules enregistrés</small>
-                        </div>
-                    </a>
-
-                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-start">
-                        <div class="me-3 text-purple">
-                            <i class="bi bi-credit-card-2-front-fill fs-4"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-1 fw-semibold">Paiements et Transactions</h6>
-                            <small class="text-muted">Méthodes de paiement et historique</small>
-                        </div>
-                    </a>
-
-                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-start">
-                        <div class="me-3 text-success">
-                            <i class="bi bi-leaf-fill fs-4"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-1 fw-semibold">Préférences Écologiques</h6>
-                            <small class="text-muted">Options de voyage écologique</small>
-                        </div>
-                    </a>
-
-                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-start">
-                        <div class="me-3 text-secondary">
-                            <i class="bi bi-question-circle-fill fs-4"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-1 fw-semibold">Aide et Support</h6>
-                            <small class="text-muted">Questions fréquentes et assistance</small>
-                        </div>
-                    </a>
-
-                    <a href="/public/dashboard.php" class="list-group-item list-group-item-action d-flex align-items-start">
-                        <div class="me-3 text-secondary">
-                            <i class="bi bi-question-circle-fill fs-4"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-1 fw-semibold">Dashboard</h6>
-                            <small class="text-muted">Accès au tableau de suivis</small>
-                        </div>
-                    </a>
-                    <a href="/logout.php" class="list-group-item list-group-item-action d-flex align-items-start bg-danger text-white">
-                        <div class="me-3 text-secondary">
-                            <i class="bi bi-question-circle-fill fs-4"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-1 fw-semibold">Se déconnecter</h6>
-                        </div>
-                    </a>
-                </div>
+        <div class="container mb-5">
+            <h4 class="mb-3 text-success"><i class="bi bi-gear"></i> Paramètres du compte</h4>
+            <div class="list-group shadow-sm" style="gap: 0.5rem; display: flex; flex-direction: column;">
+                <a href="#" class="list-group-item list-group-item-action d-flex align-items-center">
+                    <i class="bi bi-person-circle fs-4 me-2 text-success"></i>
+                    <div>
+                        <strong>Informations personnelles</strong>
+                        <div class="small text-muted">Nom, e-mail, photo...</div>
+                    </div>
+                </a>
+                <a href="historique.php" class="list-group-item list-group-item-action d-flex align-items-center">
+                    <i class="bi bi-clock-history fs-4 me-2 text-success"></i>
+                    <div>
+                        <strong>Mes trajets</strong>
+                        <div class="small text-muted">Historique et réservations</div>
+                    </div>
+                </a>
+                <a href="vehicule.php" class="list-group-item list-group-item-action d-flex align-items-center">
+                    <i class="bi bi-car-front-fill fs-4 me-2 text-primary"></i>
+                    <div>
+                        <strong>Mes véhicules</strong>
+                        <div class="small text-muted">Ajouter, gérer</div>
+                    </div>
+                </a>
+                <a href="paiements.php" class="list-group-item list-group-item-action d-flex align-items-center">
+                    <i class="bi bi-credit-card-2-front-fill fs-4 me-2 text-warning"></i>
+                    <div>
+                        <strong>Paiements</strong>
+                        <div class="small text-muted">Mes transactions</div>
+                    </div>
+                </a>
+                <!-- ESPACE pour le footer -->
+                <div style="height: 1.5rem;"></div>
+                <a href="/logout.php" class="list-group-item list-group-item-action d-flex align-items-center bg-danger text-white rounded mb-3 mt-auto">
+                    <i class="bi bi-box-arrow-right fs-4 me-2"></i>
+                    <strong>Se déconnecter</strong>
+                </a>
             </div>
+            <!-- Ajoute une marge basse supplémentaire pour dégager le bouton du footer -->
+            <div style="height: 80px;"></div>
         </div>
     </section>
-    <div class="container" style="height: 10px"></div>
+
 
     <!-- Modale pour modifier le profil -->
     <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">

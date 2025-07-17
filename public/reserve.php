@@ -48,8 +48,8 @@ if (!$passenger) {
 if ($passenger->getCredits() < $totalPrice) {
     $_SESSION['flash_error'] = [
         'trip_id' => $tripId,
-        'message' =>'Crédits insuffisants pour cette réservation. <br>
-                        <a href="/ajoutCredit.php" class="btn btn-success btn-sm ms-2">Ajouter du crédit à votre compte.</a>'
+        'message' => 'Crédits insuffisants pour cette réservation. <br>
+                        <a href="/public/paiements.php" class="btn btn-success btn-sm ms-2">Ajouter du crédit à votre compte.</a>'
         ];
     header('Location: /rechercher.php');
     exit;
