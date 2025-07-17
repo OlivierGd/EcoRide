@@ -41,15 +41,17 @@ $pageTitle = 'Mon profil - EcoRide';
     <title><?php if (isset($pageTitle)) { echo $pageTitle; } else { echo 'EcoRide - Covoiturage écologique';} ?></title>
 </head>
 <body>
-<nav class="navbar bg-body-tertiary">
-    <div class="container" style="max-width: 900px;">
-        <a class="navbar-brand" href="/index.php">
-            <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="60" class="rounded">
-        </a>
-        <h2>Mon Profil</h2>
-        <?= displayInitialsButton(); ?>
-    </div>
-</nav>
+    <header>
+        <nav class="navbar bg-body-tertiary">
+            <div class="container" style="max-width: 900px;">
+                <a class="navbar-brand" href="/index.php">
+                    <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="60" class="d-inline-block align-text-center rounded">
+                </a>
+                <h2 class="fw-bold mb-1 text-success">Mon profil</h2>
+                <?= displayInitialsButton(); ?>
+            </div>
+        </nav>
+    </header>
 
 <main>
     <!-- Section Profil personne connectée -->

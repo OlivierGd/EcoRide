@@ -91,16 +91,17 @@ $pageTitle = 'Proposer un trajet - EcoRide';
 </head>
 
 <body>
-    <nav class="navbar bg-white fixed-top shadow-sm">
-        <div class="container px-3" style="max-width: 900px">
-            <a href="index.php" class="navbar-brand d-flex align-items-center">
-                <img src="assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="d-inline-block align-text-center rounded" width="60">
-
-            </a>
-            <h2>Proposer un trajet</h2>
-            <div><?= displayInitialsButton(); ?></div>
-        </div>
-    </nav>
+    <header>
+        <nav class="navbar bg-body-tertiary">
+            <div class="container" style="max-width: 900px;">
+                <a class="navbar-brand" href="/index.php">
+                    <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="60" class="d-inline-block align-text-center rounded">
+                </a>
+                <h2 class="fw-bold mb-1 text-success">Proposer un trajet</h2>
+                <?= displayInitialsButton(); ?>
+            </div>
+        </nav>
+    </header>
 <!-- Formulaire Multi-Étapes -->
     <main class="pt-5 mt-5">
         <form action="" method="post" id="suggestedTripForm" class="multi-step-form">

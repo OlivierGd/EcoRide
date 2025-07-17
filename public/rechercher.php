@@ -30,16 +30,17 @@ $pageTitle = 'Rechercher un voyage';
     <title><?php if (isset($pageTitle)) { echo $pageTitle; } else { echo 'EcoRide - Covoiturage écologique';} ?></title>
 </head>
 <body>
-<!-- Navbar -->
-<nav class="navbar bg-white fixed-top shadow-sm">
-    <div class="container px-3" style="max-width: 900px" >
-        <a href="index.php" class="navbar-brand d-flex align-items-center">
-            <img src="assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="d-inline-block align-text-center rounded" width="60">
-        </a>
-        <span class="navbar-text fw-medium">Trouver un voyage</span>
-        <?= displayInitialsButton(); ?>
-    </div>
-</nav>
+    <header>
+        <nav class="navbar bg-body-tertiary">
+            <div class="container" style="max-width: 900px;">
+                <a class="navbar-brand" href="/index.php">
+                    <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="60" class="d-inline-block align-text-center rounded">
+                </a>
+                <h2 class="fw-bold mb-1 text-success">Trouver un voyage</h2>
+                <?= displayInitialsButton(); ?>
+            </div>
+        </nav>
+    </header>
 
 <!-- Main Content -->
 <main class="container px-3 py-2 mt-5 pt-5">

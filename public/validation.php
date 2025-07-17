@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../src/Helpers/mailer.php';
+require_once __DIR__ . '/../src/Helpers/helpers.php';
 require_once 'functions/auth.php';
 startSession();
 requireAuth();
@@ -102,27 +103,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <p>Vous venez de recevoir <strong>{$totalCredits} crédits</strong> sur votre compte EcoRide.</p>
                 <p>Merci pour votre confiance, à bientôt sur EcoRide !</p>";
 
-            $mailer->sendEmail(
-                $driver->getEmail(),
-                $driver->getFirstName(),
-                $subject,
-                $htmlContent,
-                strip_tags($htmlContent)
-            );
+            try {
+                $mailer->sendEmail(
+                    $driver->getEmail(),
+                    $driver->getFirstName(),
+                    $subject,
+                    $htmlContent,
+                    strip_tags($htmlContent)
+                );
+            } catch (\Exception $e) {
+                error_log("Erreur d'envoi du mail (Mailjet) : " . $e->getMessage());
+            }
 
             // Log payment et credits_history
-            $sqlInsertPayment = "INSERT INTO payments (user_id, trip_id, booking_id, type_transaction, montant, description, statut_transaction, commission_plateforme) VALUES (?, ?, NULL, 'gain_course', ?, 'Gain chauffeur course #{$trip->getTripId()}', 'valide', 0)";
-            $stmtInsertPayment = $pdo->prepare($sqlInsertPayment);
-            $stmtInsertPayment->execute([
-                $trip->getDriverId(),
-                $trip->getTripId(),
-                $totalCredits
-            ]);
+            try {
+                $sqlInsertPayment = "INSERT INTO payments (user_id, trip_id, booking_id, type_transaction, montant, description, statut_transaction, commission_plateforme) VALUES (?, ?, ?, 'gain_course', ?, 'Gain chauffeur course #{$trip->getTripId()}', 'valide', 0)";
+                $stmtInsertPayment = $pdo->prepare($sqlInsertPayment);
+                $stmtInsertPayment->execute([
+                    $trip->getDriverId(),
+                    $trip->getTripId(),
+                    null, // booking_id = null pour les paiements chauffeur (gain_course)
+                    $totalCredits
+                ]);
+            } catch (Exception $e) {
+                error_log("Erreur lors de l'enregistrement du paiement : " . $e->getMessage());
+            }
 
             // log pour credits_history
-            $sqlLogCredits = "INSERT INTO credits_history (user_id, montant, date_credit, type, description, created_at) VALUES (?, ?, now(), ?, ?, now())";
-            $stmtLogCredits = $pdo->prepare($sqlLogCredits);
-            $stmtLogCredits->execute([$trip->getDriverId(), $totalCredits, 'gain_course', 'Gain chauffeur course #' . $trip->getTripId()]);
+            try {
+                $sqlLogCredits = "INSERT INTO credits_history (user_id, montant, date_credit, type, description, created_at) VALUES (?, ?, now(), ?, ?, now())";
+                $stmtLogCredits = $pdo->prepare($sqlLogCredits);
+                $stmtLogCredits->execute([$trip->getDriverId(), $totalCredits, 'gain_course', 'Gain chauffeur course #' . $trip->getTripId()]);
+            } catch (Exception $e) {
+                error_log("Erreur lors de l'enregistrement des logs : " . $e->getMessage());
+            }
         }
 
         // Rediriger ou afficher message succès
@@ -148,23 +162,28 @@ $pageTitle = 'Validation de votre trajet';
 </head>
 <body>
 <header>
-    <nav class="navbar fixed-top bg-white shadow-sm">
-        <div class="container" style="max-width: 900px">
+    <nav class="navbar bg-body-tertiary">
+        <div class="container" style="max-width: 900px;">
             <a class="navbar-brand" href="/index.php">
-                <img src="assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="d-inline-block align-text-center rounded" width="60">
-                EcoRide
+                <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="60" class="d-inline-block align-text-center rounded">
             </a>
-            <a class="btn btn-success" role="button" href="/profil.php">Mon profil</a>
+            <h2 class="fw-bold mb-1 text-success">Validation du trajet</h2>
+            <?= displayInitialsButton(); ?>
         </div>
     </nav>
 </header>
 
-<main class="mt-5 pt-4">
-    <section class="container" style="max-width: 480px;">
+<main class="mt-5">
+    <section class="container mt-5" >
         <div class="mb-4 text-center">
-            <h2 class="fw-bold mb-1 text-success">Validation du trajet</h2>
             <div class="mb-2">
-                <span class="badge bg-primary me-2"><?= htmlspecialchars($trip->getStartCity()) ?> <i class="bi bi-arrow-right mx-2"></i> <?= htmlspecialchars($trip->getEndCity()) ?></span>
+                <span class="badge bg-primary me-2 fs-5"><?= htmlspecialchars($trip->getStartCity()) ?> <i class="bi bi-arrow-right mx-2"></i> <?= htmlspecialchars($trip->getEndCity()) ?></span>
+            </div>
+            <div class="mt-2 text-secondary">
+                <i class="bi bi-calendar-date-fill"></i>
+                <?= htmlspecialchars($trip->getDepartureDateFr()) ?>
+                <i class="bi bi-clock-fill ms-2"></i>
+                <?= htmlspecialchars($trip->getDepartureTime()) ?>
             </div>
             <div class="text-muted small mb-2">
                 <i class="bi bi-person-fill"></i>
