@@ -37,6 +37,10 @@ usort($allTrips, function ($a, $b) {
     return $a['trip']->getDepartureDate() <=> $b['trip']->getDepartureDate();
 });
 
+// Recupère le tableau des messages
+$flashSuccess = $_SESSION['flash_success']['message'] ?? null;
+unset($_SESSION['flash_success']);
+
 $pageTitle = 'Historique des trajets';
 ?>
 
@@ -74,7 +78,12 @@ $pageTitle = 'Historique des trajets';
                         ?>
                         <div class="card shadow rounded-4 border-0">
                             <div class="card-body d-flex flex-column gap-2">
-
+                                <?php if ($flashSuccess && isset($flashSuccess['trip_id']) && $flashSuccess['trip_id'] === $trip->getTripId()): ?>
+                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                        <i class="bi bi-check-circle-fill me-2"></i>
+                                        <?= htmlspecialchars($flashSuccess['message']) ?>
+                                    </div>
+                                <?php endif; ?>
                                 <!-- Affichage du badge du rôle et du statut du trajet ou de la réservation -->
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <!-- Badge rôle (chauffeur/passager) -->
@@ -136,18 +145,18 @@ $pageTitle = 'Historique des trajets';
                                 <div class="mt-3 d-flex gap-2 justify-content-end">
                                     <?php if ($role === 'chauffeur'): ?>
                                         <?php if ($trip->getTripStatus() === 'a_venir'): ?>
-                                            <!-- Bouton Démarrer -->
-                                            <form action="startTrip.php" method="POST" class="m-0">
-                                                <input type="hidden" name="trip_id" value="<?= $trip->getTripId() ?>">
-                                                <button type="submit" class="btn btn-success btn-sm rounded-pill px-4">
-                                                    <i class="bi bi-flag me-1"></i>Démarrer
-                                                </button>
-                                            </form>
                                             <!-- Bouton Annuler -->
                                             <form action="cancelTrip.php" method="POST" class="m-0">
                                                 <input type="hidden" name="trip_id" value="<?= $trip->getTripId() ?>">
                                                 <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-4">
                                                     <i class="bi bi-x-circle me-1"></i>Annuler
+                                                </button>
+                                            </form>
+                                            <!-- Bouton Démarrer -->
+                                            <form action="startTrip.php" method="POST" class="m-0">
+                                                <input type="hidden" name="trip_id" value="<?= $trip->getTripId() ?>">
+                                                <button type="submit" class="btn btn-success btn-sm rounded-pill px-4">
+                                                    <i class="bi bi-flag me-1"></i>Démarrer
                                                 </button>
                                             </form>
                                         <?php elseif ($trip->getTripStatus() === 'en_cours'): ?>

@@ -44,15 +44,27 @@ class Bookings
     {
         return $this->seatsReserved;
     }
+    public function setSeatsReserved(int $seatsReserved): void
+    {
+        $this->seatsReserved = $seatsReserved;
+    }
 
     public function getStatus(): string
     {
         return $this->status;
     }
+    public function setStatus(string $status): void
+    {
+        $this->status = $status;
+    }
 
     public function getCreatedAt(): DateTime
     {
         return $this->createdAt;
+    }
+    public function setCreatedAt(DateTime $createdAt): void
+    {
+        $this->createdAt = $createdAt;
     }
 
     public function saveBookingToDatabase(): bool
@@ -60,6 +72,8 @@ class Bookings
         try {
             $pdo = Database::getConnection();
             if ($this->bookingId !== null) {
+                error_log("DEBUG: SQL = " . $sql);
+                error_log("DEBUG: UPDATE booking_id=" . $this->bookingId . " | status=" . $this->status);
                 $sql = "UPDATE bookings SET trip_id=?, user_id=?, seats_reserved=?, status=?, created_at=? WHERE booking_id = ? ";
                 $stmt = $pdo->prepare($sql);
                 return $stmt->execute([
@@ -70,7 +84,9 @@ class Bookings
                     $this->createdAt->format('Y-m-d H:i:s'),
                     $this->bookingId
                 ]);
+                error_log("DEBUG: ROWS UPDATED = " . $stmt->rowCount());
             } else {
+                error_log("DEBUG: INSERT booking");
                 $sql = "INSERT INTO bookings (trip_id, user_id, seats_reserved, status, created_at) VALUES (?, ?, ?, ?, ?) RETURNING booking_id";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([
@@ -198,9 +214,11 @@ class Bookings
             $pdo->commit();
 
             // 8. Notifier le chauffeur ici (email, notification...)
-            error_log("CANCEL: SUCCESS");
             return true;
+            $pdo->commit();
+            error_log("DEBUG: COMMIT effectué");
         } catch (\Exception $e) {
+            error_log("DEBUG: ROLLBACK - " . $e->getMessage());
             $pdo->rollBack();
             // Pour le debug, tu peux logger ici $e->getMessage()
             error_log("CANCEL: ERROR - ".$e->getMessage());
@@ -350,6 +368,16 @@ class Bookings
         $sql = "UPDATE bookings SET status = ? WHERE booking_id = ?";
         $stmt = $pdo->prepare($sql);
         return $stmt->execute([$newStatus, $this->bookingId]);
+    }
+
+    public static function findAnnuleBookingByTripAndUser(int $tripId, int $userId): ?self
+    {
+        $pdo = \Olivierguissard\EcoRide\Config\Database::getConnection();
+        $sql = "SELECT * FROM bookings WHERE trip_id = ? AND user_id = ? AND status = 'annule' ORDER BY created_at DESC LIMIT 1";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$tripId, $userId]);
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return $result ? new self($result) : null;
     }
 
 }

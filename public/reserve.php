@@ -46,8 +46,12 @@ if (!$passenger) {
 }
 // Vérification si le passager à un solde suffisant de crédit
 if ($passenger->getCredits() < $totalPrice) {
-    $_SESSION['flash_error'] = 'Crédits insuffisants pour cette réservation. Ajouté du crédit à votre compte.';
-    header('Location: /profil.php');
+    $_SESSION['flash_error'] = [
+        'trip_id' => $tripId,
+        'message' =>'Crédits insuffisants pour cette réservation. <br>
+                        <a href="/ajoutCredit.php" class="btn btn-success btn-sm ms-2">Ajouter du crédit à votre compte.</a>'
+        ];
+    header('Location: /rechercher.php');
     exit;
 }
 
@@ -56,16 +60,31 @@ $pdo = \Olivierguissard\EcoRide\Config\Database::getConnection();
 try {
     $pdo->beginTransaction();
 
-    // Enregistre la réservation dans bookings
-    $booking = new Bookings([
-        'trip_id' => $tripId,
-        'user_id' => $userId,
-        'seats_reserved' => $seatsReserved,
-    ]);
-    if (!$booking->saveBookingToDatabase()) {
-        throw new Exception('Impossible de réserver ce trajet.');
+    // Vérifie s'il existe une réservation annulée pour ce trip/user
+    $oldBooking = Bookings::findAnnuleBookingByTripAndUser($tripId, $userId);
+    if ($oldBooking && $oldBooking->getStatus() === 'annule') {
+        // Réactiver la résa
+        $oldBooking->setStatus('reserve');
+        $oldBooking->setSeatsReserved($seatsReserved);
+        $oldBooking->setCreatedAt(new DateTime('now'));
+        error_log("DEBUG: oldBooking=" . print_r($oldBooking, true));
+        if (!$oldBooking->saveBookingToDatabase()) {
+            throw new Exception('Impossible de réactiver cette réservation.');
+        }
+        $bookingId = $oldBooking->getBookingId();
+        $booking = $oldBooking;
+    } else {
+        // Sinon, on fait une nouvelle résa
+        $booking = new Bookings([
+            'trip_id' => $tripId,
+            'user_id' => $userId,
+            'seats_reserved' => $seatsReserved,
+        ]);
+        if (!$booking->saveBookingToDatabase()) {
+            throw new Exception('Impossible de réserver ce trajet.');
+        }
+        $bookingId = $booking->getBookingId();
     }
-    $bookingId = $booking->getBookingId();
 
     // Déduire les crédits du passager
     $sql = 'UPDATE users SET credits = credits - ? WHERE user_id = ?';
@@ -85,12 +104,15 @@ try {
     ]);
 
     $pdo->commit();
-    $_SESSION['flash_success'] = 'Réservation enregistrée !';
+    $_SESSION['flash_success'] = [
+        'message' => 'Réservation enregistrée !',
+        'trip_id' => $tripId
+        ];
 
     } catch (Exception $e) {
     $pdo->rollBack(); // En cas d'erreur, on annule tout
     $_SESSION['flash_error'] = 'Erreur de l\'enregistrement de la réservation :' . $e->getMessage();
 }
 
-header('Location: rechercher.php');
+header('Location: historique.php');
 exit;

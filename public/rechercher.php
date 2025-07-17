@@ -16,6 +16,9 @@ require_once __DIR__ . '/../src/Helpers/helpers.php';
 $trips = Trip::findTripsUpcoming();
 $countTrip = count($trips);
 
+$flashError = $_SESSION['flash_error'] ?? null;
+unset($_SESSION['flash_error']);
+
 $pageTitle = 'Rechercher un voyage';
 ?>
 <!DOCTYPE html>
@@ -116,6 +119,8 @@ $pageTitle = 'Rechercher un voyage';
         $vehicleLabel = htmlspecialchars($car->marque . ' ' . $car->modele);
         ?>
             <div class="container p-0">
+                <?php $showError = ($flashError && $flashError['trip_id'] && $flashError['trip_id'] == $trip->getTripId()); ?>
+
                 <!-- Carte trajet -->
                 <div class="card shadow-sm mb-3 rounded-4">
                     <div class="card-body">
@@ -142,13 +147,23 @@ $pageTitle = 'Rechercher un voyage';
                             </div>
                             <div><i class="bi bi-currency-euro me-1"></i><?= $price ?> crédits</div>
                         </div>
+                        <!-- Message d'erreur si solde crédit insuffisant. -->
+                        <?php if ($showError): ?>
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="bi bi-exclamation-circle"></i>
+                                <?= $flashError['message']; ?>
+                            </div>
+                        <?php endif; ?>
+
                         <form method="post" action="reserve.php" style="display:inline">
                             <input type="hidden" name="trip_id" value="<?= htmlspecialchars($trip->getTripId()) ?>">
                             <input type="hidden" name="seats_reserved" value="1">
-                            <?php if ($remainingSeats > 0): ?>
+                            <?php if ($remainingSeats > 0 && !$showError): ?>
                             <button type="submit" class="btn btn-primary">Réserver</button>
+                            <?php elseif ($showError): ?>
+                            <button type="button" class="btn btn-secondary disabled" disabled>Réservé</button>
                             <?php else: ?>
-                            <button type="submit" class="btn btn-secondary disabled" disabled>Complet</button>
+                            <button type="button" class="btn btn-secondary disabled" disabled>Complet</button>
                             <?php endif; ?>
                         </form>
                     </div>
