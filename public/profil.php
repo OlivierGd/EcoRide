@@ -245,6 +245,13 @@ $pageTitle = 'Mon profil - EcoRide';
                         <div class="small text-muted">Mes transactions</div>
                     </div>
                 </a>
+                <a href="dashboard.php" class="list-group-item list-group-item-action d-flex align-items-center">
+                    <i class="bi bi-kanban fs-4 me-2 text-primary"></i>
+                    <div>
+                        <strong>Console d'administration</strong>
+                        <div class="small text-muted">Management</div>
+                    </div>
+                </a>
                 <!-- ESPACE pour le footer -->
                 <div style="height: 1.5rem;"></div>
                 <a href="/logout.php" class="list-group-item list-group-item-action d-flex align-items-center bg-danger text-white rounded mb-3 mt-auto">
