@@ -20,8 +20,5 @@
         "mailjet/mailjet-apiv3-php": "^1.6",
       "ext-pdo": "*",
         "robmorgan/phinx": "^0.16.10"
-    },
-    "require-dev": {
-
     }
 }
