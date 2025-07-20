@@ -25,8 +25,8 @@ $success = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Récupération des POST
-    $firstName  = trim($_POST['firstName'] ?? '');
-    $lastName   = trim($_POST['lastName'] ?? '');
+    $firstName  = trim(ucfirst($_POST['firstName'] ?? ''));
+    $lastName   = trim(mb_strtoupper($_POST['lastName'] ?? ''));
     $email      = trim($_POST['email'] ?? '');
     $password   = $_POST['password'] ?? '';
     $confirmPassword = $_POST['confirmPassword'] ?? '';
