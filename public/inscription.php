@@ -12,8 +12,6 @@ if (isAuthenticated()) {
     header('Location: /profil.php');
     exit;
 }
-echo 'Autoload exists: ' . (file_exists(__DIR__ . '/../vendor/autoload.php') ? 'OUI' : 'NON') . '<br>';
-echo 'Class exists: ' . (class_exists('Olivierguissard\\EcoRide\\Config\\Database') ? 'OUI' : 'NON') . '<br>';
 
 $pdo = Database::getConnection();
 

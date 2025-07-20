@@ -25,7 +25,7 @@ class Users
 
     public function __construct(array $data = [])
     {
-        $this->userId       = (int)$data['user_id'] ?? null;
+        $this->userId       = isset($data['user_id']) ? (int)$data['user_id'] : null;
         $this->firstName    = trim($data['firstname']);
         $this->lastName     = trim($data['lastname']);
         $this->email        = trim($data['email']);
