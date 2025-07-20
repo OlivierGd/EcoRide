@@ -15,8 +15,8 @@ class Database
             return self::$pdo;
         }
 
-        // 1) Charge le .env.local / ignore si absent (prod)
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../../', ['.env.local', '.env.production']);
+        // 1) Charge le .env (local) / ignore si absent (prod)
+        $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
         $dotenv->safeLoad();
 
         // 2) Détermine si on est en local (variables DB_*) ou en prod (DATABASE_URL)
