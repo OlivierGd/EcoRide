@@ -2,8 +2,6 @@
 
 namespace Olivierguissard\EcoRide\Model;
 
-use const class\results;
-
 class GeoApi
 {
     private string $api_key;
@@ -16,7 +14,7 @@ class GeoApi
      */
     public function __construct(string $api_key)
     {
-        this->api_key = $api_key;
+        $this->api_key = $api_key;
     }
     public function getCities(string $cityName): array
     {
@@ -29,9 +27,9 @@ class GeoApi
         if ($data === false || curl_getinfo($curl, CURLINFO_HTTP_CODE) !== 200) {
             return null;
         } else {
-            results = [];
+            $results = [];
             $data = json_decode($data, true);
-            results = $data['departement']['nom'];
+            $results = $data['departement']['nom'];
         }
     }
 }

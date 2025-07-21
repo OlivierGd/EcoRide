@@ -13,7 +13,7 @@ requireAuth();
 
 $tripId = (int)($_POST['trip_id'] ?? 0);
 $seatsReserved = (int)($_POST['seats_reserved'] ?? 1);
-$userId = $_SESSION['user_id'];
+$userId = getUserId();
 
 //debug
 error_log('RESERVE REQUEST: ' .  print_r($_REQUEST, true));

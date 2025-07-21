@@ -11,7 +11,7 @@ if (!isset($_GET['user_id'])) {
     exit;
 }
 
-$userId = intval($_GET['user_id']);
+$userId = intval(getUserId());
 
 try {
     $pdo = Database::getConnection();

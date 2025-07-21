@@ -6,10 +6,13 @@ use Olivierguissard\EcoRide\Model\Trip;
 use Olivierguissard\EcoRide\Model\Car;
 
 require_once 'functions/auth.php';
-startSession();
-isAuthenticated();
+requireAuth();
 
 require_once __DIR__ . '/../src/Helpers/helpers.php';
+
+$userID = getUserId();
+$voyages = Trip::findTripsByDriver($userID);
+$vehicles = Car::findByUser($userID);
 
 // Soumettre le formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -43,12 +46,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $voyage = Trip::find((int)$data['trip_id']);
 
         $voyage->setDriverId((int)$data['driver_id']);
-        $voyage->setStartCity($data['start-city']);
-        $voyage->setEndCity($data['end-city']);
+        $voyage->setStartCity($data['start_city']);
+        $voyage->setEndCity($data['end_city']);
         $voyage->setDepartureAt(new DateTime($data['departure_at']));
         $voyage->setPricePerPassenger($data['price_per_passenger']);
         $voyage->setComment($data['comment']);
-        $voyage->setNoSmoking($data['no-smoking']);
+        $voyage->setNoSmoking($data['no_smoking']);
         $voyage->setMusicAllowed($data['music_allowed']);
         $voyage->setDiscussAllowed($data['discuss_allowed']);
     } else {
