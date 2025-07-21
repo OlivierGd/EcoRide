@@ -16,3 +16,7 @@ tmp/
 .env.local
 .env.production
 vendor/
+.idea/
+
+# Anciennes migrations Phinx
+db/migrations/

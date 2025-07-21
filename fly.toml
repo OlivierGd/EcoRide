@@ -33,4 +33,4 @@ protocol     = "http"
     type = "connections"
 
 [deploy]
-release_command = "vendor/bin/phinx migrate -e production --no-interaction"
+release_command = "php init-db.php"
