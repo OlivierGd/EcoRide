@@ -43,7 +43,7 @@ $pageTitle = 'Accueil - EcoRide';
                 <img src="assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="d-inline-block align-text-center rounded" width="60">
 
             </a>
-            <h1>EcoRide</h1>
+            <h1>EcoRide:</h1>
             <div><?= displayInitialsButton(); ?></div>
         </div>
     </nav>

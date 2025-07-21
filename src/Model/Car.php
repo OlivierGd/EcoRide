@@ -3,7 +3,7 @@
 namespace Olivierguissard\EcoRide\Model;
 
 use class\PDOException;
-use Olivierguissard\EcoRide\config\Database;
+use Olivierguissard\EcoRide\Config\Database;
 use PDO;
 
 class Car
