@@ -1,36 +1,36 @@
-version: '3.8'
 
 services:
-  db:
-    image: postgres:16
-    container_name: ecoride_postgres
-    restart: unless-stopped
-    ports:
-      - "5433:5432"
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - db_data:/var/lib/postgresql/data
-    networks:
-      - ecoride_net
+  # db:
+   # image: postgres:16
+   # container_name: ecoride_postgres
+   # restart: unless-stopped
+   # ports:
+   #   - "5433:5432"
+   # environment:
+   #   POSTGRES_DB: ${DB_NAME}
+   #   POSTGRES_USER: ${DB_USER}
+   #   POSTGRES_PASSWORD: ${DB_PASSWORD}
+   # volumes:
+   #   - db_data:/var/lib/postgresql/data
+   # networks:
+   #   - ecoride_net
 
   app:
     build:
       context: ../
       dockerfile: Dockerfile
     container_name: ecoride_app
+    restart: unless-stopped
     ports:
       - "8081:80"
-    depends_on:
-      - db
+   # depends_on:
+   #   - db
     volumes:
       - ../:/var/www/html
     networks:
       - ecoride_net
     env_file:
-      - ../.env.local
+      - ../.env
 
 volumes:
   db_data:
