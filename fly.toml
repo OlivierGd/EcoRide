@@ -31,3 +31,6 @@ protocol     = "http"
 
   [services.concurrency]
     type = "connections"
+
+[deploy]
+release_command = "vendor/bin/phinx migrate -e production --no-interaction"

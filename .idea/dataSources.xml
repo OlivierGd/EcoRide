@@ -8,5 +8,12 @@
       <jdbc-url>jdbc:postgresql://localhost:5433/ecoride_db_local</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="EcorideProd" uuid="a6f01f81-f2ba-407e-b6d1-3792e0e7a88b">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://localhost:16380/pgdb-n83v7rg5llm05gxk?sslmode=require</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>
