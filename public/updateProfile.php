@@ -1,15 +1,14 @@
 <?php
 
+require_once __DIR__ . '/../vendor/autoload.php';
+
 use Olivierguissard\EcoRide\Config\Database;
 
 session_start();
 
-require_once __DIR__ . '/../vendor/autoload.php';
-
 require_once __DIR__ . '/functions/auth.php';
 requireAuth();
 
-require_once __DIR__ . '/../src/config/Database.php';
 
 // Connexion à la BDD
 $pdo = Database::getConnection();
