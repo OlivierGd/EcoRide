@@ -110,40 +110,58 @@ CREATE TABLE IF NOT EXISTS public.reviews (
 ----------------------------------------------------------
 -- 8. FOREIGN-KEYS
 ----------------------------------------------------------
-ALTER TABLE IF EXISTS public.bookings
-    ADD CONSTRAINT IF NOT EXISTS bookings_trip_id_fkey
+ALTER TABLE public.bookings
+    DROP CONSTRAINT IF EXISTS bookings_trip_id_fkey;
+ALTER TABLE public.bookings
+    ADD CONSTRAINT bookings_trip_id_fkey
     FOREIGN KEY (trip_id) REFERENCES public.trips(trip_id);
 
-ALTER TABLE IF EXISTS public.bookings
-    ADD CONSTRAINT IF NOT EXISTS bookings_user_id_fkey
+ALTER TABLE public.bookings
+    DROP CONSTRAINT IF EXISTS bookings_user_id_fkey;
+ALTER TABLE public.bookings
+    ADD CONSTRAINT bookings_user_id_fkey
     FOREIGN KEY (user_id) REFERENCES public.users(user_id);
 
-ALTER TABLE IF EXISTS public.credits_history
-    ADD CONSTRAINT IF NOT EXISTS credits_history_user_id_fkey
+ALTER TABLE public.credits_history
+    DROP CONSTRAINT IF EXISTS credits_history_user_id_fkey;
+ALTER TABLE public.credits_history
+    ADD CONSTRAINT credits_history_user_id_fkey
     FOREIGN KEY (user_id) REFERENCES public.users(user_id);
 
-ALTER TABLE IF EXISTS public.payments
-    ADD CONSTRAINT IF NOT EXISTS payments_booking_id_fkey
+ALTER TABLE public.payments
+    DROP CONSTRAINT IF EXISTS payments_booking_id_fkey;
+ALTER TABLE public.payments
+    ADD CONSTRAINT payments_booking_id_fkey
     FOREIGN KEY (booking_id) REFERENCES public.bookings(booking_id);
 
-ALTER TABLE IF EXISTS public.payments
-    ADD CONSTRAINT IF NOT EXISTS payments_trip_id_fkey
+ALTER TABLE public.payments
+    DROP CONSTRAINT IF EXISTS payments_trip_id_fkey;
+ALTER TABLE public.payments
+    ADD CONSTRAINT payments_trip_id_fkey
     FOREIGN KEY (trip_id) REFERENCES public.trips(trip_id);
 
-ALTER TABLE IF EXISTS public.payments
-    ADD CONSTRAINT IF NOT EXISTS payments_user_id_fkey
+ALTER TABLE public.payments
+    DROP CONSTRAINT IF EXISTS payments_user_id_fkey;
+ALTER TABLE public.payments
+    ADD CONSTRAINT payments_user_id_fkey
     FOREIGN KEY (user_id) REFERENCES public.users(user_id);
 
-ALTER TABLE IF EXISTS public.reviews
-    ADD CONSTRAINT IF NOT EXISTS reviews_booking_id_fkey
+ALTER TABLE public.reviews
+    DROP CONSTRAINT IF EXISTS reviews_booking_id_fkey;
+ALTER TABLE public.reviews
+    ADD CONSTRAINT reviews_booking_id_fkey
     FOREIGN KEY (booking_id) REFERENCES public.bookings(booking_id);
 
-ALTER TABLE IF EXISTS public.reviews
-    ADD CONSTRAINT IF NOT EXISTS reviews_trip_id_fkey
+ALTER TABLE public.reviews
+    DROP CONSTRAINT IF EXISTS reviews_trip_id_fkey;
+ALTER TABLE public.reviews
+    ADD CONSTRAINT reviews_trip_id_fkey
     FOREIGN KEY (trip_id) REFERENCES public.trips(trip_id);
 
-ALTER TABLE IF EXISTS public.reviews
-    ADD CONSTRAINT IF NOT EXISTS reviews_user_id_fkey
+ALTER TABLE public.reviews
+    DROP CONSTRAINT IF EXISTS reviews_user_id_fkey;
+ALTER TABLE public.reviews
+    ADD CONSTRAINT reviews_user_id_fkey
     FOREIGN KEY (user_id) REFERENCES public.users(user_id);
 
 COMMIT;
