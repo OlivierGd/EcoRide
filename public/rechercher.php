@@ -12,12 +12,58 @@ isAuthenticated();
 
 require_once __DIR__ . '/../src/Helpers/helpers.php';
 
-// Récupère les trajets futurs
-$trips = Trip::findTripsUpcoming();
+// Étape 1 : Centraliser la logique de récupération des voyages
+
+// Récupération des critères de recherche (GET)
+$startCity     = trim($_GET['startCity'] ?? '');
+$endCity       = trim($_GET['endCity'] ?? '');
+$departureDate = trim($_GET['departureDate'] ?? '');
+
+// Filtres avancés à ajouter plus tard (places, energy, sort, rating...)
+$filtersUsed = !empty($startCity) || !empty($endCity) || !empty($departureDate);
+
+// Construction du tableau de voyages à afficher
+if ($filtersUsed) {
+    // Prépare la requête SQL dynamiquement
+    $pdo = \Olivierguissard\EcoRide\Config\Database::getConnection();
+    $sql = "SELECT * FROM trips WHERE departure_at > NOW()";
+    $params = [];
+
+    if ($startCity !== '') {
+        $sql .= " AND start_city ILIKE :startCity";
+        $params[':startCity'] = "%$startCity%";
+    }
+    if ($endCity !== '') {
+        $sql .= " AND end_city ILIKE :endCity";
+        $params[':endCity'] = "%$endCity%";
+    }
+    if ($departureDate !== '') {
+        $sql .= " AND DATE(departure_at) = :departureDate";
+        $params[':departureDate'] = $departureDate;
+    }
+
+    // Plus tard, on rajoutera les autres filtres
+    $sql .= " ORDER BY departure_at ASC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // On convertit en objets Trip pour l’affichage existant
+    $trips = array_map(fn($r) => new Trip($r), $rows);
+} else {
+    // Aucun critère = tous les voyages à venir
+    $trips = Trip::findTripsUpcoming();
+    echo '<pre>';
+    print_r($trips);
+    echo '</pre>';
+}
+
 $countTrip = count($trips);
 
 $flashError = $_SESSION['flash_error'] ?? null;
 unset($_SESSION['flash_error']);
+
 
 $pageTitle = 'Rechercher un voyage';
 ?>
@@ -46,27 +92,81 @@ $pageTitle = 'Rechercher un voyage';
     </header>
 
 <!-- Main Content -->
-<main class="container px-3 py-2 mt-5 pt-5">
+<main class="container px-3 py-2 mt-1 pt-5">
     <!-- Search Summary -->
-    <section class="bg-primary-light rounded p-3 mb-3">
-        <div class="d-flex align-items-center mb-2">
-            <div class="flex-grow-1">
-                <div class="d-flex align-items-center fs-6 fw-medium">
-                    <span>Paris</span>
-                    <div class="mx-2 text-secondary-emphasis">
-                        <i class="ri-arrow-right-line"></i>
-                    </div>
-                    <span>Lyon</span>
+    <section class="mt-1">
+        <h2 class="fw-bold mb-4">Affinez votre recherche</h2>
+        <form action="rechercher.php" method="get" id="formSearchDestination" class="p-4 bg-white rounded-4 shadow-sm">
+            <!-- Départ -->
+            <div class="input-group mb-3 bg-light rounded-3">
+                <span class="input-group-text bg-transparent border-0">
+                    <i class="bi bi-geo-alt text-secondary"></i>
+                </span>
+                <input type="text" name="startCity" class="form-control border-0 bg-transparent" id="searchStartCity"
+                       placeholder="Ville de départ" value="<?= htmlspecialchars($startCity) ?>">
+            </div>
+            <!-- Destination -->
+            <div class="input-group mb-3 bg-light rounded-3">
+                <span class="input-group-text bg-transparent border-0">
+                    <i class="bi bi-pin-map text-secondary"></i>
+                </span>
+                <input type="text" name="endCity" class="form-control border-0 bg-transparent" id="searchEndCity"
+                       placeholder="Destination" value="<?= htmlspecialchars($endCity) ?>">
+            </div>
+            <!-- Date du voyage -->
+            <div class="input-group mb-4 bg-light rounded-3">
+                <span class="input-group-text bg-transparent border-0">
+                    <i class="bi bi-calendar-event text-secondary"></i>
+                </span>
+                <input type="date" name="departureDate" class="form-control border-0 bg-transparent" id="searchDate"
+                       value="<?= htmlspecialchars($departureDate) ?>">
+            </div>
+            <small class="form-text text-muted">Laissez vide pour afficher tous les trajets à venir.</small>
+            <!-- Filtres avancés -->
+            <div class="row mb-3 g-2">
+                <div class="col-6 col-md-3">
+                    <select name="sort" class="form-select rounded-3">
+                        <option value="">Trier par</option>
+                        <option value="price" <?= $sort === 'price' ? 'selected' : '' ?>>Prix croissant</option>
+                        <option value="time" <?= $sort === 'time' ? 'selected' : '' ?>>Heure</option>
+                        <option value="rating" <?= $sort === 'rating' ? 'selected' : '' ?>>Avis</option>
+                    </select>
                 </div>
-                <div class="small text-secondary mt-1">
-                    <i class="ri-calendar-line me-1"></i>
-                    <span id="currentDate">Lundi 5 mai 2025</span>
+                <div class="col-6 col-md-3">
+                    <select name="energy" class="form-select rounded-3">
+                        <option value="">Type de véhicule</option>
+                        <option value="Electrique" <?= $energy === 'Electrique' ? 'selected' : '' ?>>Électrique</option>
+                        <option value="Thermique" <?= $energy === 'Thermique' ? 'selected' : '' ?>>Thermique</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-3">
+                    <select name="places" class="form-select rounded-3">
+                        <option value="">Places min</option>
+                        <?php for($i=1;$i<=6;$i++): ?>
+                            <option value="<?= $i ?>" <?= $places == $i ? 'selected' : '' ?>><?= $i ?></option>
+                        <?php endfor; ?>
+                    </select>
+                </div>
+                <div class="col-6 col-md-3">
+                    <select name="rating" class="form-select rounded-3">
+                        <option value="">Avis min</option>
+                        <option value="5" <?= $rating == 5 ? 'selected' : '' ?>>5 étoiles</option>
+                        <option value="4" <?= $rating == 4 ? 'selected' : '' ?>>4 étoiles et plus</option>
+                        <option value="3" <?= $rating == 3 ? 'selected' : '' ?>>3 étoiles et plus</option>
+                    </select>
                 </div>
             </div>
-            <div class="bg-white rounded-pill px-3 py-1 small fw-medium text-primary">
-                <?= $countTrip ?> trajet<?= ($countTrip > 1) ? 's' : '' ?> trouv<?= $countTrip > 1 ? 'és' : 'é' ?>
+            <!-- Bouton de recherche -->
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-2">
+                <button type="submit" class="btn btn-success d-flex justify-content-center align-items-center gap-2 rounded-3">
+                    <i class="bi bi-search"></i> Rechercher
+                </button>
+                <button type="button" id="resetSearchForm" class="btn btn-outline-secondary ms-2" aria-label="Réinitialiser le formulaire de recherche">
+                    <i class="bi bi-x-circle"></i> Vider
+                </button>
             </div>
-        </div>
+
+        </form>
     </section>
 
     <!-- Filter Options -->
@@ -200,7 +300,7 @@ $pageTitle = 'Rechercher un voyage';
     <?php require 'footer.php'; ?>
 </footer>
 
-<script src="assets/js/script.js"></script>
+<script src="assets/js/rechercher.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
 </body>
 </html>

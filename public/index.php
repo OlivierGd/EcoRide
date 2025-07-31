@@ -9,17 +9,7 @@ isAuthenticated();
 require_once __DIR__ . '/../src/Helpers/helpers.php';
 
 
-// chemin du dossier data
-$dataDir = __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'data';
-$file = $dataDir . DIRECTORY_SEPARATOR . date('Y-m-d') . '.txt';
-$searchForTrip = [];
-if(isset($_GET['villeDepart']) && isset($_GET['villeArrivee']) && isset($_GET['dateVoyage'])) {
-    $searchForTrip = [
-        'villeDepart' => $_GET['villeDepart'],
-        'villeArrivee' => $_GET['villeArrivee'],
-        'dateVoyage' => $_GET['dateVoyage']
-    ];
-}
+
 $pageTitle = 'Accueil - EcoRide';
 ?>
 
@@ -43,7 +33,7 @@ $pageTitle = 'Accueil - EcoRide';
                 <img src="assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="d-inline-block align-text-center rounded" width="60">
 
             </a>
-            <h1>EcoRide:</h1>
+            <h1>EcoRide</h1>
             <div><?= displayInitialsButton(); ?></div>
         </div>
     </nav>
@@ -73,14 +63,14 @@ $pageTitle = 'Accueil - EcoRide';
         <!-- Formulaire de recherche de trajet -->
         <section class="mt-5">
             <h2 class="fw-bold mb-4">Trouvez votre trajet</h2>
-            <form action="index.php" method="get" id="formSearchDestination" class="p-4 bg-white rounded-4 shadow-sm">
+            <form action="rechercher.php" method="get" id="formSearchDestination" class="p-4 bg-white rounded-4 shadow-sm">
 
                <!-- Départ -->
                 <div class="input-group mb-3 bg-light rounded-3">
                     <span class="input-group-text bg-transparent border-0">
                        <i class="bi bi-geo-alt text-secondary"></i>
                    </span>
-                   <input type="text" name="villeDepart" class="form-control border-0 bg-transparent" id="searchStartCity" placeholder="Ville de départ" required>
+                   <input type="text" name="startCity" class="form-control border-0 bg-transparent" id="searchStartCity" placeholder="Ville de départ">
                 </div>
 
                 <!-- Destination -->
@@ -88,7 +78,7 @@ $pageTitle = 'Accueil - EcoRide';
             <span class="input-group-text bg-transparent border-0">
                 <i class="bi bi-pin-map text-secondary"></i>
             </span>
-                    <input type="text" name="villeArrivee" class="form-control border-0 bg-transparent" id="searchEndCity" placeholder="Destination" required>
+                    <input type="text" name="endCity" class="form-control border-0 bg-transparent" id="searchEndCity" placeholder="Destination">
                 </div>
 
                 <!-- Date du voyage -->
@@ -96,7 +86,7 @@ $pageTitle = 'Accueil - EcoRide';
             <span class="input-group-text bg-transparent border-0">
                 <i class="bi bi-calendar-event text-secondary"></i>
             </span>
-                    <input type="date" name="dateVoyage" class="form-control border-0 bg-transparent" id="searchDate" required>
+                    <input type="date" name="departureDate" class="form-control border-0 bg-transparent" id="searchDate">
                 </div>
 
                 <!-- Bouton de recherche -->
@@ -106,10 +96,6 @@ $pageTitle = 'Accueil - EcoRide';
                     </button>
                 </div>
             </form>
-            <?php /*echo '<pre>';
-            print_r($searchForTrip);
-            echo '</pre>';
-            */ ?>
         </section>
 
         <!--Stats section-->
@@ -264,6 +250,6 @@ $pageTitle = 'Accueil - EcoRide';
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
-<script type="module" src="assets/js/script.js"></script>
+<script type="module" src="assets/js/index.js"></script>
 </body>
 </html>
