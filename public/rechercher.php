@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';;
 
+use Olivierguissard\EcoRide\Config\Database;
 use Olivierguissard\EcoRide\Model\Trip;
 use Olivierguissard\EcoRide\Model\Users;
 use Olivierguissard\EcoRide\Model\Car;
@@ -12,58 +13,106 @@ isAuthenticated();
 
 require_once __DIR__ . '/../src/Helpers/helpers.php';
 
-// Étape 1 : Centraliser la logique de récupération des voyages
-
 // Récupération des critères de recherche (GET)
 $startCity     = trim($_GET['startCity'] ?? '');
 $endCity       = trim($_GET['endCity'] ?? '');
 $departureDate = trim($_GET['departureDate'] ?? '');
+// Récupération des critères des filtres avancés
+$energySelected = $_GET['energy'] ?? '';
+$placesSelected = $_GET['places'] ?? '';
+$ratingSelected = $_GET['rating'] ?? '';
+$sort = $_GET['sort'] ?? '';
 
-// Filtres avancés à ajouter plus tard (places, energy, sort, rating...)
-$filtersUsed = !empty($startCity) || !empty($endCity) || !empty($departureDate);
+// Requête SQL dynamique pour les filtres avancés
+$pdo = Database::getConnection();
+$sql = "SELECT t.* FROM trips t 
+        JOIN vehicule v ON t.vehicle_id = v.id_vehicule
+        JOIN users u ON t.driver_id = u.user_id
+        WHERE t.departure_at > NOW()";
+$params = [];
 
-// Construction du tableau de voyages à afficher
-if ($filtersUsed) {
-    // Prépare la requête SQL dynamiquement
-    $pdo = \Olivierguissard\EcoRide\Config\Database::getConnection();
-    $sql = "SELECT * FROM trips WHERE departure_at > NOW()";
-    $params = [];
-
-    if ($startCity !== '') {
-        $sql .= " AND start_city ILIKE :startCity";
-        $params[':startCity'] = "%$startCity%";
-    }
-    if ($endCity !== '') {
-        $sql .= " AND end_city ILIKE :endCity";
-        $params[':endCity'] = "%$endCity%";
-    }
-    if ($departureDate !== '') {
-        $sql .= " AND DATE(departure_at) = :departureDate";
-        $params[':departureDate'] = $departureDate;
-    }
-
-    // Plus tard, on rajoutera les autres filtres
-    $sql .= " ORDER BY departure_at ASC";
-
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // On convertit en objets Trip pour l’affichage existant
-    $trips = array_map(fn($r) => new Trip($r), $rows);
-} else {
-    // Aucun critère = tous les voyages à venir
-    $trips = Trip::findTripsUpcoming();
-    echo '<pre>';
-    print_r($trips);
-    echo '</pre>';
+if ($startCity !== '') {
+    $sql .= " AND t.start_city ILIKE :startCity";
+    $params[':startCity'] = "%$startCity%";
 }
+if ($endCity !== '') {
+    $sql .= " AND t.end_city ILIKE :endCity";
+    $params[':endCity'] = "%$endCity%";
+}
+if ($departureDate !== '') {
+    $sql .= " AND DATE(t.departure_at) = :departureDate";
+    $params[':departureDate'] = $departureDate;
+}
+if ($energySelected !== '') {
+    $sql .= " AND v.type_carburant = :energy";
+    $params[':energy'] = $energySelected;
+}
+if ($placesSelected !== '') {
+    $sql .= " AND t.available_seats >= :places";
+    $params[':places'] = $placesSelected;
+}
+if ($ratingSelected !== '') {
+    $sql .= " AND u.ranking >= :rating";
+    $params[':rating'] = $ratingSelected;
+}
+
+// Tri suivant l'option choisie
+switch ($sort) {
+    case 'price':
+        $sql .= " ORDER BY t.price_per_passenger ASC";
+        break;
+    case 'time':
+        $sql .= " ORDER BY t.departure_at ASC";
+        break;
+    case 'rating':
+        $sql .= " ORDER BY u.ranking DESC";
+        break;
+    default:
+        $sql .= " ORDER BY t.departure_at ASC";
+}
+
+// Execute la requête
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$trips = array_map(fn($r) => new Trip($r), $rows);
+
+// Initialise les tableaux pour chaque filtre
+$energies = [];
+$places = [];
+$ratings = [];
+
+foreach ($trips as $trip) {
+    // Énergie du véhicule utilisé
+    $car = Car::find($trip->getVehicleId());
+    if ($car && !in_array($car->carburant, $energies)) {
+        $energies[] = $car->carburant;
+    }
+
+    // Nombre de places disponibles
+    $remainingSeats = $trip->getRemainingSeats();
+    if (!in_array($remainingSeats, $places)) {
+        $places[] = $remainingSeats;
+    }
+
+    // Classement du conducteur (ranking)
+    $driver = Users::findUser($trip->getDriverId());
+    if ($driver) {
+        $ranking = intval($driver->getRanking());
+        if (!in_array($ranking, $ratings)) {
+            $ratings[] = $ranking;
+        }
+    }
+}
+// Trier les tableaux pour affichage croissant
+sort($energies);
+sort($places);
+rsort($ratings); // Décroissant pour le ranking
 
 $countTrip = count($trips);
 
 $flashError = $_SESSION['flash_error'] ?? null;
 unset($_SESSION['flash_error']);
-
 
 $pageTitle = 'Rechercher un voyage';
 ?>
@@ -135,24 +184,25 @@ $pageTitle = 'Rechercher un voyage';
                 <div class="col-6 col-md-3">
                     <select name="energy" class="form-select rounded-3">
                         <option value="">Type de véhicule</option>
-                        <option value="Electrique" <?= $energy === 'Electrique' ? 'selected' : '' ?>>Électrique</option>
-                        <option value="Thermique" <?= $energy === 'Thermique' ? 'selected' : '' ?>>Thermique</option>
+                        <?php foreach ($energies as $energy): ?>
+                            <option value="<?= htmlspecialchars($energy) ?>" <?= $energy === $energySelected ? 'selected' : '' ?>><?= htmlspecialchars($energy) ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="col-6 col-md-3">
                     <select name="places" class="form-select rounded-3">
                         <option value="">Places min</option>
-                        <?php for($i=1;$i<=6;$i++): ?>
-                            <option value="<?= $i ?>" <?= $places == $i ? 'selected' : '' ?>><?= $i ?></option>
-                        <?php endfor; ?>
+                        <?php foreach ($places as $p): ?>
+                            <option value="<?= $p ?>" <?= $p == $placesSelected ? 'selected' : '' ?>><?= $p ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="col-6 col-md-3">
                     <select name="rating" class="form-select rounded-3">
                         <option value="">Avis min</option>
-                        <option value="5" <?= $rating == 5 ? 'selected' : '' ?>>5 étoiles</option>
-                        <option value="4" <?= $rating == 4 ? 'selected' : '' ?>>4 étoiles et plus</option>
-                        <option value="3" <?= $rating == 3 ? 'selected' : '' ?>>3 étoiles et plus</option>
+                        <?php foreach ($ratings as $r): ?>
+                            <option value="<?= $r ?>" <?= $r == $ratingSelected ? 'selected' : '' ?>><?= $r ?> étoiles</option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
             </div>
@@ -169,34 +219,9 @@ $pageTitle = 'Rechercher un voyage';
         </form>
     </section>
 
-    <!-- Filter Options -->
-    <section class="mb-3">
-        <div class="d-flex gap-2 filter-container pb-2">
-            <button class="btn btn-primary rounded-pill py-1 px-3 filter-btn">
-                <i class="ri-sort-asc-line me-1"></i>
-                Prix croissant
-            </button>
-            <button class="btn btn-light rounded-pill py-1 px-3 border filter-btn">
-                <i class="ri-time-line me-1"></i>
-                Heure
-            </button>
-            <button class="btn btn-light rounded-pill py-1 px-3 border filter-btn">
-                <i class="ri-star-line me-1"></i>
-                Avis
-            </button>
-            <button class="btn btn-light rounded-pill py-1 px-3 border filter-btn">
-                <i class="ri-charging-pile-line me-1"></i>
-                Électrique
-            </button>
-            <button class="btn btn-light rounded-pill py-1 px-3 border filter-btn">
-                <i class="ri-user-line me-1"></i>
-                Places
-            </button>
-        </div>
-    </section>
-
     <!-- Rides List -->
-    <section class="mb-3">
+    <section class="mt-5 mb-3">
+        <h2 class="fw-bold mb-4">Les trajets disponibles</h2>
         <!-- Ride card -->
         <?php foreach ($trips as $trip):
         // Le conducteur
@@ -277,7 +302,7 @@ $pageTitle = 'Rechercher un voyage';
     </section>
 
     <!-- Eco Impact Banner -->
-    <section class="bg-primary-light rounded p-3 mb-3">
+    <section class="bg-primary-light rounded p-3 mb-5">
         <div class="d-flex align-items-start">
             <div class="bg-primary rounded-circle me-3 p-2 text-white" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
                 <i class="ri-leaf-line"></i>
@@ -295,7 +320,6 @@ $pageTitle = 'Rechercher un voyage';
     </section>
 </main>
 
-<!-- Tab Bar -->
 <footer>
     <?php require 'footer.php'; ?>
 </footer>
