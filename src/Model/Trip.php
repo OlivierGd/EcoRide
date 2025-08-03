@@ -85,6 +85,14 @@ class Trip
     {
         return $this->endCity;
     }
+    public function getDepartureAt(): DateTime
+    {
+        return $this->departureAt;
+    }
+    public function setDepartureAt(DateTime $departureAt): void
+    {
+        $this->departureAt = $departureAt;
+    }
     public function getDepartureDateAndTime(): string
     {
         return $this->departureAt->format('Y-m-d H:i');
@@ -340,6 +348,31 @@ class Trip
      * @param string $newStatus Le nouveau statut à définir pour le voyage.
      * @return bool Retourne true si la mise à jour a réussi, sinon false.
      */
+
+    /**
+     * Checks if the trip's status should be updated by comparing the departure time with the current time.
+     * If the departure time has passed and the status is 'a_venir', the status is updated to 'termine'.
+     * @return void
+     */
+    public function checkAndUpdateStatusIfExpired(): void
+    {
+        $now = new \DateTime('now', new \DateTimeZone('Europe/Paris') );
+        if ($this->departureAt < $now && $this->tripStatus === 'a_venir') {
+            $this->updateTripStatus('termine');
+        }
+    }
+
+    /**
+     * Determines whether the trip's departure time has already passed compared to the current time.
+     *
+     * @return bool Returns true if the departure time is in the past; otherwise, false.
+     */
+    public function isPastTrip(): bool
+    {
+        $now = new \DateTime('now', new \DateTimeZone('Europe/Paris') );
+        return $this->departureAt < $now;
+    }
+
     public function updateTripStatus(string $newStatus): bool
     {
         $pdo = Database::getConnection();
@@ -351,6 +384,5 @@ class Trip
         }
         return $result;
     }
-
 
 }

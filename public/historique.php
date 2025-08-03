@@ -75,6 +75,10 @@ $pageTitle = 'Historique des trajets';
                         /** @var Olivierguissard\EcoRide\Model\Bookings|null $booking */
                         $booking = $item['booking'];
                         $role = $item['role'];
+
+                        $trip->checkAndUpdateStatusIfExpired();
+                        $isPast = $trip->isPastTrip();
+
                         ?>
                         <div class="card shadow rounded-4 border-0">
                             <div class="card-body d-flex flex-column gap-2">
@@ -148,14 +152,16 @@ $pageTitle = 'Historique des trajets';
                                             <!-- Bouton Annuler -->
                                             <form action="cancelTrip.php" method="POST" class="m-0">
                                                 <input type="hidden" name="trip_id" value="<?= $trip->getTripId() ?>">
-                                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-4">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-4"
+                                                    <?= $isPast ? 'disabled title="Ce trajet est déjà passé"' : '' ?>>
                                                     <i class="bi bi-x-circle me-1"></i>Annuler
                                                 </button>
                                             </form>
                                             <!-- Bouton Démarrer -->
                                             <form action="startTrip.php" method="POST" class="m-0">
                                                 <input type="hidden" name="trip_id" value="<?= $trip->getTripId() ?>">
-                                                <button type="submit" class="btn btn-success btn-sm rounded-pill px-4">
+                                                <button type="submit" class="btn btn-success btn-sm rounded-pill px-4"
+                                                    <?= $isPast ? 'disabled title="Ce trajet est déjà passé"' : '' ?>>
                                                     <i class="bi bi-flag me-1"></i>Démarrer
                                                 </button>
                                             </form>
