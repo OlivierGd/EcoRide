@@ -1,68 +1,94 @@
-document.addEventListener('DOMContentLoaded', function() {
-  // —————— Gestion du calcul Places × Prix ——————
-  const form = document.getElementById('suggestedTripForm');
+document.addEventListener('DOMContentLoaded', function () {
+  // ——— FORMULAIRE & ÉLÉMENTS ———
+  const form = document.getElementById('tripForm');
+  const startCity = document.getElementById('startCity');
+  const endCity = document.getElementById('endCity');
+  const departureDate = document.getElementById('departureDate');
+  const departureTime = document.getElementById('departureTime');
+  const comment = document.getElementById('commentForPassenger');
+  const priceInput = document.getElementById('pricePerPassenger');
   const seatRadios = document.querySelectorAll('input[name="available_seats"]');
-  const priceInput  = document.getElementById('pricePerPassenger');
-  const placeFreeEl = document.getElementById('placeFree');
-  const totalPriceEl= document.getElementById('totalPrice');
+  const publishBtn = document.getElementById('publishSuggestedForm');
+  const modalText = document.getElementById('modalText');
+  const confirmBtn = document.getElementById('confirmSubmit');
+  const modalEl = document.getElementById('confirmationModal');
+  const bsModal = new bootstrap.Modal(modalEl);
 
-  function updateDisplay() {
-    const seats = Array.from(seatRadios).find(r => r.checked)?.value || 0;
-    const price  = parseInt(priceInput.value) || 0;
-    placeFreeEl.textContent   = seats;
-    totalPriceEl.textContent  = seats * price;
+  // ——— BARRE DE PROGRESSION ———
+  const steps = document.querySelectorAll('.form-step');
+  const circles = document.querySelectorAll('.circle');
+
+  const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const index = Array.from(steps).indexOf(entry.target);
+            circles.forEach((circle, i) => {
+              if (i < index) {
+                circle.classList.remove('bg-light', 'text-secondary', 'border-secondary');
+                circle.classList.add('bg-success', 'text-white');
+              } else if (i === index) {
+                circle.classList.remove('bg-light', 'text-secondary', 'border-secondary');
+                circle.classList.add('bg-success', 'text-white');
+              } else {
+                circle.classList.remove('bg-success', 'text-white');
+                circle.classList.add('bg-light', 'text-secondary', 'border', 'border-secondary');
+              }
+            });
+          }
+        });
+      },
+      {
+        rootMargin: '0px 0px -60% 0px',
+        threshold: 0.2
+      }
+  );
+
+  steps.forEach(step => observer.observe(step));
+
+  // ——— PRIX x PLACES (console pour vérif) ———
+  function updatePrice() {
+    const selectedSeat = Array.from(seatRadios).find(r => r.checked)?.value || 0;
+    const price = parseInt(priceInput.value) || 0;
+    console.log(`Total : ${selectedSeat * price} crédits`);
   }
 
-  seatRadios.forEach(r => r.addEventListener('change', updateDisplay));
-  priceInput.addEventListener('input', updateDisplay);
-  updateDisplay();
+  seatRadios.forEach(r => r.addEventListener('change', updatePrice));
+  priceInput.addEventListener('input', updatePrice);
+  updatePrice();
 
-
-  // —————— Gestion de la modale de confirmation ——————
-  const publishBtn   = document.getElementById('publishSuggestedForm');
-  const modalEl      = document.getElementById('confirmationModal');
-  const modalText    = document.getElementById('modalText');
-  const confirmBtn   = document.getElementById('confirmSubmit');
-  const bsModal      = new bootstrap.Modal(modalEl);
-
-  publishBtn.addEventListener('click', function(e) {
+  // ——— GESTION MODALE ———
+  publishBtn.addEventListener('click', function (e) {
     e.preventDefault();
 
-    // Récupère les valeurs saisies
-    const startCity  = document.getElementById('startCity').value.trim();
-    const endCity    = document.getElementById('endCity').value.trim();
-    const dateRaw    = document.getElementById('departureDate').value.trim();
-    const timeRaw    = document.getElementById('departureTime').value.trim();
-    const seats     = Array.from(seatRadios).find(r => r.checked)?.value || 0;
-    const price      = parseInt(priceInput.value) || 0;
-    const comment    = document.getElementById('commentForPassenger').value.trim();
+    const cityA = startCity.value.trim();
+    const cityB = endCity.value.trim();
+    const date = departureDate.value.trim();
+    const time = departureTime.value.trim();
+    const msg = comment.value.trim();
+    const seats = Array.from(seatRadios).find(r => r.checked)?.value || 0;
+    const price = parseInt(priceInput.value) || 0;
 
-    // Vérification rapide
-    if (!startCity || !endCity || !dateRaw || !timeRaw || !seats || !price) {
-      console.warn('Veuillez remplir tous les champs obligatoires.');
+    if (!cityA || !cityB || !date || !time || !seats || !price) {
+      alert('Veuillez remplir tous les champs obligatoires.');
       return;
     }
 
-    // Formate la date en JJ/MM/AAAA
-    const [y,m,d] = dateRaw.split('-');
-    const displayDate = `${d}/${m}/${y}`;
+    const [y, m, d] = date.split('-');
+    const formattedDate = `${d}/${m}/${y}`;
 
-    // Compose le texte de confirmation
     modalText.innerHTML = `
-      <p>Vous proposez un trajet de <strong>${startCity}</strong> à <strong>${endCity}</strong>.</p>
-      <p><strong>Date :</strong> ${displayDate} <strong>Heure :</strong> ${timeRaw}</p>
+      <p>Vous proposez un trajet de <strong>${cityA}</strong> à <strong>${cityB}</strong>.</p>
+      <p><strong>Date :</strong> ${formattedDate} à <strong>${time}</strong></p>
       <p><strong>Places :</strong> ${seats} — <strong>Prix :</strong> ${price} crédits</p>
-      ${comment ? `<p><strong>Commentaire :</strong> ${comment}</p>` : ''}
-      <p>Confirmez-vous la publication ?</p>
+      ${msg ? `<p><strong>Commentaire :</strong> ${msg}</p>` : ''}
+      <p class="fw-bold text-success">Souhaitez-vous confirmer la publication de ce trajet ?</p>
     `;
 
-    // Affiche la modale
     bsModal.show();
   });
 
-  // Quand l’utilisateur confirme dans la modale
-  confirmBtn.addEventListener('click', function() {
-    bsModal.hide();
+  confirmBtn.addEventListener('click', function () {
     form.submit();
   });
 });

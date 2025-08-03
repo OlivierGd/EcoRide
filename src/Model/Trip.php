@@ -25,6 +25,9 @@ class Trip
     private ?int $bookingId = null;
     private ?string $bookingStatus = null;
     private string $tripStatus;
+    private string $startLocation;
+    private string $endLocation;
+    private ?\DateInterval $estimatedDuration = null;
 
     public function __construct(array $data = [])
     {
@@ -42,6 +45,9 @@ class Trip
         $this->discussAllowed = $data['discuss_allowed'] ?? false;
         $this->createdAt    = $data['created_at'] ?? date('Y-m-d H:i:s');
         $this->tripStatus   = $data['status'] ?? 'a_venir';
+        $this->startLocation = $data['start_location'] ?? '';
+        $this->endLocation = $data['end_location'] ?? '';
+        $this->estimatedDuration = $data['estimated_duration'] ?? null;
     }
     public function setBookingStatus(?string $status): void
     {
@@ -137,6 +143,18 @@ class Trip
     {
         $this->tripStatus = $tripStatus;
     }
+    public function getStartLocation(): string
+    {
+        return $this->startLocation;
+    }
+    public function getEndLocation(): string
+    {
+        return $this->endLocation;
+    }
+    public function getEstimatedDuration(): ?\DateInterval
+    {
+        return $this->estimatedDuration;
+    }
 
 
     public function validateTrip(): bool
@@ -166,7 +184,7 @@ class Trip
 
             $pdo = Database::getConnection();
             if ($this->tripId !== null) {
-                $sql = "UPDATE trips SET vehicle_id=?, start_city=?, end_city=?, departure_at=?, available_seats=?, price_per_passenger=?, comment=?, no_smoking=?, music_allowed=?, discuss_allowed=? WHERE trip_id = ? ";
+                $sql = "UPDATE trips SET vehicle_id=?, start_city=?, end_city=?, departure_at=?, available_seats=?, price_per_passenger=?, comment=?, no_smoking=?, music_allowed=?, discuss_allowed=?, start_location=?, end_location=?, estimated_duration=? WHERE trip_id = ? ";
                 $stmt = $pdo->prepare($sql);
                 return $stmt->execute([
                     $this->vehicleId,
@@ -179,10 +197,13 @@ class Trip
                     $this->noSmoking,
                     $this->musicAllowed,
                     $this->discussAllowed,
-                    $this->tripId
+                    $this->tripId,
+                    $this->startLocation,
+                    $this->endLocation,
+                    $this->estimatedDuration
                 ]);
             } else {
-                $sql = "INSERT INTO trips (driver_id, vehicle_id, start_city, end_city, departure_at, available_seats, price_per_passenger, comment, no_smoking, music_allowed, discuss_allowed, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING trip_id";
+                $sql = "INSERT INTO trips (driver_id, vehicle_id, start_city, end_city, departure_at, available_seats, price_per_passenger, comment, no_smoking, music_allowed, discuss_allowed, created_at, start_location, end_location, estimated_duration) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING trip_id";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([
                     $this->driverId,
@@ -196,7 +217,10 @@ class Trip
                     $this->noSmoking,
                     $this->musicAllowed,
                     $this->discussAllowed,
-                    $this->createdAt
+                    $this->createdAt,
+                    $this->startLocation,
+                    $this->endLocation,
+                    $this->estimatedDuration
                 ]);
                 // Récupère l'ID généré
                 $this->tripId = (int)$stmt->fetchColumn();
