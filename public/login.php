@@ -4,8 +4,7 @@ use Olivierguissard\EcoRide\Config\Database;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once 'functions/auth.php';
-
-session_start();
+startSession();
 
 $erreur = null;
 

@@ -27,7 +27,7 @@ class Trip
     private string $tripStatus;
     private string $startLocation;
     private string $endLocation;
-    private ?\DateInterval $estimatedDuration = null;
+    private ?string $estimatedDuration = null;
 
     public function __construct(array $data = [])
     {
@@ -154,6 +154,10 @@ class Trip
     public function getEstimatedDuration(): ?\DateInterval
     {
         return $this->estimatedDuration;
+    }
+    public function setEstimatedDuration(string $duration): void
+    {
+        $this->estimatedDuration = $duration;
     }
 
 
