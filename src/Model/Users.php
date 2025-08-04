@@ -8,6 +8,7 @@ use Dom\Text;
 use Exception;
 use Olivierguissard\EcoRide\Config\Database;
 use PDO;
+use PDOException;
 
 class Users
 {
@@ -138,5 +139,18 @@ class Users
         $stmt->execute([$userId]);
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
         return $data ? new self($data) : null;
+    }
+
+    public static function getUsersCredits(int $userId) : ?int {
+        try {
+            $pdo = Database::getConnection();
+            $sql = "SELECT credits FROM users WHERE user_id = ?";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$userId]);
+            return (int)$stmt->fetchColumn();
+        } catch (PDOException $e) {
+            error_log("Erreur Users::getUsersCredits : " . $e->getMessage());
+            return null;
+        }
     }
 }

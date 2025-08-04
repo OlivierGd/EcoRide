@@ -96,8 +96,10 @@ class Bookings
                     $this->status,
                     $this->createdAt->format('Y-m-d H:i:s')
                 ]);
+                $bookingId = $stmt->fetchColumn(); // pour debug a supprimer après
+                error_log("DEBUG: fetchColumn() = " . print_r($bookingId, true)); // pour debug a supprimer après
                 // Récupère l'ID généré
-                $this->bookingId = (int)$stmt->fetchColumn();
+                $this->bookingId = (int)$bookingId;
                 return true;
             }
         } catch (\PDOException $e) {
@@ -203,7 +205,7 @@ class Bookings
             ]);
             error_log("CANCEL: étape 7 - insert credits_history");
             // 7. Loger dans credits_history
-            $sql = "INSERT INTO credits_history (user_id, montant, type, description, created_at)VALUES (?, ?, 'remboursement', ?, NOW())";
+            $sql = "INSERT INTO credits_history (user_id, amounts, type, status, created_at)VALUES (?, ?, 'remboursement', ?, NOW())";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 $userId,
@@ -297,7 +299,7 @@ class Bookings
                 ]);
 
                 // e. Log credits_history
-                $sqlHistory = "INSERT INTO credits_history (user_id, montant, type, description, created_at)
+                $sqlHistory = "INSERT INTO credits_history (user_id, amounts, type, status, created_at)
                            VALUES (?, ?, 'remboursement', ?, NOW())";
                 $stmtHistory = $pdo->prepare($sqlHistory);
                 $stmtHistory->execute([

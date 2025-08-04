@@ -6,8 +6,10 @@ use Olivierguissard\EcoRide\Model\Bookings;
 use Olivierguissard\EcoRide\Model\Trip;
 use Olivierguissard\EcoRide\Model\Users;
 use Olivierguissard\EcoRide\Model\Payment;
+use Olivierguissard\EcoRide\Service\CreditService;
 
 require_once 'functions/auth.php';
+require_once __DIR__ . '/../src/Helpers/helpers.php';
 startSession();
 requireAuth();
 
@@ -16,7 +18,8 @@ $seatsReserved = (int)($_POST['seats_reserved'] ?? 1);
 $userId = getUserId();
 
 //debug
-error_log('RESERVE REQUEST: ' .  print_r($_REQUEST, true));
+error_log("=== [DEBUG RESERVATION] trip_id=$tripId | seats=$seatsReserved | user_id=$userId");
+
 
 // Vérifie qu'il reste des places
 $trip = \Olivierguissard\EcoRide\Model\Trip::findTripsByTripId($tripId);
@@ -59,7 +62,7 @@ if ($passenger->getCredits() < $totalPrice) {
 $pdo = \Olivierguissard\EcoRide\Config\Database::getConnection();
 try {
     $pdo->beginTransaction();
-
+    $flashError = getFlash('error');
     // Vérifie s'il existe une réservation annulée pour ce trip/user
     $oldBooking = Bookings::findAnnuleBookingByTripAndUser($tripId, $userId);
     if ($oldBooking && $oldBooking->getStatus() === 'annule') {
@@ -80,29 +83,26 @@ try {
             'user_id' => $userId,
             'seats_reserved' => $seatsReserved,
         ]);
-        if (!$booking->saveBookingToDatabase()) {
+        error_log("DEBUG: booking=" . print_r($booking, true));
+        $saved = $booking->saveBookingToDatabase();
+        error_log("DEBUG: Résultat saveBookingToDatabase() = " . ($saved ? 'OK' : 'ÉCHEC'));
+        if (!$saved) {
+            error_log("❌ DEBUG: Échec de saveBookingToDatabase()");
             throw new Exception('Impossible de réserver ce trajet.');
         }
+        error_log("✅ DEBUG: Réservation sauvegardée avec ID=" . $booking->getBookingId());
+        }
         $bookingId = $booking->getBookingId();
-    }
+    error_log("DEBUG: bookingId retourné = " . var_export($bookingId, true));
+
 
     // Déduire les crédits du passager
-    $sql = 'UPDATE users SET credits = credits - ? WHERE user_id = ?';
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$totalPrice, $userId]);
-
-    // Créer une entrée dans payments
-    Payment::create([
-        'user_id' => $userId,
-        'trip_id' => $tripId,
-        'booking_id' => $bookingId,
-        'type_transaction' => 'reservation',
-        'montant' => $totalPrice,
-        'description' => 'Réservation trajet #' . $tripId,
-        'statut_transaction' => 'reserve',
-        'commission_plateforme' => 0
-    ]);
-
+    error_log("DEBUG: Avant débit crédits");
+    if (!CreditService::debitCredits($userId, $totalPrice, $bookingId)) {
+        throw new Exception("Erreur lors du débit des crédits pour l'utilisateur $userId");
+    }
+    error_log("DEBUG: Après débit crédits");
+    error_log("✅ DEBUG: commit() effectué avec succès");
     $pdo->commit();
     $_SESSION['flash_success'] = [
         'message' => 'Réservation enregistrée !',
@@ -110,7 +110,9 @@ try {
         ];
 
     } catch (Exception $e) {
-    $pdo->rollBack(); // En cas d'erreur, on annule tout
+    if ($pdo->inTransaction()) {  // En cas d'erreur, on annule tout
+        $pdo->rollBack();
+    }
     $_SESSION['flash_error'] = 'Erreur de l\'enregistrement de la réservation :' . $e->getMessage();
 }
 

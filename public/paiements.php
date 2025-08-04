@@ -1,8 +1,10 @@
 <?php
+
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once 'functions/auth.php';
 startSession();
 requireAuth();
+
 require_once __DIR__ . '/../src/Helpers/helpers.php';
 
 if (!isset($_SESSION['connecte']) || !$_SESSION['connecte']) {
@@ -10,27 +12,46 @@ if (!isset($_SESSION['connecte']) || !$_SESSION['connecte']) {
     exit;
 }
 
-$totalCredits = $_SESSION['credits'] ?? 0;
+use Olivierguissard\EcoRide\Config\Database;
 
-// Simule quelques transactions pour la démo
-$transactions = [
-    [
-        'date' => '2025-07-10 14:32',
-        'type' => 'Achat',
-        'montant' => 100,
-        'solde_depart' => 50,
-        'solde_arrive' => 150,
-        'statut' => 'Validé'
-    ],
-    [
-        'date' => '2025-07-12 10:15',
-        'type' => 'Paiement trajet',
-        'montant' => -15,
-        'solde_depart' => 150,
-        'solde_arrive' => 135,
-        'statut' => 'Validé'
-    ],
-];
+$user_id = getUserId();
+$totalCredits = 0;
+
+try {
+    $pdo = Database::getConnection();
+    $sql = "SELECT credits FROM users WHERE users.user_id = :user_id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(['user_id' => $user_id]);
+    $totalCredits = $stmt->fetchColumn();
+    $totalCredits = (int) $totalCredits;
+
+} catch (PDOException $e) {
+    error_log("Erreur de récupération des crédits : " . $e->getMessage());
+}
+
+$transactions = [];
+
+try {
+    $sql = "SELECT amounts, balance_before, balance_after, type, date_credit, status, created_at 
+                FROM credits_history WHERE user_id = :user_id ORDER BY created_at DESC ";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(['user_id' => $user_id]);
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($results as $result) {
+        $transactions[] = [
+            'date' => $result['created_at'],
+            'type' => $result['type'],
+            'montant' => $result['amounts'],
+            'solde_depart' => $result['balance_before'],
+            'solde_arrive' => $result['balance_after'],
+            'statut' => $result['status']
+        ];
+    }
+} catch (PDOException $e) {
+    error_log("Erreur lors de la récupération des transactions : " . $e->getMessage());
+    $transactions = []; // fallback vide
+}
 
 $pageTitle = 'Mes paiements - EcoRide';
 ?>
@@ -42,33 +63,14 @@ $pageTitle = 'Mes paiements - EcoRide';
     <link rel="icon" type="image/png" href="assets/pictures/logoEcoRide.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="assets/css/paiements.css">
     <title><?= $pageTitle ?></title>
-    <style>
-        .credit-icon {
-            background: linear-gradient(135deg, #4ade80, #22c55e);
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-        }
-        .fixed-bottom-space {
-            height: 90px;
-        }
-        /* Table pour mobile */
-        @media (max-width: 600px) {
-            .credit-icon { width: 48px; height: 48px; font-size: 1.3rem;}
-            .table th, .table td { font-size: 0.94rem; padding: 0.3rem 0.3rem; }
-            .modal-content { margin: 10px; }
-        }
-    </style>
 </head>
 <body>
 <header>
     <nav class="navbar bg-body-tertiary mb-3">
         <div class="container px-2" style="max-width: 900px;">
-            <a class="navbar-brand" href="/index.php">
+            <a class="navbar-brand" href="index.php">
                 <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="45" class="rounded">
             </a>
             <h2 class="fw-bold text-success fs-4 mb-0">Mes paiements</h2>
@@ -78,6 +80,12 @@ $pageTitle = 'Mes paiements - EcoRide';
 </header>
 
 <main>
+    <?php if (isset($_SESSION['flash_success'])): ?>
+        <div class="alert alert-success text-center"><?= $_SESSION['flash_success']; unset($_SESSION['flash_success']); ?></div>
+    <?php elseif (isset($_SESSION['flash_error'])): ?>
+        <div class="alert alert-danger text-center"><?= $_SESSION['flash_error']; unset($_SESSION['flash_error']); ?></div>
+    <?php endif; ?>
+
     <div class="container mt-3 mb-5 px-2" style="max-width: 900px;">
         <!-- Bloc crédits -->
         <section class="mb-4">
@@ -113,10 +121,10 @@ $pageTitle = 'Mes paiements - EcoRide';
                         <tr>
                             <th>Date</th>
                             <th class="d-none d-md-table-cell">Type</th>
-                            <th>Montant</th>
-                            <th class="d-none d-sm-table-cell">Départ</th>
-                            <th class="d-none d-sm-table-cell">Arrivé</th>
-                            <th>Status</th>
+                            <th>Montants</th>
+                            <th class="d-none d-sm-table-cell">Initial</th>
+                            <th class="d-none d-sm-table-cell">Solde</th>
+                            <th>État</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -143,14 +151,8 @@ $pageTitle = 'Mes paiements - EcoRide';
                                     </td>
                                     <td class="d-none d-sm-table-cell"><?= htmlspecialchars($tx['solde_depart']) ?></td>
                                     <td class="d-none d-sm-table-cell"><?= htmlspecialchars($tx['solde_arrive']) ?></td>
-                                    <td>
-                                        <?php if ($tx['statut'] === 'Validé'): ?>
-                                            <span class="badge bg-success"><?= $tx['statut'] ?></span>
-                                        <?php elseif ($tx['statut'] === 'En attente'): ?>
-                                            <span class="badge bg-warning text-dark"><?= $tx['statut'] ?></span>
-                                        <?php else: ?>
-                                            <span class="badge bg-secondary"><?= htmlspecialchars($tx['statut']) ?></span>
-                                        <?php endif; ?>
+                                    <td class="d-none d-sm-table-cell">
+                                        <?= displayTypeTransactionBadge($tx['statut']) ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -166,7 +168,7 @@ $pageTitle = 'Mes paiements - EcoRide';
     <!-- MODALE Achat crédits -->
     <div class="modal fade" id="buyCreditModal" tabindex="-1" aria-labelledby="buyCreditModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <form class="modal-content" method="POST" action="achat_credits.php">
+            <form class="modal-content" method="POST" action="buyCredits.php">
                 <div class="modal-header">
                     <h5 class="modal-title" id="buyCreditModalLabel">Acheter des crédits</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>

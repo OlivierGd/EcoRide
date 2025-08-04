@@ -167,6 +167,19 @@ class Trip
     {
         $this->estimatedDuration = $duration;
     }
+    public function getEstimatedDurationAsInterval(): ?\DateInterval
+    {
+        if (is_string($this->estimatedDuration) && $this->estimatedDuration !== '') {
+            try {
+                return new \DateInterval($this->estimatedDuration);
+            } catch (\Exception $e) {
+                error_log("Erreur DateInterval: " . $e->getMessage());
+                return null;
+            }
+        }
+        return null;
+    }
+
 
 
     public function validateTrip(): bool

@@ -61,3 +61,39 @@ function renderStars(float $ranking, int $max = 5): string
     }
     return $html;
 }
+
+function displayTypeTransactionBadge(string $type): string {
+    return match (strtolower($type)) {
+        'achat'    => '<span class="badge bg-success">Achat de crédits</span>',
+        'paiement' => '<span class="badge bg-info text-dark">Paiement trajet</span>',
+        'offert'   => '<span class="badge bg-warning text-dark">Crédits offerts</span>',
+        default    => '<span class="badge bg-secondary">' . htmlspecialchars($type) . '</span>',
+    };
+}
+
+// Helper réutilisable pour gérer les messages flash (success, error)
+function getFlash(string $key): mixed
+{
+    if (!isset($_SESSION)) {
+        session_start();
+    }
+
+    if (isset($_SESSION["flash_$key"])) {
+        $value = $_SESSION["flash_$key"];
+        unset($_SESSION["flash_$key"]);
+        return $value;
+    }
+    return null;
+}
+function displayFlash(string $key, string $type = 'info'): void {
+    $message = getFlash($key);
+    if (!$message) return;
+
+    if (is_string($message)) {
+        echo "<div class=\"alert alert-$type alert-dismissible fade show\" role=\"alert\">
+                " . htmlspecialchars($message) . "
+                <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Fermer\"></button>
+              </div>";
+    }
+}
+

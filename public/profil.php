@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use Olivierguissard\EcoRide\Model\Trip;
+use Olivierguissard\EcoRide\Model\Users;
 
 require_once 'functions/auth.php';
 startSession();
@@ -31,10 +32,12 @@ $roles = [
 ];
 $roleLabel = $roles[$_SESSION['role']] ?? 'Passager';
 
-$passengerTrips = Trip::findTripsUpcoming();
-$driverTrips = Trip::findUpcomingByDriver($_SESSION['user_id']);
-$passengerTrips = Trip::findTripsUpcomingByPassenger($_SESSION['user_id']);
+$userId = getUserId();
+$passengerTrips = Trip::findTripsUpcoming($userId);
+$driverTrips = Trip::findUpcomingByDriver($userId);
+$passengerTrips = Trip::findTripsUpcomingByPassenger($userId);
 $allTrips = array_merge(array_map(fn($t)=>['trip'=>$t, 'role'=>'chauffeur'], $driverTrips), array_map(fn($t)=>['trip'=>$t, 'role'=>'passager'], $passengerTrips));
+$credits = Users::getUsersCredits($userId);
 $pageTitle = 'Mon profil - EcoRide';
 
 ?>
@@ -123,8 +126,8 @@ $pageTitle = 'Mon profil - EcoRide';
                     <div class="card border-0 shadow-sm">
                         <div class="card-body">
                             <i class="bi bi-currency-euro text-success fs-2"></i>
-                            <div class="fw-bold mt-2">215 €</div>
-                            <div class="text-muted small">Économies réalisées</div>
+                            <div class="fw-bold mt-2"><?= htmlspecialchars($credits) ?></div>
+                            <div class="text-muted small">Solde de crédits</div>
                         </div>
                     </div>
                 </div>

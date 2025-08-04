@@ -131,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // log pour credits_history
             try {
-                $sqlLogCredits = "INSERT INTO credits_history (user_id, montant, date_credit, type, description, created_at) VALUES (?, ?, now(), ?, ?, now())";
+                $sqlLogCredits = "INSERT INTO credits_history (user_id, credits, date_credit, type, status, created_at) VALUES (?, ?, now(), ?, ?, now())";
                 $stmtLogCredits = $pdo->prepare($sqlLogCredits);
                 $stmtLogCredits->execute([$trip->getDriverId(), $totalCredits, 'gain_course', 'Gain chauffeur course #' . $trip->getTripId()]);
             } catch (Exception $e) {

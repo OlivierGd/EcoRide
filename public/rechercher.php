@@ -23,6 +23,9 @@ $placesSelected = $_GET['places'] ?? '';
 $ratingSelected = $_GET['rating'] ?? '';
 $sort = $_GET['sort'] ?? '';
 
+
+
+
 // Requête SQL dynamique pour les filtres avancés
 $pdo = Database::getConnection();
 $sql = "SELECT t.* FROM trips t 
@@ -77,6 +80,7 @@ $stmt->execute($params);
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $trips = array_map(fn($r) => new Trip($r), $rows);
 
+
 // Initialise les tableaux pour chaque filtre
 $energies = [];
 $places = [];
@@ -110,9 +114,6 @@ sort($places);
 rsort($ratings); // Décroissant pour le ranking
 
 $countTrip = count($trips);
-
-$flashError = $_SESSION['flash_error'] ?? null;
-unset($_SESSION['flash_error']);
 
 $pageTitle = 'Rechercher un voyage';
 ?>
@@ -228,23 +229,32 @@ $pageTitle = 'Rechercher un voyage';
         $driver = Users::findUser($trip->getDriverId());
         // Le véhicule utilisé
         $car = Car::find($trip->getVehicleId());
+        if (!$driver || !$car) continue;
+
         // Calcul du nombre de places
         $remainingSeats = $trip->getRemainingSeats();
-        // Variables
+
+        // Détermination de l'erreur pour ce trajet spécifique
+        $showError = false;
+        $flashError = getFlash('error');
+        if (is_array($flashError) && isset($flashError['trip_id']) && $flashError['trip_id'] == $trip->getTripId()) {
+            $showError = true;
+        }
+
+        // Données affichées
         $initialsBtn = displayInitialsButton($driver);
-        $nameLabel = htmlspecialchars($driver->getFirstName() . ' ' . strtoupper(substr($driver->getLastName(),0,1)));
-        $stars = renderStars($driver->getRanking());
-        $ranking = htmlspecialchars($driver->getRanking());
-        $energy = htmlspecialchars($car->carburant);
-        $startCity = htmlspecialchars($trip->getStartCity());
-        $endCity = htmlspecialchars($trip->getEndCity());
-        $time = htmlspecialchars($trip->getDepartureTime());
-        $date = htmlspecialchars($trip->getDepartureDateFr());
-        $price = htmlspecialchars($trip->getPricePerPassenger());
+        $nameLabel  = htmlspecialchars($driver->getFirstName() . ' ' . strtoupper(substr($driver->getLastName(),0,1)));
+        $stars      = renderStars($driver->getRanking());
+        $ranking    = htmlspecialchars($driver->getRanking());
+        $energy     = htmlspecialchars($car->carburant);
+        $startCity  = htmlspecialchars($trip->getStartCity());
+        $endCity    = htmlspecialchars($trip->getEndCity());
+        $time       = htmlspecialchars($trip->getDepartureTime());
+        $date       = htmlspecialchars($trip->getDepartureDateFr());
+        $price      = htmlspecialchars($trip->getPricePerPassenger());
         $vehicleLabel = htmlspecialchars($car->marque . ' ' . $car->modele);
         ?>
             <div class="container p-0">
-                <?php $showError = ($flashError && $flashError['trip_id'] && $flashError['trip_id'] == $trip->getTripId()); ?>
 
                 <!-- Carte trajet -->
                 <div class="card shadow-sm mb-3 rounded-4">
@@ -279,6 +289,17 @@ $pageTitle = 'Rechercher un voyage';
                                 <?= $flashError['message']; ?>
                             </div>
                         <?php endif; ?>
+                        <?php if (isAuthenticated()) : ?>
+                            <!-- Bouton détails modal si non connecté -->
+                        <?php else: ?>
+                            <button type="button" class="btn btn-outline-secondary me-2" onclick="alert('Connectez-vous pour voir les détails du trajet.'); window.location.href='login.php';">
+                                Détails
+                            </button>
+                        <?php endif; ?>
+                        <!-- Bouton détails trajets -->
+                        <button type="button" class="btn btn-outline-secondary me-2" data-bs-toggle="modal"
+                                data-bs-target="#tripModal-<?= $trip->getTripId(); ?>">Détails
+                        </button>
 
                         <form method="post" action="reserve.php" style="display:inline">
                             <input type="hidden" name="trip_id" value="<?= htmlspecialchars($trip->getTripId()) ?>">
@@ -291,6 +312,40 @@ $pageTitle = 'Rechercher un voyage';
                             <button type="button" class="btn btn-secondary disabled" disabled>Complet</button>
                             <?php endif; ?>
                         </form>
+                    </div>
+                </div>
+            </div>
+            <?php
+            $arrivalTime = clone $trip->getDepartureAt();
+            $interval = $trip->getEstimatedDurationAsInterval();
+            if ($interval) {
+                $arrivalTime->add($interval);
+            }
+            $arrivalFormatted = $arrivalTime->format('H:i');
+            ?>
+            <div class="modal fade" id="tripModal-<?= $trip->getTripId(); ?>" tabindex="-1" aria-labelledby="tripModalLabel-<?= $trip->getTripId(); ?>" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-success text-white">
+                            <h5 class="modal-title" id="tripModalLabel-<?= $trip->getTripId(); ?>">Détails du trajet</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p><strong>Conducteur :</strong> <?= htmlspecialchars($driver->getFirstName()) ?> (<?= renderStars($driver->getRanking()) ?>)</p>
+                            <p><strong>Départ :</strong> <?= $trip->getStartCity() ?>, <?= $trip->getStartLocation() ?></p>
+                            <p><strong>Arrivée :</strong> <?= $trip->getEndCity() ?>, <?= $trip->getEndLocation() ?></p>
+                            <p><strong>Départ prévu :</strong> <?= $trip->getDepartureDateFr() ?> à <?= $trip->getDepartureTime() ?></p>
+                            <p><strong>Arrivée estimée :</strong> <?= $arrivalFormatted ?></p>
+                            <p><strong>Places disponibles :</strong> <?= $trip->getRemainingSeats() ?></p>
+                            <p><strong>Prix :</strong> <?= $trip->getPricePerPassenger() ?> crédits</p>
+                            <p><strong>Commentaire :</strong> <?= nl2br(htmlspecialchars($trip->getComment())) ?></p>
+                            <p><strong>Préférences :</strong>
+                                <?= $trip->getNoSmoking() ? '🚭 Non-fumeur, ' : '' ?>
+                                <?= $trip->getMusicAllowed() ? '🎵 Musique autorisée, ' : '' ?>
+                                <?= $trip->getDiscussAllowed() ? '💬 Discussion autorisée' : '' ?>
+                            </p>
+                            <p><strong>Véhicule :</strong> <?= htmlspecialchars($car->marque . ' ' . $car->modele . ' - ' . $car->couleur) ?></p>
+                        </div>
                     </div>
                 </div>
             </div>
