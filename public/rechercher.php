@@ -132,7 +132,7 @@ $pageTitle = 'Rechercher un voyage';
     <header>
         <nav class="navbar bg-body-tertiary">
             <div class="container" style="max-width: 900px;">
-                <a class="navbar-brand" href="/index.php">
+                <a class="navbar-brand" href="index.php">
                     <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="60" class="d-inline-block align-text-center rounded">
                 </a>
                 <h2 class="fw-bold mb-1 text-success">Trouver un voyage</h2>

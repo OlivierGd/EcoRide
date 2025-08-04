@@ -5,8 +5,6 @@ namespace Olivierguissard\EcoRide\Service;
 use Olivierguissard\EcoRide\Model\Users;
 use Olivierguissard\EcoRide\Config\Database;
 use Olivierguissard\EcoRide\Model\CreditsHistory;
-use PDO;
-use PDOException;
 
 class CreditService
 {
@@ -60,6 +58,7 @@ class CreditService
 
     /**
      * Débite un utilisateur (ex: pour une résa) - bookingId requis
+     * @throws \Exception
      */
     public static function debitCredits(int $userId, int $amount, ?int $bookingId = null): bool
     {
