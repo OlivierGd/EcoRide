@@ -153,4 +153,22 @@ class Users
             return null;
         }
     }
+
+    /**
+     * Compte le nombre total d'utilisateurs
+     */
+    public static function countAllUsers(): int
+    {
+        try {
+            $pdo = Database::getConnection();
+            $sql = "SELECT COUNT(*) FROM users";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute();
+            return (int)$stmt->fetchColumn();
+        } catch (\PDOException $e) {
+            error_log("Erreur Users::countAllUsers : " . $e->getMessage());
+            return 0;
+        }
+    }
+
 }

@@ -1,5 +1,9 @@
 <?php
 
+use Olivierguissard\EcoRide\Model\Car;
+use Olivierguissard\EcoRide\Model\Trip;
+use Olivierguissard\EcoRide\Model\Users;
+
 require __DIR__ . '/../vendor/autoload.php';
 
 require_once 'functions/auth.php';
@@ -8,6 +12,11 @@ isAuthenticated();
 
 require_once __DIR__ . '/../src/Helpers/helpers.php';
 
+// Récupération des statistiques dynamiques
+$totalGreenTrips = Trip::countGreenTrips();
+$totalUsers = Users::countAllUsers();
+// Récupération des 3 prochains voyages
+$upcomingTrips = Trip::findNext3UpcomingTrips();
 
 
 $pageTitle = 'Accueil - EcoRide';
@@ -22,30 +31,29 @@ $pageTitle = 'Accueil - EcoRide';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="assets/css/index.css">
-    <title><?php if (isset($pageTitle)) { echo $pageTitle; } else { echo 'EcoRide - Covoiturage écologique';} ?></title>
+    <title><?= $pageTitle ?? 'EcoRide - Covoiturage écologique' ?></title>
 </head>
 <body>
 <!-- Navbar -->
 <header>
-    <nav class="navbar bg-white fixed-top shadow-sm">
-        <div class="container px-3" style="max-width: 900px">
-            <a href="index.php" class="navbar-brand d-flex align-items-center">
-                <img src="assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="d-inline-block align-text-center rounded" width="60">
-
-            </a>
-            <h1>EcoRide</h1>
-            <div><?= displayInitialsButton(); ?></div>
-        </div>
-    </nav>
-    <div class="<?= (isset($erreur) || ini_get('display_errors')) ? 'has-error' : '' ?>">
+    <header>
+        <nav class="navbar bg-body-tertiary">
+            <div class="container" style="max-width: 900px;">
+                <a class="navbar-brand" href="index.php">
+                    <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="60" class="d-inline-block align-text-center rounded">
+                </a>
+                <h2 class="fw-bold mb-1 text-success">EcoRide</h2>
+                <?= displayInitialsButton(); ?>
+            </div>
+        </nav>
+    </header>
 </header>
 <!-- Main content -->
 <main>
     <div class="container" style="max-width: 900px;">
         <!-- Picture section -->
         <section>
-            <div style="height: 5rem"></div>
-            <div class="pt-5"></div>
+            <div class="pt-2"></div>
             <div class="position-relative text-white">
                 <img src="assets/pictures/voitures.jpg" class="img-fluid w-100 rounded-3" alt="Réduisez votre empreinte carbone avec EcoRide">
 
@@ -62,30 +70,38 @@ $pageTitle = 'Accueil - EcoRide';
 
         <!-- Formulaire de recherche de trajet -->
         <section class="mt-5">
-            <h2 class="fw-bold mb-4">Trouvez votre trajet</h2>
+            <h2 class="fw-bold mb-4 text-success">Trouvez votre trajet</h2>
             <form action="rechercher.php" method="get" id="formSearchDestination" class="p-4 bg-white rounded-4 shadow-sm">
 
                <!-- Départ -->
-                <div class="input-group mb-3 bg-light rounded-3">
-                    <span class="input-group-text bg-transparent border-0">
-                       <i class="bi bi-geo-alt text-secondary"></i>
-                   </span>
-                   <input type="text" name="startCity" class="form-control border-0 bg-transparent" id="searchStartCity" placeholder="Ville de départ">
+                <div class="input-container mb-3">
+                    <div class="input-group bg-light rounded-3">
+                        <span class="input-group-text bg-transparent border-0">
+                           <i class="bi bi-geo-alt text-secondary"></i>
+                        </span>
+                        <input type="text" name="startCity" class="form-control border-0 bg-transparent"
+                               autocomplete="off" id="searchStartCity" placeholder="Ville de départ">
+                    </div>
+                    <div id="startCitySuggestions" class="suggestion-box" style="display: none;"></div>
                 </div>
 
                 <!-- Destination -->
-              <div class="input-group mb-3 bg-light rounded-3">
-            <span class="input-group-text bg-transparent border-0">
-                <i class="bi bi-pin-map text-secondary"></i>
-            </span>
-                    <input type="text" name="endCity" class="form-control border-0 bg-transparent" id="searchEndCity" placeholder="Destination">
+                <div class="input-container mb-3">
+                    <div class="input-group bg-light rounded-3">
+                        <span class="input-group-text bg-transparent border-0">
+                            <i class="bi bi-pin-map text-secondary"></i>
+                        </span>
+                        <input type="text" name="endCity" class="form-control border-0 bg-transparent"
+                               autocomplete="off" id="searchEndCity" placeholder="Destination">
+                    </div>
+                    <div id="endCitySuggestions" class="suggestion-box" style="display: none;"></div>
                 </div>
 
                 <!-- Date du voyage -->
                 <div class="input-group mb-4 bg-light rounded-3">
-            <span class="input-group-text bg-transparent border-0">
-                <i class="bi bi-calendar-event text-secondary"></i>
-            </span>
+                    <span class="input-group-text bg-transparent border-0">
+                        <i class="bi bi-calendar-event text-secondary"></i>
+                    </span>
                     <input type="date" name="departureDate" class="form-control border-0 bg-transparent" id="searchDate">
                 </div>
 
@@ -100,13 +116,13 @@ $pageTitle = 'Accueil - EcoRide';
 
         <!--Stats section-->
         <section>
-            <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="row row-cols-1 row-cols-md-3 g-4 pt-4">
                 <div class="col">
                     <div class="card h-80">
                         <div class="card-body d-flex align-items-center flex-column">
                             <h5 class="card-title"><i class="bi bi-ev-front"></i></h5>
                             <p class="card-text">Trajets Verts</p>
-                            <p class="card-text">1.245</p>
+                            <p class="card-text"><strong><?= $totalGreenTrips ?></strong></p>
                         </div>
                     </div>
                 </div>
@@ -115,7 +131,7 @@ $pageTitle = 'Accueil - EcoRide';
                         <div class="card-body d-flex align-items-center flex-column">
                             <h5 class="card-title"><i class="bi bi-person"></i></h5>
                             <p class="card-text">Utilisateurs</p>
-                            <p class="card-text">8.732</p>
+                            <p class="card-text"><strong><?= $totalUsers ?></strong></p>
                         </div>
                     </div>
                 </div>
@@ -124,7 +140,7 @@ $pageTitle = 'Accueil - EcoRide';
                         <div class="card-body d-flex align-items-center flex-column">
                             <h5 class="card-title"><i class="bi bi-leaf"></i></h5>
                             <p class="card-text">CO2 économisé</p>
-                            <p class="card-text">56 T</p>
+                            <p class="card-text"><strong>56 T</strong></p>
                         </div>
                     </div>
                 </div>
@@ -133,8 +149,11 @@ $pageTitle = 'Accueil - EcoRide';
 
         <!--Popular destinations-->
         <section>
-            <h2 class="pt-5">Destinations populaires</h2>
-            <span>Voir tout</span>
+            <div class="d-flex justify-content-between align-items-center pt-5 mb-3">
+                <h2 class="mb-0 text-success">Destinations populaires</h2>
+                <a href="rechercher.php" class="text-primary fw-semibold small">Voir tout</a>
+            </div>
+
             <div class="row row-cols-1 row-cols-md-2 g-4">
                 <div class="col">
                     <div class="card">
@@ -171,44 +190,40 @@ $pageTitle = 'Accueil - EcoRide';
             </div>
         </section>
 
+
+        <!-- Section trajets pour les 3 prochains voyages -->
         <section>
             <div class="d-flex justify-content-between align-items-center pt-5 mb-3">
-                <h2 class="mb-0">Trajets récents</h2>
-                <a href="/rechercher.php" class="text-primary fw-semibold small">Voir tout</a>
+                <h2 class="mb-0 text-success">Prochains voyages</h2>
+                <a href="rechercher.php" class="text-primary fw-semibold small">Voir tout</a>
             </div>
 
             <div class="container p-0">
-                <!-- Carte trajet -->
-                <div class="card shadow-sm mb-3 rounded-4">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="fw-bold me-2">Sophie M.</div>
-                            <div class="d-flex align-items-center small text-warning me-2">
-                                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-half"></i>
-                                <span class="ms-1 text-secondary">(4.5)</span>
-                            </div>
-                            <span class="badge rounded-pill bg-success ms-auto">Électrique</span>
-                        </div>
-                        <div class="mb-2">
-                            <i class="bi bi-geo-alt me-1"></i> <strong>Paris</strong>
-                            <span class="mx-2 text-muted">→</span>
-                            <i class="bi bi-pin-map me-1"></i> <strong>Lyon</strong>
-                        </div>
-                        <div class="d-flex align-items-center text-secondary small mb-2">
-                            <div class="me-3"><i class="bi bi-calendar-event me-1"></i>10 mai, 10:00</div>
-                            <div class="me-3"><i class="bi bi-person-fill-add me-1"></i>2 places</div>
-                            <div><i class="bi bi-currency-euro me-1"></i>15 crédits</div>
-                        </div>
-                        <div class="d-flex justify-content-end">
-                            <button class="btn btn-primary btn-sm rounded-pill">Réserver</button>
-                        </div>
+                <?php if (empty($upcomingTrips)): ?>
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-calendar-x fs-1"></i>
+                        <p class="mt-3">Aucun voyage disponible pour le moment</p>
+                        <a href="proposer.php" class="btn btn-success">Proposer un trajet</a>
                     </div>
-                </div>
+                <?php else: ?>
+                    <?php foreach ($upcomingTrips as $trip): ?>
+                        <div class="mb-3">
+                            <?php
+                            $driver = Users::findUser($trip->getDriverId());
+                            $car = Car::find($trip->getVehicleId());
+                            // Préparer les données pour _card_trip_simple.php
+                            $item = [
+                                'trip' => $trip,
+                                'booking' => null,
+                                'role' => 'visiteur'
+                            ];
+                            include 'components/_card_trip_simple.php';
+                            ?>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </section>
-
 
         <!-- Eco Impact -->
         <section>
@@ -250,6 +265,6 @@ $pageTitle = 'Accueil - EcoRide';
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
-<script type="module" src="assets/js/index.js"></script>
+<script src="assets/js/index.js"></script>
 </body>
 </html>

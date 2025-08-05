@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../vendor/autoload.php';;
+require_once __DIR__ . '/../vendor/autoload.php';
 
 use Olivierguissard\EcoRide\Config\Database;
 use Olivierguissard\EcoRide\Model\Trip;
@@ -60,19 +60,13 @@ if ($ratingSelected !== '') {
 }
 
 // Tri suivant l'option choisie
-switch ($sort) {
-    case 'price':
-        $sql .= " ORDER BY t.price_per_passenger ASC";
-        break;
-    case 'time':
-        $sql .= " ORDER BY t.departure_at ASC";
-        break;
-    case 'rating':
-        $sql .= " ORDER BY u.ranking DESC";
-        break;
-    default:
-        $sql .= " ORDER BY t.departure_at ASC";
-}
+$sql .= match ($sort) {
+    'price'  => " ORDER BY t.price_per_passenger ASC",
+    'time'   => " ORDER BY t.departure_at ASC",
+    'rating' => " ORDER BY u.ranking DESC",
+    default  => " ORDER BY t.departure_at ASC"
+};
+
 
 // Execute la requête
 $stmt = $pdo->prepare($sql);
@@ -126,7 +120,7 @@ $pageTitle = 'Rechercher un voyage';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="assets/css/rechercher.css">
-    <title><?php if (isset($pageTitle)) { echo $pageTitle; } else { echo 'EcoRide - Covoiturage écologique';} ?></title>
+    <title><?= $pageTitle ?? 'EcoRide - Covoiturage écologique' ?></title>
 </head>
 <body>
     <header>
@@ -350,7 +344,7 @@ $pageTitle = 'Rechercher un voyage';
                                 <?= $trip->getMusicAllowed() ? '🎵 Musique autorisée, ' : '' ?>
                                 <?= $trip->getDiscussAllowed() ? '💬 Discussion autorisée' : '' ?>
                             </p>
-                            <p><strong>Véhicule :</strong> <?= htmlspecialchars($car->marque . ' ' . $car->modele . ' - ' . $car->couleur) ?></p>
+                            <p><strong>Véhicule :</strong> <?= htmlspecialchars($car->marque . ' ' . $car->modele) ?></p>
                         </div>
                     </div>
                 </div>

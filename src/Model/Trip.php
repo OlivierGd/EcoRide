@@ -398,4 +398,64 @@ class Trip
         return $result;
     }
 
+    /**
+     * Compte le nombre total de trajets effectués (terminés)
+     */
+    public static function countCompletedTrips(): int
+    {
+        try {
+            $pdo = Database::getConnection();
+            $sql = "SELECT COUNT(*) FROM trips WHERE status = 'termine' OR departure_at < NOW()";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute();
+            return (int)$stmt->fetchColumn();
+        } catch (\PDOException $e) {
+            error_log("Erreur Trip::countCompletedTrips : " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Compte le nombre total de trajets créés
+     */
+    public static function countGreenTrips(): int
+    {
+        try {
+            $pdo = Database::getConnection();
+            $sql = "SELECT COUNT(*) FROM trips";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute();
+            return (int)$stmt->fetchColumn();
+        } catch (\PDOException $e) {
+            error_log("Erreur Trip::countAllTrips : " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Récupère les 3 prochains voyages disponibles
+     * @return array
+     */
+    public static function findNext3UpcomingTrips(): array
+    {
+        try {
+            $pdo = Database::getConnection();
+            $sql = "SELECT * 
+                FROM trips
+                LIMIT 3";
+
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute();
+            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            return array_map(fn($r) => new self($r), $rows);
+        } catch (\PDOException $e) {
+            error_log("Erreur Trip::findNext3UpcomingTrips : " . $e->getMessage());
+            return [];
+        }
+    }
+
+
+
 }
