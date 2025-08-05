@@ -8,7 +8,9 @@ function bookingStatusBadge(string $status): string
         'annule' => '<span class="badge bg-danger">Annulé</span>',
         'rembourse' => '<span class="badge bg-info">Remboursé</span>',
         'en attente' => '<span class="badge bg-warning text-dark">En attente</span>',
-        'valider' => '<span class="badge bg-success">Termine</span>',
+        'a_valider' => '<span class="badge bg-success">Á Valider</span>',
+        'valide' => '<span class="badge bg-success">Validé</span>',
+        'termine' => '<span class="badge bg-success">Terminé</span>',
         default => '<span class="badge bg-secondary">Inconnu</span>',
     };
 }

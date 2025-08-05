@@ -1,29 +1,33 @@
 <?php
-//debug
-ini_set('log_errors', 1);
-ini_set('error_log', '/tmp/php_debug.log'); // <- le chemin /tmp est universel sur Mac/Linux
-error_log("=== TEST LOG === " . date('c'));
 
 require_once __DIR__ . '/../vendor/autoload.php';
-
-use Olivierguissard\EcoRide\Model\Bookings;
-
 require_once 'functions/auth.php';
 startSession();
 requireAuth();
 
+use Olivierguissard\EcoRide\Model\Bookings;
+
 $bookingId = (int)($_POST['booking_id'] ?? 0);
 $userId = getUserId();
 
-// Debug
-error_log('CANCEL BOOKING REQUEST: ' .  print_r($_REQUEST, true));
+if (!$bookingId || !$userId) {
+    $_SESSION['flash_error'] = "Données manquantes pour l'annulation.";
+    header("Location: historique.php");
+    exit;
+}
 
 try {
-    Bookings::cancelByPassenger($bookingId, $userId);
-    $_SESSION['flash_success'] = "Réservation annulée et crédits remboursés !";
+    $success = Bookings::cancelByPassenger($bookingId, $userId);
+    
+    if ($success) {
+        $_SESSION['flash_success'] = "Réservation annulée avec succès !";
+    } else {
+        $_SESSION['flash_error'] = "Erreur lors de l'annulation de la réservation.";
+    }
 } catch (Exception $e) {
-    $_SESSION['flash_error'] = "Erreur lors de l'annulation de la réservation : " . $e->getMessage();
+    $_SESSION['flash_error'] = "Erreur lors de l'annulation : " . $e->getMessage();
 }
-header("Location: rechercher.php");
-exit;
 
+header("Location: historique.php");
+exit;
+?>

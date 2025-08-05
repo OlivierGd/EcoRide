@@ -4,6 +4,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use Olivierguissard\EcoRide\Model\Trip;
 use Olivierguissard\EcoRide\Model\Users;
+use Olivierguissard\EcoRide\Model\Bookings;
 
 require_once 'functions/auth.php';
 startSession();
@@ -38,6 +39,7 @@ $driverTrips = Trip::findUpcomingByDriver($userId);
 $passengerTrips = Trip::findTripsUpcomingByPassenger($userId);
 $allTrips = array_merge(array_map(fn($t)=>['trip'=>$t, 'role'=>'chauffeur'], $driverTrips), array_map(fn($t)=>['trip'=>$t, 'role'=>'passager'], $passengerTrips));
 $credits = Users::getUsersCredits($userId);
+$completedTrips = Bookings::countUserCompletedTrips($userId);
 $pageTitle = 'Mon profil - EcoRide';
 
 ?>
@@ -50,7 +52,7 @@ $pageTitle = 'Mon profil - EcoRide';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="assets/css/profil.css">
-    <title><?php if (isset($pageTitle)) { echo $pageTitle; } else { echo 'EcoRide - Covoiturage écologique';} ?></title>
+    <title><?= $pageTitle ?? 'EcoRide - Covoiturage écologique' ?></title>
 </head>
 <body>
     <header>
@@ -108,7 +110,7 @@ $pageTitle = 'Mon profil - EcoRide';
                     <div class="card border-0 shadow-sm">
                         <div class="card-body">
                             <i class="bi bi-ev-front text-success fs-2"></i>
-                            <div class="fw-bold mt-2">47</div>
+                            <div class="fw-bold mt-2"><?= htmlspecialchars($completedTrips) ?></div>
                             <div class="text-muted small">Trajets effectués</div>
                         </div>
                     </div>

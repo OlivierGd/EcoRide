@@ -81,9 +81,29 @@ $pageTitle = 'Mes paiements - EcoRide';
 
 <main>
     <?php if (isset($_SESSION['flash_success'])): ?>
-        <div class="alert alert-success text-center"><?= $_SESSION['flash_success']; unset($_SESSION['flash_success']); ?></div>
+        <div class="alert alert-success text-center">
+            <?php 
+            // Gestion des messages de succès en tableau ou string
+            if (is_array($_SESSION['flash_success'])) {
+                echo $_SESSION['flash_success']['message'] ?? 'Opération réussie';
+            } else {
+                echo $_SESSION['flash_success'];
+            }
+            unset($_SESSION['flash_success']); 
+            ?>
+        </div>
     <?php elseif (isset($_SESSION['flash_error'])): ?>
-        <div class="alert alert-danger text-center"><?= $_SESSION['flash_error']; unset($_SESSION['flash_error']); ?></div>
+        <div class="alert alert-danger text-center">
+            <?php 
+            // Gestion des messages d'erreur en tableau ou string
+            if (is_array($_SESSION['flash_error'])) {
+                echo $_SESSION['flash_error']['message'] ?? 'Erreur inconnue';
+            } else {
+                echo $_SESSION['flash_error'];
+            }
+            unset($_SESSION['flash_error']); 
+            ?>
+        </div>
     <?php endif; ?>
 
     <div class="container mt-3 mb-5 px-2" style="max-width: 900px;">

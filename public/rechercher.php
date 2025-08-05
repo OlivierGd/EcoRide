@@ -255,6 +255,12 @@ $pageTitle = 'Rechercher un voyage';
         $vehicleLabel = htmlspecialchars($car->marque . ' ' . $car->modele);
         ?>
             <div class="container p-0">
+                <?php if ($showError && isset($flashError['message'])): ?>
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <?= $flashError['message'] ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php endif; ?>
 
                 <!-- Carte trajet -->
                 <div class="card shadow-sm mb-3 rounded-4">

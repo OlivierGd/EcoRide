@@ -1,6 +1,8 @@
 <?php
-
 require_once __DIR__ . '/../vendor/autoload.php';
+require_once 'functions/auth.php';
+startSession();
+requireAuth();
 
 use Olivierguissard\EcoRide\Model\Bookings;
 use Olivierguissard\EcoRide\Model\Trip;
@@ -8,18 +10,11 @@ use Olivierguissard\EcoRide\Model\Users;
 use Olivierguissard\EcoRide\Model\Payment;
 use Olivierguissard\EcoRide\Service\CreditService;
 
-require_once 'functions/auth.php';
 require_once __DIR__ . '/../src/Helpers/helpers.php';
-startSession();
-requireAuth();
 
 $tripId = (int)($_POST['trip_id'] ?? 0);
 $seatsReserved = (int)($_POST['seats_reserved'] ?? 1);
 $userId = getUserId();
-
-//debug
-error_log("=== [DEBUG RESERVATION] trip_id=$tripId | seats=$seatsReserved | user_id=$userId");
-
 
 // Vérifie qu'il reste des places
 $trip = \Olivierguissard\EcoRide\Model\Trip::findTripsByTripId($tripId);
@@ -47,12 +42,12 @@ if (!$passenger) {
     header('Location: /rechercher.php');
     exit;
 }
+
 // Vérification si le passager à un solde suffisant de crédit
 if ($passenger->getCredits() < $totalPrice) {
     $_SESSION['flash_error'] = [
         'trip_id' => $tripId,
-        'message' => 'Crédits insuffisants pour cette réservation. <br>
-                        <a href="/public/paiements.php" class="btn btn-success btn-sm ms-2">Ajouter du crédit à votre compte.</a>'
+        'message' => 'Crédits insuffisants pour cette réservation. <a href="paiements.php" class="btn btn-success btn-sm ms-2">Ajouter du crédit</a>'
         ];
     header('Location: /rechercher.php');
     exit;
@@ -62,7 +57,7 @@ if ($passenger->getCredits() < $totalPrice) {
 $pdo = \Olivierguissard\EcoRide\Config\Database::getConnection();
 try {
     $pdo->beginTransaction();
-    $flashError = getFlash('error');
+    
     // Vérifie s'il existe une réservation annulée pour ce trip/user
     $oldBooking = Bookings::findAnnuleBookingByTripAndUser($tripId, $userId);
     if ($oldBooking && $oldBooking->getStatus() === 'annule') {
@@ -70,11 +65,9 @@ try {
         $oldBooking->setStatus('reserve');
         $oldBooking->setSeatsReserved($seatsReserved);
         $oldBooking->setCreatedAt(new DateTime('now'));
-        error_log("DEBUG: oldBooking=" . print_r($oldBooking, true));
         if (!$oldBooking->saveBookingToDatabase()) {
             throw new Exception('Impossible de réactiver cette réservation.');
         }
-        $bookingId = $oldBooking->getBookingId();
         $booking = $oldBooking;
     } else {
         // Sinon, on fait une nouvelle résa
@@ -83,38 +76,39 @@ try {
             'user_id' => $userId,
             'seats_reserved' => $seatsReserved,
         ]);
-        error_log("DEBUG: booking=" . print_r($booking, true));
-        $saved = $booking->saveBookingToDatabase();
-        error_log("DEBUG: Résultat saveBookingToDatabase() = " . ($saved ? 'OK' : 'ÉCHEC'));
-        if (!$saved) {
-            error_log("❌ DEBUG: Échec de saveBookingToDatabase()");
+        if (!$booking->saveBookingToDatabase()) {
             throw new Exception('Impossible de réserver ce trajet.');
         }
-        error_log("✅ DEBUG: Réservation sauvegardée avec ID=" . $booking->getBookingId());
-        }
-        $bookingId = $booking->getBookingId();
-    error_log("DEBUG: bookingId retourné = " . var_export($bookingId, true));
-
+    }
+    $bookingId = $booking->getBookingId();
 
     // Déduire les crédits du passager
-    error_log("DEBUG: Avant débit crédits");
     if (!CreditService::debitCredits($userId, $totalPrice, $bookingId)) {
-        throw new Exception("Erreur lors du débit des crédits pour l'utilisateur $userId");
+        throw new Exception("Erreur lors du débit des crédits");
     }
-    error_log("DEBUG: Après débit crédits");
-    error_log("✅ DEBUG: commit() effectué avec succès");
-    $pdo->commit();
-    $_SESSION['flash_success'] = [
-        'message' => 'Réservation enregistrée !',
-        'trip_id' => $tripId
-        ];
 
-    } catch (Exception $e) {
-    if ($pdo->inTransaction()) {  // En cas d'erreur, on annule tout
+    // Enregistrer le paiement dans la table payments
+    Payment::create([
+        'user_id' => $userId,
+        'trip_id' => $tripId,
+        'booking_id' => $bookingId,
+        'type_transaction' => 'reservation',
+        'montant' => $totalPrice,
+        'description' => "Paiement réservation trajet #$tripId",
+        'statut_transaction' => 'paye',
+        'commission_plateforme' => 0
+    ]);
+
+    $pdo->commit();
+    $_SESSION['flash_success'] = 'Réservation enregistrée avec succès !';
+
+} catch (Exception $e) {
+    if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
-    $_SESSION['flash_error'] = 'Erreur de l\'enregistrement de la réservation :' . $e->getMessage();
+    $_SESSION['flash_error'] = 'Erreur lors de la réservation : ' . $e->getMessage();
 }
 
 header('Location: historique.php');
 exit;
+?>
