@@ -156,4 +156,59 @@ class CreditService
         }
     }
 
+    /**
+     * Extrait les commissions pour les voyages proposés
+     */
+    public static function getCommissionHistory(?string $dateMin = null, ?string $dateMax = null): array
+    {
+        try {
+            $pdo = Database::getConnection();
+
+            $sql = "SELECT ch.*, u.firstname, u.lastname 
+                   FROM credits_history ch 
+                   JOIN users u ON ch.user_id = ch.user_id 
+                   WHERE ch.status = 'trajet_propose'";
+
+            $params = [];
+
+            if ($dateMin !== null) {
+                $sql .= " AND ch.created_at >= :dateMin";
+                $params[':dateMin'] = $dateMin;
+            }
+
+            if ($dateMax !== null) {
+                $sql .= " AND ch.created_at <= :dateMax";
+                $params[':dateMax'] = $dateMax;
+            }
+
+            $sql .= " ORDER BY ch.created_at DESC";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {
+            error_log("Erreur getCommissionHistory : " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public static function getMonthlyCommissionTotals(): array
+    {
+        try {
+            $pdo = Database::getConnection();
+            $sql = " SELECT TO_CHAR(created_at, 'YYYY-MM') AS month, SUM(amounts) AS total
+                    FROM credits_history
+                    WHERE status = 'trajet_propose'
+                    GROUP BY month
+                    ORDER BY month ASC";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {
+            error_log("Erreur getMonthlyCommissionTotals : " . $e->getMessage());
+            return [];
+        }
+    }
 }

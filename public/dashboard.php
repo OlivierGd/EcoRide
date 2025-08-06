@@ -4,13 +4,65 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use Olivierguissard\EcoRide\Config\Database;
 use Olivierguissard\EcoRide\Model\Users;
+use Olivierguissard\EcoRide\Model\CreditsHistory;
 
 require_once 'functions/auth.php';
 startSession();
 isAuthenticated();
 requireAuth();
 
+// Dates depuis formulaire GET
+$dateMin = $_GET['date_min'] ?? null;
+$dateMax = $_GET['date_max'] ?? null;
 
+// Récupération des commissions pour le tableau
+$pdo = Database::getConnection();
+$sql = "SELECT ch.*, u.firstname, u.lastname
+        FROM credits_history ch
+        JOIN users u ON u.user_id = ch.user_id
+        WHERE ch.status = 'trajet_propose'";
+
+$params = [];
+if ($dateMin) {
+    $sql .= " AND ch.created_at >= :date_min";
+    $params[':date_min'] = $dateMin;
+}
+if ($dateMax) {
+    $sql .= " AND ch.created_at <= :date_max";
+    $params[':date_max'] = $dateMax;
+}
+$sql .= " ORDER BY ch.created_at DESC";
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$commissions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Gain total collecté
+$totalGagne = array_reduce($commissions, function ($carry, $item) {
+    return $carry + abs((float)$item['amounts']);
+}, 0);
+
+// Données pour le graphique (groupées par mois)
+$sqlGraph = "
+    SELECT TO_CHAR(created_at, 'YYYY-MM') AS month,
+           SUM(ABS(amounts)) AS total
+    FROM credits_history
+    WHERE status = 'trajet_propose'
+";
+
+if ($dateMin) {
+    $sqlGraph .= " AND created_at >= :date_min_graph";
+    $params[':date_min_graph'] = $dateMin;
+}
+if ($dateMax) {
+    $sqlGraph .= " AND created_at <= :date_max_graph";
+    $params[':date_max_graph'] = $dateMax;
+}
+
+$sqlGraph .= " GROUP BY month ORDER BY month ASC";
+$stmtGraph = $pdo->prepare($sqlGraph);
+$stmtGraph->execute(array_filter($params, fn($k) => str_contains($k, '_graph'), ARRAY_FILTER_USE_KEY));
+$monthlyData = $stmtGraph->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 
@@ -19,7 +71,7 @@ requireAuth();
 <head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="assets/pictures/logoEcoRide.png">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="assets/css/dashboard.css">
     <title>EcoRide - Console Admin</title>
@@ -36,86 +88,114 @@ requireAuth();
 
 <body>
 
-    <nav class="d-flex">
-        <!-- SIDEBAR -->
-        <nav class="sidebar bg-dark text-white p-3">
-            <h3>EcoRide</h3>
-            <ul class="nav flex-column">
-                <li class="nav-item"><a href="#users" class="nav-link text-white">Utilisateurs</a></li>
-                <li class="nav-item"><a href="#stats" class="nav-link text-white">Statistiques</a></li>
-                <li class="nav-item"><a href="#comments" class="nav-link text-white">Commentaires</a></li>
-            </ul>
-        </nav>
-
-
-        <!-- CONTENU PRINCIPAL -->
-        <main class="flex-grow-1 p-4">
-            <!-- HEADER -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1>Console d’administration</h1>
-                <!-- Ici tu ajoutes date picker, filtres globaux… -->
-            </div>
-
-            <!-- SECTION UTILISATEURS -->
-            <section id="users" class="mb-5">
-                <div class="d-flex justify-content-between mb-3">
-                    <h2>Rechercher un utilisateur</h2>
-                </div>
-                <form id="searchUserForm" class="row g-3 mb-4">
-                    <div class="col-md-4">
-                        <input type="text" class="form-control" name="query" placeholder="Nom, prénom ou email">
-                    </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-primary" type="submit">Rechercher</button>
-                    </div>
-                </form>
-                <div id="userDetails">
-                    <!-- Les infos détaillées de l’utilisateur apparaîtront ici -->
-                </div>
-            </section>
-
-            <!-- SECTION STATISTIQUES -->
-            <section id="stats" class="mb-5">
-                <!-- Graphiques dynamiques (à coder) -->
-            </section>
-
-            <!-- SECTION COMMENTAIRES -->
-            <section id="comments">
-                <!-- Tableau commentaires + actions (à coder) -->
-                <section id="comments" class="mb-5">
-                    <div class="d-flex justify-content-between mb-3">
-                        <h2>Commentaires utilisateurs</h2>
-                        <form id="commentsFilterForm" class="d-flex gap-2">
-                            <select class="form-select" name="rating" style="width:auto">
-                                <option value="">Tous les rankings</option>
-                                <option value="5">5 ★</option>
-                                <option value="4">4 ★</option>
-                                <option value="3">3 ★</option>
-                                <option value="2">2 ★</option>
-                                <option value="1">1 ★</option>
-                            </select>
-                            <input type="date" class="form-control" name="date_min" style="width:auto" placeholder="Date min">
-                            <input type="date" class="form-control" name="date_max" style="width:auto" placeholder="Date max">
-                            <button type="submit" class="btn btn-primary">Filtrer</button>
-                        </form>
-                    </div>
-                    <div id="commentsTableContainer">
-                        <!-- Tableau généré ici par JS -->
-                    </div>
-                </section>
-
-            </section>
-        </main>
+<nav class="d-flex">
+    <!-- SIDEBAR -->
+    <nav class="sidebar bg-dark text-white p-3">
+        <h3>EcoRide</h3>
+        <ul class="nav flex-column">
+            <li class="nav-item"><a href="#users" class="nav-link text-white">Utilisateurs</a></li>
+            <li class="nav-item"><a href="#stats" class="nav-link text-white">Statistiques</a></li>
+            <li class="nav-item"><a href="#comments" class="nav-link text-white">Commentaires</a></li>
+        </ul>
     </nav>
 
+    <!-- CONTENU PRINCIPAL -->
+    <main class="flex-grow-1 p-4">
+        <!-- HEADER -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Console d’administration</h1>
+        </div>
+
+        <!-- SECTION UTILISATEURS -->
+        <section id="users" class="mb-5">
+            <h2>Rechercher un utilisateur</h2>
+            <form id="searchUserForm" class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <input type="text" class="form-control" name="query" placeholder="Nom, prénom ou email">
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-primary" type="submit">Rechercher</button>
+                </div>
+            </form>
+            <div id="userDetails"></div>
+        </section>
+
+        <!-- SECTION FINANCIER -->
+        <section id="revenus" class="mb-5">
+            <div class="d-flex justify-content-between mb-3">
+                <h2>Commissions (publication de trajets)</h2>
+                <form method="get" class="d-flex gap-2">
+                    <input type="date" name="date_min" class="form-control">
+                    <input type="date" name="date_max" class="form-control">
+                    <button class="btn btn-primary">Filtrer</button>
+                </form>
+            </div>
+
+            <div class="alert alert-success fw-bold">
+                Gain total collecté : <?= (fmod($totalGagne, 1) == 0 ?
+                    number_format($totalGagne,0, ',','') :
+                    number_format($totalGagne,2, ',','')) ?> crédits
+            </div>
+
+            <!-- Graphique -->
+            <canvas id="chartCommissions" height="120"></canvas>
+
+            <!-- Tableau -->
+            <div class="table-responsive mt-4">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Chauffeur</th>
+                        <th>Montant</th>
+                        <th>Solde avant</th>
+                        <th>Solde après</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($commissions as $c): ?>
+                        <tr>
+                            <td><?= date('d/m/Y H:i', strtotime($c['created_at'])) ?></td>
+                            <td><?= htmlspecialchars($c['firstname'] . ' ' . $c['lastname']) ?></td>
+                            <td><?= abs((float)$c['amounts']) ?> crédits</td>
+                            <td><?= $c['balance_before'] ?></td>
+                            <td><?= $c['balance_after'] ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SECTION COMMENTAIRES -->
+        <section id="comments" class="mb-5">
+            <h2>Commentaires utilisateurs</h2>
+            <form id="commentsFilterForm" class="d-flex gap-2">
+                <select class="form-select" name="rating" style="width:auto">
+                    <option value="">Tous les rankings</option>
+                    <option value="5">5 ★</option>
+                    <option value="4">4 ★</option>
+                    <option value="3">3 ★</option>
+                    <option value="2">2 ★</option>
+                    <option value="1">1 ★</option>
+                </select>
+                <input type="date" class="form-control" name="date_min" style="width:auto">
+                <input type="date" class="form-control" name="date_max" style="width:auto">
+                <button type="submit" class="btn btn-primary">Filtrer</button>
+            </form>
+            <div id="commentsTableContainer"></div>
+        </section>
+    </main>
+</nav>
 
 <footer>
 
 </footer>
 
-<!-- Bootstrap JS et Chart.js (pour la suite) -->
+<!-- Bootstrap JS et Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>const monthlyData = <?= json_encode($monthlyData) ?>;</script>
 <script src="assets/js/dashboard.js"></script>
 </body>
 </html>
