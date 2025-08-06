@@ -72,9 +72,10 @@ class Bookings
         try {
             $pdo = Database::getConnection();
             if ($this->bookingId !== null) {
+
+                $sql = "UPDATE bookings SET trip_id=?, user_id=?, seats_reserved=?, status=?, created_at=? WHERE booking_id = ? ";
                 error_log("DEBUG: SQL = " . $sql);
                 error_log("DEBUG: UPDATE booking_id=" . $this->bookingId . " | status=" . $this->status);
-                $sql = "UPDATE bookings SET trip_id=?, user_id=?, seats_reserved=?, status=?, created_at=? WHERE booking_id = ? ";
                 $stmt = $pdo->prepare($sql);
                 return $stmt->execute([
                     $this->tripId,

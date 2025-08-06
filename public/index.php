@@ -42,7 +42,7 @@ $pageTitle = 'Accueil - EcoRide';
                 <a class="navbar-brand" href="index.php">
                     <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="60" class="d-inline-block align-text-center rounded">
                 </a>
-                <h2 class="fw-bold mb-1 text-success">EcoRide</h2>
+                <h2 class="fw-bold mb-1 text-success fs-2">EcoRide</h2>
                 <?= displayInitialsButton(); ?>
             </div>
         </nav>

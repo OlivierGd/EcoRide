@@ -101,4 +101,59 @@ class CreditService
 
         return true;
     }
+
+    /**
+     * Déduit 2 crédits pour commissions EcoRide
+     * @param int $userId
+     * @return bool
+     * @throws \Exception
+     */
+    public static function debitForTripPublication(int $userId): bool
+    {
+        $cost = 2;
+
+        $pdo = Database::getConnection();
+        $user = Users::findUser($userId);
+
+        if (!$user) {
+            throw new \Exception("Utilisateur introuvable");
+        }
+
+        $balanceBefore = $user->getCredits();
+        if ($balanceBefore < $cost) {
+            throw new \Exception("Solde insuffisant pour publier un trajet.");
+        }
+
+        $balanceAfter = $balanceBefore - $cost;
+
+        try {
+            $pdo->beginTransaction();
+
+            // Débit
+            $sql = "UPDATE users SET credits = :credits WHERE user_id = :user_id";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                ':credits' => $balanceAfter,
+                ':user_id' => $userId
+            ]);
+
+            // Historique
+            $sql = "INSERT INTO postgres.public.credits_history(user_id, amounts, status, balance_before, balance_after, created_at) VALUES (:user_id, :amounts, :status, :before, :after, NOW())";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                ':user_id' => $userId,
+                ':amounts' => -$cost,
+                ':status' => 'trajet_propose',
+                ':before' => $balanceBefore,
+                ':after' => $balanceAfter
+            ]);
+
+            $pdo->commit();
+            return true;
+        } catch (\Exception $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+    }
+
 }

@@ -305,7 +305,17 @@ $pageTitle = 'Rechercher un voyage';
                             <input type="hidden" name="trip_id" value="<?= htmlspecialchars($trip->getTripId()) ?>">
                             <input type="hidden" name="seats_reserved" value="1">
                             <?php if ($remainingSeats > 0 && !$showError): ?>
-                            <button type="submit" class="btn btn-primary">Réserver</button>
+                            <button type="button"
+                                class="btn btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#reservationModal"
+                                data-trip-id="<?= $trip->getTripId() ?>"
+                                data-start-city="<?= $startCity ?>"
+                                data-end-city="<?= $endCity ?>"
+                                data-departure="<?= $trip->getDepartureDateFr() ?> à <?= $trip->getDepartureTime() ?>"
+                                data-price="<?= $trip->getPricePerPassenger() ?>">
+                                Réserver
+                            </button>
                             <?php elseif ($showError): ?>
                             <button type="button" class="btn btn-secondary disabled" disabled>Réservé</button>
                             <?php else: ?>
@@ -315,6 +325,8 @@ $pageTitle = 'Rechercher un voyage';
                     </div>
                 </div>
             </div>
+
+        <!-- Modale infos trajets (Bouton détails) -->
             <?php
             $arrivalTime = clone $trip->getDepartureAt();
             $interval = $trip->getEstimatedDurationAsInterval();
@@ -346,6 +358,38 @@ $pageTitle = 'Rechercher un voyage';
                             </p>
                             <p><strong>Véhicule :</strong> <?= htmlspecialchars($car->marque . ' ' . $car->modele) ?></p>
                         </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Modale de confirmation de voyage -->
+            <div class="modal fade" id="reservationModal" tabindex="-1" aria-labelledby="reservationModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+
+                        <div class="modal-header bg-success text-white">
+                            <h5 class="modal-title">Confirmer votre réservation</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <p>Vous réservez une place pour le voyage :</p>
+                            <ul class="list-unstyled">
+                                <li><strong>Départ :</strong> <span id="modalStartCity"></span></li>
+                                <li><strong>Arrivée :</strong> <span id="modalEndCity"></span></li>
+                                <li><strong>Date :</strong> <span id="modalDeparture"></span></li>
+                                <li><strong>Crédits requis :</strong> <span id="modalPrice"></span> crédits</li>
+                            </ul>
+
+                            <form method="post" action="reserve.php">
+                                <input type="hidden" name="trip_id" id="confirmTripId">
+                                <input type="hidden" name="seats_reserved" value="1">
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-success me-2">Confirmer</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                </div>
+                            </form>
+                        </div>
+
                     </div>
                 </div>
             </div>

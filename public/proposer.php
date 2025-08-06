@@ -4,6 +4,7 @@ require_once __DIR__ . '/../vendor/autoload.php';;
 
 use Olivierguissard\EcoRide\Model\Trip;
 use Olivierguissard\EcoRide\Model\Car;
+use Olivierguissard\EcoRide\Service\CreditService;
 
 require_once 'functions/auth.php';
 startSession();
@@ -52,39 +53,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!empty($data['trip_id'])) {
         $voyage = Trip::find((int)$data['trip_id']);
-
         $voyage->setDriverId((int)$data['driver_id']);
         $voyage->setStartCity($data['start_city']);
         $voyage->setEndCity($data['end_city']);
         $voyage->setDepartureAt(new DateTime($data['departure_at']));
         $voyage->setPricePerPassenger($data['price_per_passenger']);
         $voyage->setComment($data['comment']);
-        $voyage->setNoSmoking($data['no_smoking']);
-        $voyage->setMusicAllowed($data['music_allowed']);
-        $voyage->setDiscussAllowed($data['discuss_allowed']);
+        $voyage->setNoSmoking(isset($data['no_smoking']));
+        $voyage->setMusicAllowed(isset($data['music_allowed']));
+        $voyage->setDiscussAllowed(isset($data['discuss_allowed']));
         $voyage->setEstimatedDuration($data['estimated_duration']);
     } else {
         $data['driver_id'] = $_SESSION['user_id'];
         $voyage = new Trip($data);
+
+        try {
+            // Débit automatique de 2 crédits
+            CreditService::debitForTripPublication($userID);
+        } catch (Exception $e) {
+            $error = $e->getMessage();
+            echo "<div class='alert alert-danger' role='alert'>Erreur : $error.
+        <a href='paiements.php'>Ajoutez des crédits ici</a></div>";
+            exit;
+        }
     }
 
     if ($voyage->validateTrip()) {
-
         if ($voyage->saveToDatabase()) {
             $_SESSION['flash_success'] = 'Le voyage est enregistré !';
+            $success = true;
+            header('Location: /rechercher.php');
+            exit;
         } else {
             $_SESSION['flash_error'] = 'Une erreur est survenue lors de l\'enregistrement du voyage.';
         }
     } else {
         $_SESSION['flash_error'] = 'Le voyage n\'est pas valide.';
     }
-    header('Location: /rechercher.php');
-    exit;
 }
-$voyage = Trip::findTripsByDriver($_SESSION['user_id']);
+$voyage = Trip::findTripsByDriver($userID);
 
 // Récupère la liste des véhicules de l'utilisateur connecté
-$vehicles = Car::findByUser($_SESSION['user_id']);
+$vehicles = Car::findByUser($userID);
+if (empty($vehicles)) {
+    $_SESSION['flash_error'] = "Vous devez enregistrez un véhicule avant de pouvoir proposer un trajet.";
+    header('Location: profil.php');
+    exit;
+}
 
 $success = false;
 $pageTitle = 'Proposer un trajet - EcoRide';
@@ -99,14 +114,14 @@ $pageTitle = 'Proposer un trajet - EcoRide';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="assets/css/proposer.css">
-    <title><?php if (isset($pageTitle)) { echo $pageTitle; } else { echo 'EcoRide - Covoiturage écologique';} ?></title>
+    <title><?= $pageTitle ?? 'EcoRide - Covoiturage écologique'; ?></title>
 </head>
 
 <body>
     <header>
         <nav class="navbar bg-body-tertiary">
             <div class="container" style="max-width: 900px;">
-                <a class="navbar-brand" href="/index.php">
+                <a class="navbar-brand" href="index.php">
                     <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="60" class="d-inline-block align-text-center rounded">
                 </a>
                 <h2 class="fw-bold mb-1 text-success">Proposer un trajet</h2>
@@ -207,8 +222,6 @@ $pageTitle = 'Proposer un trajet - EcoRide';
                         </div>
                     </div>
                 </div>
-
-
 
                 <!-- Étape 3 : Places/Prix -->
                 <div class="step step3">
