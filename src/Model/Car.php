@@ -2,7 +2,7 @@
 
 namespace Olivierguissard\EcoRide\Model;
 
-use class\PDOException;
+use PDOException;
 use Olivierguissard\EcoRide\Config\Database;
 use PDO;
 
@@ -111,7 +111,11 @@ class Car
             }
         } catch (PDOException $e) {
             error_log('Exception PDO : ' . $e->getMessage());
-            $this->errors['database'] = "Erreur lors de la sauvegarde : " . $e->getMessage();
+            if( str_contains($e->getMessage(), 'duplicate key') || $e->getCode() == '23505' ) {
+                $this->errors['immatriculation'] = "Cette plaque d'immatriculation est déjà enregistrée. Veuillez en saisir une autre.";
+            } else {
+                $this->errors['database'] = "Erreur lors de la sauvegarde : " . $e->getMessage();
+            }
             return false;
         }
     }
@@ -132,7 +136,13 @@ class Car
         return array_map(fn($r) => new self($r), $rows);
         }
 
-        public static function find(int $id): ?self
+    /**
+     * Finds and retrieves an instance of the object based on the provided ID.
+     *
+     * @param int $id The unique identifier of the record to be fetched from the database.
+     * @return self|null Returns an instance of the object if the record is found, or null if no matching record exists.
+     */
+    public static function find(int $id): ?self
         {
             $pdo = Database::getConnection();
             $sql = "SELECT * FROM vehicule WHERE id_vehicule = ?";

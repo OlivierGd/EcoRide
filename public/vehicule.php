@@ -38,26 +38,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Ajout d'un nouveau véhicule
         $data = array_intersect_key($_POST, array_flip(['marque', 'modele', 'type_carburant', 'nbr_places', 'plaque_immatriculation']));
         $voiture = new Car($_POST);
-        $voiture->user_id = $_SESSION['user_id'];
-
-        error_log('Objet voiture créé : ' . print_r($voiture, true));
+        $voiture->user_id = getUserId();
 
         if ($voiture->validateCar()) {
-            error_log(('Validation réussie'));
-
             if ($voiture->saveToDatabase()) {
                 $_SESSION['flash_success'] = 'Véhicule ajouté avec succès !';
             } else {
-                // Debug - Erreur lors de la sauvegarde
-                error_log('Erreurs de sauvegarde : ' . print_r($voiture->errors, true));
-                $_SESSION['flash_error'] = 'Erreur lors de l\'enregistrement du véhicule';
-
+                $_SESSION['flash_error'] = implode('<br>', $voiture->errors);
+                $_SESSION['form_data'] = $_POST;
             }
         } else {
-            // Debug - Erreurs de validation
-            error_log('Erreurs de validation : ' . print_r($voiture->errors, true));
             $_SESSION['flash_error'] = implode('<br>', $voiture->errors);
-
+            $_SESSION['form_data'] = $_POST;
         }
         header('Location: vehicule.php');
         exit;
@@ -112,7 +104,7 @@ $pageTitle = 'Mes véhicules';
             </div>
         <?php endif; ?>
 
-        <?php if (!empty($_SESSION['flash_error'])) : ?>
+        <?php if (!empty($_SESSION['flash_error']) && empty($_SESSION['form_data'])) : ?>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <?= $_SESSION['flash_error']; unset($_SESSION['flash_error']); ?>
         </div>
@@ -157,7 +149,7 @@ $pageTitle = 'Mes véhicules';
             <i class="bi bi-plus-lg fs-4"></i>
         </button>
 
-        <!-- Modale ajout d'un véhicule -->
+        <!-- Modale : ajout d'un véhicule -->
         <div class="modal fade" id="ajoutVehiculeModal" tabindex="-1" aria-labelledby="ajoutVehiculeLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content rounded-4">
@@ -166,18 +158,25 @@ $pageTitle = 'Mes véhicules';
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
                     </div>
                     <div class="modal-body">
+                        <?php if (!empty($_SESSION['form_data']) && !empty($_SESSION['flash_error'])) : ?>
+                        <div class="alert alert-danger" role="alert">
+                            <?= htmlspecialchars($_SESSION['flash_error']) ?>
+                        </div>
+                        <?php endif; ?>
                         <form action="vehicule.php" method="post" id="formAjoutVehicule" enctype="multipart/form-data">
 
                             <!-- Marque -->
                             <div class="mb-3">
                                 <label for="marqueVehicule" class="form-label">Marque du véhicule :</label>
-                                <input type="text" class="form-control" id="marqueVehicule" name="marque" placeholder="Ex: Tesla">
+                                <input type="text" class="form-control" id="marqueVehicule" name="marque"
+                                       value="<?= htmlspecialchars($_SESSION['form_data']['marque'] ?? '') ?>" placeholder="Ex: Tesla">
                             </div>
 
                             <!-- Modèle -->
                             <div class="mb-3">
                                 <label for="modeleVehicule" class="form-label">Modèle du véhicule :</label>
-                                <input type="text" class="form-control" id="modeleVehicule" name="modele" placeholder="Ex: Model 3">
+                                <input type="text" class="form-control" id="modeleVehicule" name="modele"
+                                       value="<?= htmlspecialchars($_SESSION['form_data']['modele'] ?? '') ?>" placeholder="Ex: Model 3">
                             </div>
 
                             <!-- Type -->
@@ -185,17 +184,18 @@ $pageTitle = 'Mes véhicules';
                                 <label for="typeVehicule" class="form-label">Énergie utilisée :</label>
                                 <select class="form-select" id="typeVehicule" name="type_carburant">
                                     <option value="" selected disabled>Type d'énergie</option>
-                                    <option value="Electrique">Électrique</option>
-                                    <option value="Hybride">Hybride</option>
-                                    <option value="Essence">Essence</option>
-                                    <option value="Gasoil">Gasoil</option>
+                                    <option value="Electrique"<?= ($_SESSION['form_data']['type_carburant'] ?? '') === 'Electrique' ? 'selected' : '' ?>>Électrique</option>
+                                    <option value="Hybride"<?= ($_SESSION['form_data']['type_carburant'] ?? '') === 'Hybride' ? 'selected' : '' ?>>Hybride</option>
+                                    <option value="Essence"<?= ($_SESSION['form_data']['type_carburant'] ?? '') === 'Essence' ? 'selected' : '' ?>>Essence</option>
+                                    <option value="Gasoil"<?= ($_SESSION['form_data']['type_carburant'] ?? '') === 'Gasoil' ? 'selected' : '' ?>>Gasoil</option>
                                 </select>
                             </div>
 
                             <!-- Plaque -->
                             <div class="mb-3">
                                 <label for="plaqueVehicule" class="form-label">Plaque d'immatriculation :</label>
-                                <input type="text" class="form-control" id="plaqueVehicule" name="plaque_immatriculation" placeholder="Ex: AB-123-CD">
+                                <input type="text" class="form-control" id="plaqueVehicule" name="plaque_immatriculation"
+                                       value="<?= htmlspecialchars($_SESSION['form_data']['plaque_immatriculation'] ?? '') ?>" placeholder="Ex: AB-123-CD">
                             </div>
 
                             <!-- Nombre de places -->
@@ -203,14 +203,13 @@ $pageTitle = 'Mes véhicules';
                                 <label for="nbPlaces" class="form-label">Nombre de places :</label>
                                 <select class="form-select" id="nbPlaces" name="nbr_places">
                                     <option value="" selected disabled>Choisissez</option>
-                                    <option>1</option>
-                                    <option>2</option>
-                                    <option>3</option>
-                                    <option>4</option>
-                                    <option>5</option>
+                                    <option value="1" <?= ($_SESSION['form_data']['nbr_places'] ?? '') === '1' ? 'selected' : '' ?>>1</option>
+                                    <option value="2" <?= ($_SESSION['form_data']['nbr_places'] ?? '') === '2' ? 'selected' : '' ?>>2</option>
+                                    <option value="3" <?= ($_SESSION['form_data']['nbr_places'] ?? '') === '3' ? 'selected' : '' ?>>3</option>
+                                    <option value="4" <?= ($_SESSION['form_data']['nbr_places'] ?? '') === '4' ? 'selected' : '' ?>>4</option>
+                                    <option value="5" <?= ($_SESSION['form_data']['nbr_places'] ?? '') === '5' ? 'selected' : '' ?>>5</option>
                                 </select>
                             </div>
-
                         </form>
                     </div>
 
@@ -222,7 +221,7 @@ $pageTitle = 'Mes véhicules';
         </div>
     </div>
 
-    <!-- Modale pour éditer un véhicule -->
+    <!-- Modale : édite un véhicule -->
     <div class="modal fade" id="editVehiculeModal" tabindex="-1" aria-labelledby="editVehiculeLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content rounded-4">
@@ -272,12 +271,19 @@ $pageTitle = 'Mes véhicules';
             </div>
         </div>
     </div>
-
 </main>
-
 <?php require_once 'footer.php'; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
 <script src="assets/js/vehicule.js"></script>
+<?php if (isset($_SESSION['form_data'])) : ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = new bootstrap.Modal(document.getElementById('ajoutVehiculeModal'));
+            modal.show();
+        });
+    </script>
+<?php endif; ?>
+<?php unset($_SESSION['form_data'], $_SESSION['flash_success'], $_SESSION['flash_error']); ?>
 </body>
 </html>
