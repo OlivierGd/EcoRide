@@ -4,9 +4,9 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use Olivierguissard\EcoRide\Config\Database;
 
-session_start();
 
 require_once __DIR__ . '/functions/auth.php';
+startSession();
 requireAuth();
 
 

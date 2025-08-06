@@ -4,7 +4,7 @@ use Olivierguissard\EcoRide\Config\Database;
 use Olivierguissard\EcoRide\Model\Users;
 
 require __DIR__ . '/../vendor/autoload.php';
-
+session_start();
 
 require_once 'functions/auth.php';
 if (isAuthenticated()) {
