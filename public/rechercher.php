@@ -141,7 +141,7 @@ $pageTitle = 'Rechercher un voyage';
 <main class="container px-3 py-2 mt-1 pt-5">
     <!-- Search Summary -->
     <section class="mt-1">
-        <h2 class="fw-bold mb-4">Affinez votre recherche</h2>
+        <h3 class="fw-bold mb-4"><i class="bi bi-search text-success me-2"></i>Recherche un trajet</h3>
         <form action="rechercher.php" method="get" id="formSearchDestination" class="p-4 bg-white rounded-4 shadow-sm">
             <!-- Départ -->
             <div class="input-group mb-3 bg-light rounded-3">
@@ -218,7 +218,7 @@ $pageTitle = 'Rechercher un voyage';
 
     <!-- Rides List -->
     <section class="mt-5 mb-3">
-        <h2 class="fw-bold mb-4">Les trajets disponibles</h2>
+        <h3 class="fw-bold mb-4"><i class="bi bi-search-heart text-success me-2"></i>Les trajets disponibles</h3>
         <!-- Ride card -->
         <?php foreach ($trips as $trip):
         // Le conducteur

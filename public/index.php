@@ -72,7 +72,7 @@ $pageTitle = 'Accueil - EcoRide';
 
         <!-- Formulaire de recherche de trajet -->
         <section class="mt-5">
-            <h2 class="fw-bold mb-4 text-success">Trouvez votre trajet</h2>
+            <h3 class="fw-bold mb-4"><i class="bi bi-geo-alt text-success me-2"></i>Trouvez votre trajet</h3>
             <form action="rechercher.php" method="get" id="formSearchDestination" class="p-4 bg-white rounded-4 shadow-sm">
 
                <!-- Départ -->
@@ -152,7 +152,7 @@ $pageTitle = 'Accueil - EcoRide';
         <!--Popular destinations-->
         <section>
             <div class="d-flex justify-content-between align-items-center pt-5 mb-3">
-                <h2 class="mb-0 text-success">Destinations populaires</h2>
+                <h3 class="fw-bold mb-4"><i class="bi bi-flag text-success me-2"></i>Destinations populaires</h3>
                 <a href="rechercher.php" class="text-primary fw-semibold small">Voir tout</a>
             </div>
 
@@ -196,7 +196,7 @@ $pageTitle = 'Accueil - EcoRide';
         <!-- Section trajets pour les 3 prochains voyages -->
         <section>
             <div class="d-flex justify-content-between align-items-center pt-5 mb-3">
-                <h2 class="mb-0 text-success">Prochains voyages</h2>
+                <h3 class="fw-bold mb-4"><i class="bi bi-rocket-takeoff text-success me-2"></i>Prochains voyages</h3>
                 <a href="rechercher.php" class="text-primary fw-semibold small">Voir tout</a>
             </div>
 

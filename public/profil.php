@@ -140,7 +140,7 @@ $pageTitle = 'Mon profil - EcoRide';
     <!-- Trajets à venir -->
     <section>
         <div class="container mt-4">
-            <h4 class="mb-3 text-success"><i class="bi bi-calendar-event"></i> Trajets à venir</h4>
+            <h3 class="fw-bold mb-4"><i class="bi bi-calendar-event text-success me-2"></i>Trajets à venir</h3>
             <?php if (empty($allTrips)): ?>
                 <div class="alert alert-light text-center">Aucun trajet à venir.</div>
             <?php else: ?>
@@ -178,7 +178,7 @@ $pageTitle = 'Mon profil - EcoRide';
     <!-- Préférences écologiques -->
     <section>
         <div class="container my-5">
-            <h4 class="mb-3 text-success"><i class="bi bi-leaf"></i> Préférences écologiques</h4>
+            <h3 class="fw-bold mb-4"><i class="bi bi-leaf text-success me-2"></i>Préférences de voyages</h3>
             <div class="card shadow-sm border-0">
                 <div class="card-body">
                     <div class="row gy-3">
@@ -220,7 +220,7 @@ $pageTitle = 'Mon profil - EcoRide';
     <!-- Paramètres du compte -->
     <section>
         <div class="container mb-5">
-            <h4 class="mb-3 text-success"><i class="bi bi-gear"></i> Paramètres du compte</h4>
+            <h3 class="fw-bold mb-4"><i class="bi bi-gear text-success me-2"></i>Paramètres du compte</h3>
             <div class="list-group shadow-sm" style="gap: 0.5rem; display: flex; flex-direction: column;">
                 <a href="#" class="list-group-item list-group-item-action d-flex align-items-center">
                     <i class="bi bi-person-circle fs-4 me-2 text-success"></i>

@@ -113,210 +113,287 @@ $pageTitle = 'Proposer un trajet - EcoRide';
     <link rel="icon" type="image/png" href="assets/pictures/logoEcoRide.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="assets/css/proposer.css">
-    <title><?= $pageTitle ?? 'EcoRide - Covoiturage écologique'; ?></title>
+    <title>Proposer un trajet - EcoRide</title>
 </head>
 
 <body>
-    <header>
-        <nav class="navbar bg-body-tertiary">
-            <div class="container" style="max-width: 900px;">
-                <a class="navbar-brand" href="index.php">
-                    <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="60" class="d-inline-block align-text-center rounded">
-                </a>
-                <h2 class="fw-bold mb-1 text-success">Proposer un trajet</h2>
-                <?= displayInitialsButton(); ?>
+<header>
+    <nav class="navbar bg-body-tertiary">
+        <div class="container" style="max-width: 900px;">
+            <a class="navbar-brand" href="index.php">
+                <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="60" class="d-inline-block align-text-center rounded">
+            </a>
+            <h2 class="fw-bold mb-1 text-success">Proposer un trajet</h2>
+            <?= displayInitialsButton(); ?>
+        </div>
+    </nav>
+</header>
+
+<main class="container px-3 py-2 mt-1 pt-5">
+    <!-- Messages de succès/erreur -->
+    <div class="alert alert-success alert-dismissible fade show d-none" role="alert" id="successAlert">
+        <i class="bi bi-check-circle me-2"></i>
+        <span id="successMessage"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="alert alert-danger alert-dismissible fade show d-none" role="alert" id="errorAlert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <span id="errorMessage"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <form action="" method="post" id="suggestedTripForm">
+
+        <!-- Section 1: Itinéraire -->
+        <section class="mt-4">
+            <h3 class="fw-bold mb-4"><i class="bi bi-geo-alt text-success me-2"></i>Itinéraire</h3>
+            <div class="p-4 bg-white rounded-4 shadow-sm mb-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="input-group bg-light rounded-3">
+                            <span class="input-group-text bg-transparent border-0">
+                                <i class="bi bi-geo-alt text-secondary"></i>
+                            </span>
+                            <input type="text" name="start_city" class="form-control border-0 bg-transparent"
+                                   autocomplete="off" id="startCity" placeholder="Ville de départ" required>
+                        </div>
+                        <div id="startCitySuggestions" class="suggestion-box" style="display: none;"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group bg-light rounded-3">
+                            <span class="input-group-text bg-transparent border-0">
+                                <i class="bi bi-signpost-split text-secondary"></i>
+                            </span>
+                            <input type="text" name="start_location" class="form-control border-0 bg-transparent"
+                                   id="startLocation" placeholder="Lieu de départ précis (ex: Parking gare de Lyon)" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group bg-light rounded-3">
+                            <span class="input-group-text bg-transparent border-0">
+                                <i class="bi bi-pin-map text-secondary"></i>
+                            </span>
+                            <input type="text" name="end_city" class="form-control border-0 bg-transparent"
+                                   autocomplete="off" id="endCity" placeholder="Ville de destination" required>
+                        </div>
+                        <div id="endCitySuggestions" class="suggestion-box" style="display: none;"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group bg-light rounded-3">
+                            <span class="input-group-text bg-transparent border-0">
+                                <i class="bi bi-signpost-split text-secondary"></i>
+                            </span>
+                            <input type="text" name="end_location" class="form-control border-0 bg-transparent"
+                                   id="endLocation" placeholder="Lieu d'arrivée précis (ex: Entrée principale université)" required>
+                        </div>
+                    </div>
+                </div>
+                <small class="text-muted mt-2 d-block">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Ajouter un arrêt supplémentaire (fonctionnalité à venir)
+                </small>
             </div>
-        </nav>
-    </header>
-<!-- Formulaire Multi-Étapes -->
-    <main class="pt-5 mt-5">
-        <form action="" method="post" id="suggestedTripForm" class="multi-step-form">
-            <!-- Étapes contrôlées par radio -->
-            <input type="radio" name="step" id="step1" checked hidden>
-            <input type="radio" name="step" id="step2" hidden>
-            <input type="radio" name="step" id="step3" hidden>
-            <input type="radio" name="step" id="step4" hidden>
+        </section>
 
-            <div class="steps container py-4">
-
-                <?php if (!empty($errors)): ?>
-                <div class="alert alert-danger" role="alert">
-                    Formulaire invalidegfhd
-                </div>
-                <?php endif; ?>
-                <?php if ($success): ?>
-                    <div class="alert alert-success" role="alert">
-                        Merci d'avoir publié votre trajet !
-                    </div>
-                <?php endif; ?>
-                <!-- Barre de progression -->
-                <div class="progress mb-4">
-                    <div class="progress-bar bg-success" role="progressbar" style="width: 25%;" id="progressBar"></div>
-                </div>
-
-                <!-- Étape 1 : Itinéraire -->
-                <div class="step step1">
-                    <h2>1. Itinéraire</h2>
-                    <div class="mb-3">
-                        <label for="startCity" class="form-label"><i class="bi bi-geo-alt"></i> Ville de départ</label>
-                        <input type="text" name="start_city"  class="form-control ps-5" id="startCity" placeholder="Départ" required>
-                        <?php if (isset($errors['startCity'])): ?>
-                        <div class="invalid-feedback"><?= $errors['startCity'] ?></div>
-                        <?php endif; ?>
-                    </div>
-                    <div class="mb-3">
-                        <label for="startLocation" class="form-label"><i class="bi bi-signpost-split"></i> Lieu de départ (précis)</label>
-                        <input type="text" name="start_location" class="form-control ps-5" id="startLocation" placeholder="Ex : Parking gare de Lyon" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="endCity" class="form-label"><i class="bi bi-pin-map"></i> Destination</label>
-                        <input type="text" name="end_city" class="form-control ps-5" id="endCity" placeholder="Destination" required>
-                        <?php if (isset($errors['endCity'])): ?>
-                            <div class="invalid-feedback"><?= $errors['endCity'] ?></div>
-                        <?php endif; ?>
-                    </div>
-                    <div class="mb-3">
-                        <label for="endLocation" class="form-label"><i class="bi bi-signpost-split"></i> Lieu d’arrivée (précis)</label>
-                        <input type="text" name="end_location" class="form-control ps-5" id="endLocation" placeholder="Ex : Entrée principale université" required>
-                    </div>
-                    <p>+ Ajouter un arrêt supplémentaire</p>
-                </div>
-
-                <!-- Étape 2 : Date/Heure -->
-                <div class="step step2">
-                    <h2>2. Date et Heure</h2>
-                    <div class="mb-3">
-                        <label for="departureDate" class="form-label">Date du voyage</label>
-                        <input type="date" name="departure_date" class="form-control w-100 w-md-50" id="departureDate" required>
-                        <?php if (isset($errors['departureDate'])): ?>
-                            <div class="invalid-feedback"><?= $errors['departureDate'] ?></div>
-                        <?php endif; ?>
-                    </div>
-                    <div class="mb-3">
-                        <label for="departureTime" class="form-label">Heure de départ</label>
-                        <input type="time" name="departure_time" class="form-control w-100 w-md-50" id="departureTime" required>
-                        <?php if (isset($errors['departureTime'])): ?>
-                            <div class="invalid-feedback"><?= $errors['departureTime'] ?></div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label"><i class="bi bi-hourglass-split"></i> Durée estimée</label>
-                    <div class="row g-2 w-100 w-md-50">
-                        <div class="col">
-                            <select class="form-select" name="duration_hours" id="durationHours" required>
-                                <option value="" disabled selected>Heures</option>
-                                <?php for ($i = 0; $i <= 10; $i++): ?>
-                                    <option value="<?= $i ?>"><?= $i ?>h</option>
-                                <?php endfor; ?>
-                            </select>
+        <!-- Section 2: Date et Heure -->
+        <section class="mt-4">
+            <h3 class="fw-bold mb-4"><i class="bi bi-calendar-event text-success me-2"></i>Date et Heure</h3>
+            <div class="p-4 bg-white rounded-4 shadow-sm mb-4">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="input-group bg-light rounded-3">
+                                <span class="input-group-text bg-transparent border-0">
+                                    <i class="bi bi-calendar-date text-secondary"></i>
+                                </span>
+                            <input type="date" name="departure_date" class="form-control border-0 bg-transparent"
+                                   id="departureDate" required>
                         </div>
-                        <div class="col">
-                            <select class="form-select" name="duration_minutes" id="durationMinutes" required>
-                                <option value="" disabled selected>Minutes</option>
-                                <?php foreach ([0, 15, 30, 45] as $m): ?>
-                                    <option value="<?= $m ?>"><?= $m ?> min</option>
-                                <?php endforeach; ?>
-                            </select>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group bg-light rounded-3">
+                                <span class="input-group-text bg-transparent border-0">
+                                    <i class="bi bi-clock text-secondary"></i>
+                                </span>
+                            <input type="time" name="departure_time" class="form-control border-0 bg-transparent"
+                                   id="departureTime" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted small mb-1">
+                            <i class="bi bi-hourglass-split me-1"></i>Durée estimée
+                        </label>
+                        <div class="row g-1">
+                            <div class="col-6">
+                                <select class="form-select bg-light border-0 rounded-3" name="duration_hours" required>
+                                    <option value="" disabled selected>Heures</option>
+                                    <?php for ($i = 0; $i <= 10; $i++): ?>
+                                        <option value="<?= $i ?>"><?= $i ?>h</option>
+                                    <?php endfor; ?>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <select class="form-select bg-light border-0 rounded-3" name="duration_minutes" required>
+                                    <option value="" disabled selected>Min</option>
+                                    <option value="0">00</option>
+                                    <option value="15">15</option>
+                                    <option value="30">30</option>
+                                    <option value="45">45</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
+        </section>
 
-                <!-- Étape 3 : Places/Prix -->
-                <div class="step step3">
-                    <h2>3. Places et Prix</h2>
-                    <h3>Véhicule utilisé</h3>
-                    <div class="mb-3 w-100 w-md-50">
-                        <label for="vehiclesUser">Véhicule</label>
-                        <select class="form-select" id="vehiclesUser" name="vehicle_id" required>
+        <!-- Section 3: Véhicule et Places -->
+        <section class="mt-4">
+            <h3 class="fw-bold mb-4"><i class="bi bi-car-front text-success me-2"></i>Véhicule et Places</h3>
+            <div class="p-4 bg-white rounded-4 shadow-sm mb-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small mb-2">Véhicule utilisé</label>
+                        <select class="form-select bg-light border-0 rounded-3" name="vehicle_id" required>
                             <option value="" disabled selected>Choisissez votre véhicule</option>
-                            <?php foreach ($vehicles as $veh): ?>
-                                <option value="<?= htmlspecialchars($veh->id) ?>">
-                                    <?= htmlspecialchars($veh->marque . ' ' . $veh->modele) ?>
-                                </option>
-                            <?php endforeach; ?>
+                            <!-- Les options seront générées par PHP -->
+                            <option value="1">Peugeot 308 - Essence</option>
+                            <option value="2">Renault Zoé - Électrique</option>
                         </select>
                     </div>
-                    <h3>Nombre de places disponibles</h3>
-                    <div class="mb-3">
-                        <div class="btn-group" role="group">
-                            <input type="radio" class="btn-check placeAvailable" name="available_seats" id="place1" value="1">
-                            <label class="btn btn-outline-success" for="place1">1</label>
-                            <input type="radio" class="btn-check placeAvailable" name="available_seats" id="place2" value="2">
-                            <label class="btn btn-outline-success" for="place2">2</label>
-                            <input type="radio" class="btn-check placeAvailable" name="available_seats" id="place3" value="3" checked>
-                            <label class="btn btn-outline-success" for="place3">3</label>
-                            <input type="radio" class="btn-check placeAvailable" name="available_seats" id="place4" value="4">
-                            <label class="btn btn-outline-success" for="place4">4</label>
-                            <input type="radio" class="btn-check placeAvailable" name="available_seats" id="place5" value="5">
-                            <label class="btn btn-outline-success" for="place5">5</label>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small mb-2">Places disponibles</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="available_seats" id="place1" value="1">
+                            <label class="btn btn-outline-success flex-fill" for="place1">1</label>
+                            <input type="radio" class="btn-check" name="available_seats" id="place2" value="2">
+                            <label class="btn btn-outline-success flex-fill" for="place2">2</label>
+                            <input type="radio" class="btn-check" name="available_seats" id="place3" value="3" checked>
+                            <label class="btn btn-outline-success flex-fill" for="place3">3</label>
+                            <input type="radio" class="btn-check" name="available_seats" id="place4" value="4">
+                            <label class="btn btn-outline-success flex-fill" for="place4">4</label>
+                            <input type="radio" class="btn-check" name="available_seats" id="place5" value="5">
+                            <label class="btn btn-outline-success flex-fill" for="place5">5</label>
                         </div>
-                    </div>
-                    <h3>Prix par passager</h3>
-                    <div class="input-group flex-nowrap mb-3 w-100 w-md-50">
-                        <span class="input-group-text">Crédits</span>
-                        <input type="number" class="form-control" name="price_per_passenger" id="pricePerPassenger" placeholder="--" value="20" min="0" step="1" required>
-                    </div>
-                    <p>Jusqu'à <strong id="totalPrice"></strong> crédits pour ce trajet avec <strong id="placeFree"></strong> passagers</p>
-                </div>
-
-                <!-- Étape 4 : Options -->
-                <div class="step step4">
-                    <h2>4. Options</h2>
-                    <h3>Préférences</h3>
-                    <div class="form-check form-switch">
-                        <input type="checkbox" name="no_smoking" class="form-check-input"  id="no-smoking" checked>
-                        <label class="form-check-label" for="no-smoking">Non-fumeur</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input type="checkbox" name="music_allowed" class="form-check-input"  id="musicPlay" checked>
-                        <label class="form-check-label" for="musicPlay">Musique autorisée</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input type="checkbox" name="discuss_allowed" class="form-check-input"  id="discussTogether" checked>
-                        <label class="form-check-label" for="discussTogether">Discussions bienvenues</label>
-                    </div>
-                    <h3>Commentaire pour les passagers</h3>
-                    <div class="form-floating mb-3">
-                        <textarea name="comment" class="form-control" id="commentForPassenger" style="height: 100px"></textarea>
-                        <label for="commentForPassenger">Ex: Je pars du parking de la gare de Lyon...</label>
                     </div>
                 </div>
             </div>
-            <button type="button" class="btn btn-lg btn-success" id="publishSuggestedForm">Publier ce trajet</button> <!-- boutton de type button pour ne pas soumettre le formulaire. -->
-            <div class="p-5"></div>
-        </form>
-        <section>
-            <!-- Modale de validation du formulaire de trajet -->
-            <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="confirmationModalLabel">Proposer un trajet :</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                        </div>
+        </section>
 
-                        <div class="modal-body">
-                            <div id="modalText"></div>
+        <!-- Section 4: Prix -->
+        <section class="mt-4">
+            <h3 class="fw-bold mb-4"><i class="bi bi-currency-euro text-success me-2"></i>Prix</h3>
+            <div class="p-4 bg-white rounded-4 shadow-sm mb-4">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label text-muted small mb-2">Prix par passager</label>
+                        <div class="input-group bg-light rounded-3">
+                            <input type="number" class="form-control border-0 bg-transparent text-center fw-bold"
+                                   name="price_per_passenger" id="pricePerPassenger"
+                                   placeholder="20" value="20" min="0" step="1" required>
+                            <span class="input-group-text bg-transparent border-0 text-muted">crédits</span>
                         </div>
-
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Annuler</button>
-                            <button type="button" class="btn btn-success" id="confirmSubmit">Proposer</button>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="alert alert-info border-0 bg-light mb-0">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong id="totalPrice">60</strong> crédits maximum pour ce trajet avec
+                            <strong id="placeFree">3</strong> passagers
                         </div>
                     </div>
                 </div>
+            </div>
         </section>
-    </main>
-</body>
 
-<!-- Tab Bar -->
+        <!-- Section 5: Préférences et Commentaires -->
+        <section class="mt-4">
+            <h3 class="fw-bold mb-4"><i class="bi bi-gear text-success me-2"></i>Préférences et Commentaires</h3>
+            <div class="p-4 bg-white rounded-4 shadow-sm mb-4">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-3">Préférences de voyage</h6>
+                        <div class="d-flex flex-column gap-2">
+                            <div class="form-check form-switch">
+                                <input type="checkbox" name="no_smoking" class="form-check-input" id="no-smoking" checked>
+                                <label class="form-check-label" for="no-smoking">
+                                    <i class="bi bi-slash-circle me-1"></i>Non-fumeur
+                                </label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input type="checkbox" name="music_allowed" class="form-check-input" id="musicPlay" checked>
+                                <label class="form-check-label" for="musicPlay">
+                                    <i class="bi bi-music-note me-1"></i>Musique autorisée
+                                </label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input type="checkbox" name="discuss_allowed" class="form-check-input" id="discussTogether" checked>
+                                <label class="form-check-label" for="discussTogether">
+                                    <i class="bi bi-chat-dots me-1"></i>Discussions bienvenues
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <h6 class="text-muted mb-3">Commentaire pour les passagers</h6>
+                        <div class="form-floating">
+                                <textarea name="comment" class="form-control bg-light border-0"
+                                          id="commentForPassenger" style="height: 120px"
+                                          placeholder="Ajoutez des informations utiles pour vos futurs passagers..."></textarea>
+                            <label for="commentForPassenger" class="text-muted">
+                                Ex: Je pars du parking de la gare de Lyon, n'hésitez pas à me contacter...
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bouton de soumission -->
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4 mb-5">
+            <button type="button" class="btn btn-success btn-lg px-4 rounded-3" id="publishSuggestedForm">
+                <i class="bi bi-plus-circle me-2"></i>Publier ce trajet
+            </button>
+        </div>
+    </form>
+
+    <!-- Modale de confirmation -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="confirmationModalLabel">
+                        <i class="bi bi-check-circle me-2"></i>Confirmer la publication de votre trajet
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="alert alert-info border-0">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Coût de publication :</strong> 2 crédits seront débités de votre compte pour publier ce trajet.
+                    </div>
+                    <div id="modalText"></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Annuler
+                    </button>
+                    <button type="button" class="btn btn-success" id="confirmSubmit">
+                        <i class="bi bi-check-lg me-1"></i>Confirmer et publier
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="pt-5"></div>
+</main>
+
 <footer>
-    <?php include 'footer.php'; ?> >
+    <?php include 'footer.php'; ?>
 </footer>
 
-<script src="assets/js/proposer.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
+<script src="assets/js/proposer.js"></script>
 </body>
 </html>

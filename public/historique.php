@@ -96,7 +96,7 @@ $pageTitle = 'Historique des trajets';
             <?php else: ?>
 
                 <?php if (!empty($tripsEnCours)): ?>
-                    <h6 class="mt-4 mb-2 text-info text-uppercase fw-semibold">Trajets en cours</h6>
+                    <h3 class="mt-4 mb-2 text-info text-uppercase fw-semibold"><i class="bi bi-activity"></i> Trajets en cours</h3>
                     <div class="d-flex flex-column gap-3">
                         <?php foreach ($tripsEnCours as $item): ?>
                             <?php include 'components/_card_trip.php'; ?>
@@ -105,7 +105,7 @@ $pageTitle = 'Historique des trajets';
                 <?php endif; ?>
 
                 <?php if (!empty($tripsAVenir)): ?>
-                    <h6 class="mt-4 mb-2 text-success text-uppercase fw-semibold">Trajets à venir</h6>
+                    <h3 class="fw-bold mb-4"><i class="bi bi-calendar text-success me-2"></i>Trajets à venir</h3>
                     <div class="d-flex flex-column gap-3">
                         <?php foreach ($tripsAVenir as $item): ?>
                             <?php include 'components/_card_trip.php'; ?>
@@ -114,7 +114,7 @@ $pageTitle = 'Historique des trajets';
                 <?php endif; ?>
 
                 <?php if (!empty($tripsPasses)): ?>
-                    <h6 class="mt-4 mb-2 text-secondary text-uppercase fw-semibold">Trajets passés</h6>
+                    <h3 class="fw-bold mb-4"><i class="bi bi-archive text-success me-2"></i>Trajets passés</h3>
                     <div class="d-flex flex-column gap-3">
                         <?php foreach ($tripsPasses as $item): ?>
                             <?php include 'components/_card_trip.php'; ?>
