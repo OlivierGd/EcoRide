@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "esbuild public/assets/js/*.js --bundle --outdir=public/assets/js --allow-overwrite",
+    "build": "esbuild public/assets/js/*.js --bundle --outdir=public/assets/js --allow-overwrite --minify",
+    "dev": "esbuild public/assets/js/*.js --bundle --outdir=public/assets/js --allow-overwrite --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

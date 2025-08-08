@@ -1,20 +1,4 @@
-
 services:
-  # db:
-   # image: postgres:16
-   # container_name: ecoride_postgres
-   # restart: unless-stopped
-   # ports:
-   #   - "5433:5432"
-   # environment:
-   #   POSTGRES_DB: ${DB_NAME}
-   #   POSTGRES_USER: ${DB_USER}
-   #   POSTGRES_PASSWORD: ${DB_PASSWORD}
-   # volumes:
-   #   - db_data:/var/lib/postgresql/data
-   # networks:
-   #   - ecoride_net
-
   app:
     build:
       context: ../
@@ -23,14 +7,29 @@ services:
     restart: unless-stopped
     ports:
       - "8081:80"
-   # depends_on:
-   #   - db
     volumes:
       - ../:/var/www/html
+      # Exclure node_modules pour éviter les conflits
+      - /var/www/html/node_modules
     networks:
       - ecoride_net
     env_file:
       - ../.env
+    # Commande pour rebuilder les JS en dev si nécessaire
+    # command: sh -c "npm run build && apache2-foreground"
+
+  # Service optionnel pour watcher les changements JS en dev
+  js-watcher:
+    build:
+      context: ../
+      dockerfile: Dockerfile.dev  # Voir ci-dessous
+    container_name: ecoride_js_watcher
+    volumes:
+      - ../:/app
+    working_dir: /app
+    command: sh -c "npm ci && npm run dev"
+    networks:
+      - ecoride_net
 
 volumes:
   db_data:
