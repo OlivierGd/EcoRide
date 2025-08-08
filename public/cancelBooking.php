@@ -1,11 +1,12 @@
 <?php
 
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once 'functions/auth.php';
-startSession();
-requireAuth();
 
 use Olivierguissard\EcoRide\Model\Bookings;
+
+require_once 'functions/auth.php';
+requireAuth();
+updateActivity();
 
 $bookingId = (int)($_POST['booking_id'] ?? 0);
 $userId = getUserId();

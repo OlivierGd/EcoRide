@@ -6,8 +6,8 @@ use Olivierguissard\EcoRide\Config\Database;
 
 
 require_once __DIR__ . '/functions/auth.php';
-startSession();
 requireAuth();
+updateActivity();
 
 
 // Connexion à la BDD

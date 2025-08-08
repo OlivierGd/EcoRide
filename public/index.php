@@ -1,14 +1,16 @@
 <?php
+require __DIR__ . '/../vendor/autoload.php';
 
 use Olivierguissard\EcoRide\Model\Car;
 use Olivierguissard\EcoRide\Model\Trip;
 use Olivierguissard\EcoRide\Model\Users;
 
-require __DIR__ . '/../vendor/autoload.php';
-
 require_once 'functions/auth.php';
 startSession();
-isAuthenticated();
+// Met à jour l'activité si connecté
+if (isAuthenticated()) {
+    updateActivity();
+}
 
 require_once __DIR__ . '/../src/Helpers/helpers.php';
 

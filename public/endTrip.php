@@ -1,10 +1,10 @@
 <?php
 
 require_once __DIR__ . '/../vendor/autoload.php';
+
 require_once 'functions/auth.php';
-startSession();
-isAuthenticated();
 requireAuth();
+updateActivity();
 
 use Olivierguissard\EcoRide\Model\Trip;
 use Olivierguissard\EcoRide\Model\Bookings;

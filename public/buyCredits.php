@@ -1,10 +1,11 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once 'functions/auth.php';
-requireAuth();
-startSession();
 
 use Olivierguissard\EcoRide\Config\Database;
+
+require_once 'functions/auth.php';
+requireAuth();
+updateActivity();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $userId = getUserId() ?? null;

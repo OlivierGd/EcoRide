@@ -1,9 +1,12 @@
 <?php
 
 require_once __DIR__ . '/../vendor/autoload.php';
+
+use Olivierguissard\EcoRide\Config\Database;
+
 require_once 'functions/auth.php';
-startSession();
 requireAuth();
+updateActivity();
 
 require_once __DIR__ . '/../src/Helpers/helpers.php';
 
@@ -11,8 +14,6 @@ if (!isset($_SESSION['connecte']) || !$_SESSION['connecte']) {
     header('Location: login.php');
     exit;
 }
-
-use Olivierguissard\EcoRide\Config\Database;
 
 $user_id = getUserId();
 $totalCredits = 0;

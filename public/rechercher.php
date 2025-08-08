@@ -9,7 +9,9 @@ use Olivierguissard\EcoRide\Model\Car;
 
 require_once 'functions/auth.php';
 startSession();
-isAuthenticated();
+if (isAuthenticated()) {
+    updateActivity();
+}
 
 require_once __DIR__ . '/../src/Helpers/helpers.php';
 

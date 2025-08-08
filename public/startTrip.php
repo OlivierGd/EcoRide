@@ -1,12 +1,12 @@
 <?php
 
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once 'functions/auth.php';
-startSession();
-isAuthenticated();
-requireAuth();
 
 use Olivierguissard\EcoRide\Model\Trip;
+
+require_once 'functions/auth.php';
+requireAuth();
+updateActivity();
 
 if (!isset($_POST['trip_id'])) {
     header('Location: historique.php?error=missing_trip');

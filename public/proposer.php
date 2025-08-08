@@ -7,8 +7,8 @@ use Olivierguissard\EcoRide\Model\Car;
 use Olivierguissard\EcoRide\Service\CreditService;
 
 require_once 'functions/auth.php';
-startSession();
 requireAuth();
+updateActivity();
 
 require_once __DIR__ . '/../src/Helpers/helpers.php';
 

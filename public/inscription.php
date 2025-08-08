@@ -1,21 +1,20 @@
 <?php
 
+require __DIR__ . '/../vendor/autoload.php';
+
 use Olivierguissard\EcoRide\Config\Database;
 use Olivierguissard\EcoRide\Model\Users;
 
-require __DIR__ . '/../vendor/autoload.php';
-session_start();
-
 require_once 'functions/auth.php';
+session_start();
 if (isAuthenticated()) {
-    header('Location: /profil.php');
+    updateActivity();
+    header('Location: rechercher.php');
     exit;
 }
 
 $pdo = Database::getConnection();
-
 $pageTitle = 'Créer un compte - EcoRide';
-
 
 $error = [];
 $success = false;
@@ -49,7 +48,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($error)) {
         try {
             // Vérifie si l'email existe déjà
-            $stmt = $pdo->prepare('SELECT user_id FROM users WHERE email = ?');
+            $sql = 'SELECT user_id FROM users WHERE email = :email';
+            $stmt = $pdo->prepare($sql);
             $stmt->execute([trim($_POST['email'])]);
 
             if ($stmt->fetchColumn() > 0) {

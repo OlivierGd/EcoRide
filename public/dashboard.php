@@ -8,9 +8,8 @@ use Olivierguissard\EcoRide\Model\CreditsHistory;
 use Olivierguissard\EcoRide\Service\DateFilterService;
 
 require_once 'functions/auth.php';
-startSession();
-isAuthenticated();
 requireAuth();
+updateActivity();
 
 // === Commissions ===
 $commissionsPreset = $_GET['commissions_preset'] ?? null;

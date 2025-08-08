@@ -1,14 +1,15 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once 'functions/auth.php';
-startSession();
-requireAuth();
 
 use Olivierguissard\EcoRide\Model\Bookings;
 use Olivierguissard\EcoRide\Model\Trip;
 use Olivierguissard\EcoRide\Model\Users;
 use Olivierguissard\EcoRide\Model\Payment;
 use Olivierguissard\EcoRide\Service\CreditService;
+
+require_once 'functions/auth.php';
+requireAuth();
+updateActivity();
 
 require_once __DIR__ . '/../src/Helpers/helpers.php';
 
