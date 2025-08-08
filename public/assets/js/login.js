@@ -1,15 +1,1 @@
-// Script pour le toggle du mot de passe existant
-document.getElementById("togglePassword").addEventListener("click", function() {
-    const password = document.getElementById("password");
-    const icon = document.getElementById("passwordIcon");
-
-    if (password.type === "password") {
-        password.type = "text";
-        icon.classList.remove("bi-eye");
-        icon.classList.add("bi-eye-slash");
-    } else {
-        password.type = "password";
-        icon.classList.remove("bi-eye-slash");
-        icon.classList.add("bi-eye");
-    }
-})
+(()=>{document.getElementById("togglePassword").addEventListener("click",function(){let s=document.getElementById("password"),e=document.getElementById("passwordIcon");s.type==="password"?(s.type="text",e.classList.remove("bi-eye"),e.classList.add("bi-eye-slash")):(s.type="password",e.classList.remove("bi-eye-slash"),e.classList.add("bi-eye"))});})();

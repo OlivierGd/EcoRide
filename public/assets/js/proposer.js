@@ -1,279 +1,38 @@
-// proposer.js
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('suggestedTripForm');
-    const publishBtn = document.getElementById('publishSuggestedForm');
-    const confirmModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
-    const confirmBtn = document.getElementById('confirmSubmit');
-    const priceInput = document.getElementById('pricePerPassenger');
-    const placeButtons = document.querySelectorAll('input[name="available_seats"]');
-
-    // Initialisation de l'autocomplétion pour les villes
-    initializeCityAutocomplete();
-
-    // Initialisation de la date minimale (aujourd'hui)
-    initializeDateInput();
-
-    // Mise à jour du calcul de prix
-    function updatePriceCalculation() {
-        const price = parseInt(priceInput.value) || 0;
-        const selectedPlace = document.querySelector('input[name="available_seats"]:checked');
-        const places = selectedPlace ? parseInt(selectedPlace.value) : 3;
-
-        document.getElementById('totalPrice').textContent = price * places;
-        document.getElementById('placeFree').textContent = places;
-    }
-
-    // Écouteurs pour mise à jour du prix
-    priceInput.addEventListener('input', updatePriceCalculation);
-    placeButtons.forEach(button => {
-        button.addEventListener('change', updatePriceCalculation);
-    });
-
-    // Validation du formulaire avant affichage de la modale
-    publishBtn.addEventListener('click', function() {
-        if (validateForm()) {
-            displayConfirmationModal();
-        }
-    });
-
-    // Soumission du formulaire après confirmation
-    confirmBtn.addEventListener('click', function() {
-        form.submit();
-    });
-
-    // Validation personnalisée du formulaire
-    function validateForm() {
-        // Vérification des champs texte
-        const textFields = [
-            { id: 'startCity', message: 'La ville de départ est obligatoire' },
-            { id: 'startLocation', message: 'Le lieu de départ précis est obligatoire' },
-            { id: 'endCity', message: 'La ville de destination est obligatoire' },
-            { id: 'endLocation', message: 'Le lieu d\'arrivée précis est obligatoire' }
-        ];
-
-        for (let field of textFields) {
-            const element = document.getElementById(field.id);
-            if (!element || !element.value.trim()) {
-                showError(field.message);
-                element?.focus();
-                return false;
-            }
-        }
-
-        // Vérification des champs date et time (sans trim)
-        const dateTimeFields = [
-            { id: 'departureDate', message: 'La date de départ est obligatoire' },
-            { id: 'departureTime', message: 'L\'heure de départ est obligatoire' }
-        ];
-
-        for (let field of dateTimeFields) {
-            const element = document.getElementById(field.id);
-            // console.log(`Validation ${field.id}:`, element ? `"${element.value}"` : 'Element not found'); // Debug - à retirer en production
-            if (!element || !element.value) {
-                showError(field.message);
-                element?.focus();
-                return false;
-            }
-        }
-
-        // Vérification de la date (ne peut pas être dans le passé)
-        const dateInput = document.getElementById('departureDate');
-        if (dateInput && dateInput.value) {
-            const selectedDate = new Date(dateInput.value + 'T00:00:00'); // Éviter les problèmes de timezone
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            if (selectedDate < today) {
-                showError('La date ne peut pas être dans le passé');
-                dateInput.focus();
-                return false;
-            }
-        }
-
-        // Vérification des selects de durée
-        const durationHours = document.querySelector('select[name="duration_hours"]');
-        const durationMinutes = document.querySelector('select[name="duration_minutes"]');
-
-        if (!durationHours || !durationMinutes || !durationHours.value || !durationMinutes.value) {
-            showError('Veuillez indiquer la durée estimée du trajet');
-            (durationHours && !durationHours.value ? durationHours : durationMinutes)?.focus();
-            return false;
-        }
-
-        // Vérification du véhicule
-        const vehicleSelect = document.querySelector('select[name="vehicle_id"]');
-        if (!vehicleSelect || !vehicleSelect.value) {
-            showError('Veuillez sélectionner un véhicule');
-            vehicleSelect?.focus();
-            return false;
-        }
-
-        // Vérification du prix
-        const price = parseInt(priceInput.value);
-        if (!price || price <= 0 || price > 1000) { // Limite max raisonnable
-            showError('Le prix doit être entre 1 et 1000 crédits');
-            priceInput.focus();
-            return false;
-        }
-
-        return true;
-    }
-
-    // Affichage de la modale de confirmation
-    function displayConfirmationModal() {
-        const formData = new FormData(form);
-        let modalContent = '<div class="row g-3">';
-
-        // Récupération des données du formulaire
-        const startCity = formData.get('start_city');
-        const startLocation = formData.get('start_location');
-        const endCity = formData.get('end_city');
-        const endLocation = formData.get('end_location');
-        const departureDate = formData.get('departure_date');
-        const departureTime = formData.get('departure_time');
-        const durationHours = formData.get('duration_hours');
-        const durationMinutes = formData.get('duration_minutes');
-        const availableSeats = formData.get('available_seats');
-        const price = formData.get('price_per_passenger');
-        const vehicleSelect = document.querySelector('select[name="vehicle_id"]');
-        const vehicleText = vehicleSelect.options[vehicleSelect.selectedIndex].text;
-
-        // Construction du contenu de la modale
-        modalContent += `
+(()=>{document.addEventListener("DOMContentLoaded",function(){let f=document.getElementById("suggestedTripForm"),E=document.getElementById("publishSuggestedForm"),L=new bootstrap.Modal(document.getElementById("confirmationModal")),C=document.getElementById("confirmSubmit"),m=document.getElementById("pricePerPassenger"),w=document.querySelectorAll('input[name="available_seats"]');T(),D();function p(){let e=parseInt(m.value)||0,t=document.querySelector('input[name="available_seats"]:checked'),s=t?parseInt(t.value):3;document.getElementById("totalPrice").textContent=e*s,document.getElementById("placeFree").textContent=s}m.addEventListener("input",p),w.forEach(e=>{e.addEventListener("change",p)}),E.addEventListener("click",function(){I()&&B()}),C.addEventListener("click",function(){f.submit()});function I(){let e=[{id:"startCity",message:"La ville de d\xE9part est obligatoire"},{id:"startLocation",message:"Le lieu de d\xE9part pr\xE9cis est obligatoire"},{id:"endCity",message:"La ville de destination est obligatoire"},{id:"endLocation",message:"Le lieu d'arriv\xE9e pr\xE9cis est obligatoire"}];for(let r of e){let o=document.getElementById(r.id);if(!o||!o.value.trim())return d(r.message),o?.focus(),!1}let t=[{id:"departureDate",message:"La date de d\xE9part est obligatoire"},{id:"departureTime",message:"L'heure de d\xE9part est obligatoire"}];for(let r of t){let o=document.getElementById(r.id);if(!o||!o.value)return d(r.message),o?.focus(),!1}let s=document.getElementById("departureDate");if(s&&s.value){let r=new Date(s.value+"T00:00:00"),o=new Date;if(o.setHours(0,0,0,0),r<o)return d("La date ne peut pas \xEAtre dans le pass\xE9"),s.focus(),!1}let n=document.querySelector('select[name="duration_hours"]'),i=document.querySelector('select[name="duration_minutes"]');if(!n||!i||!n.value||!i.value)return d("Veuillez indiquer la dur\xE9e estim\xE9e du trajet"),(n&&!n.value?n:i)?.focus(),!1;let a=document.querySelector('select[name="vehicle_id"]');if(!a||!a.value)return d("Veuillez s\xE9lectionner un v\xE9hicule"),a?.focus(),!1;let l=parseInt(m.value);return!l||l<=0||l>1e3?(d("Le prix doit \xEAtre entre 1 et 1000 cr\xE9dits"),m.focus(),!1):!0}function B(){let e=new FormData(f),t='<div class="row g-3">',s=e.get("start_city"),n=e.get("start_location"),i=e.get("end_city"),a=e.get("end_location"),l=e.get("departure_date"),r=e.get("departure_time"),o=e.get("duration_hours"),c=e.get("duration_minutes"),v=e.get("available_seats"),h=e.get("price_per_passenger"),x=document.querySelector('select[name="vehicle_id"]'),k=x.options[x.selectedIndex].text;t+=`
             <div class="col-md-6">
-                <h6 class="text-muted mb-2">Itinéraire</h6>
-                <p class="mb-1"><i class="bi bi-geo-alt text-success me-1"></i> <strong>${startCity}</strong></p>
-                <p class="mb-1 small text-muted ms-3">${startLocation}</p>
-                <p class="mb-1"><i class="bi bi-arrow-down text-muted me-1"></i> <strong>${endCity}</strong></p>
-                <p class="small text-muted ms-3">${endLocation}</p>
+                <h6 class="text-muted mb-2">Itin\xE9raire</h6>
+                <p class="mb-1"><i class="bi bi-geo-alt text-success me-1"></i> <strong>${s}</strong></p>
+                <p class="mb-1 small text-muted ms-3">${n}</p>
+                <p class="mb-1"><i class="bi bi-arrow-down text-muted me-1"></i> <strong>${i}</strong></p>
+                <p class="small text-muted ms-3">${a}</p>
             </div>
             <div class="col-md-6">
                 <h6 class="text-muted mb-2">Date et heure</h6>
-                <p class="mb-1"><i class="bi bi-calendar-event text-success me-1"></i> ${formatDate(departureDate)}</p>
-                <p class="mb-1"><i class="bi bi-clock text-success me-1"></i> ${departureTime}</p>
-                <p class="small text-muted"><i class="bi bi-hourglass-split me-1"></i> Durée : ${durationHours}h${durationMinutes.padStart(2, '0')}</p>
+                <p class="mb-1"><i class="bi bi-calendar-event text-success me-1"></i> ${S(l)}</p>
+                <p class="mb-1"><i class="bi bi-clock text-success me-1"></i> ${r}</p>
+                <p class="small text-muted"><i class="bi bi-hourglass-split me-1"></i> Dur\xE9e : ${o}h${c.padStart(2,"0")}</p>
             </div>
             <div class="col-md-6">
-                <h6 class="text-muted mb-2">Véhicule</h6>
-                <p class="mb-1"><i class="bi bi-car-front text-success me-1"></i> ${vehicleText}</p>
+                <h6 class="text-muted mb-2">V\xE9hicule</h6>
+                <p class="mb-1"><i class="bi bi-car-front text-success me-1"></i> ${k}</p>
             </div>
             <div class="col-md-6">
                 <h6 class="text-muted mb-2">Places et prix</h6>
-                <p class="mb-1"><i class="bi bi-people text-success me-1"></i> ${availableSeats} places disponibles</p>
-                <p class="mb-1"><i class="bi bi-currency-euro text-success me-1"></i> ${price} crédits par passager</p>
-                <p class="small text-success fw-bold">Total maximum : ${price * availableSeats} crédits</p>
+                <p class="mb-1"><i class="bi bi-people text-success me-1"></i> ${v} places disponibles</p>
+                <p class="mb-1"><i class="bi bi-currency-euro text-success me-1"></i> ${h} cr\xE9dits par passager</p>
+                <p class="small text-success fw-bold">Total maximum : ${h*v} cr\xE9dits</p>
             </div>
-        `;
-
-        // Ajout des préférences si cochées
-        const preferences = [];
-        if (formData.get('no_smoking')) preferences.push('🚭 Non-fumeur');
-        if (formData.get('music_allowed')) preferences.push('🎵 Musique autorisée');
-        if (formData.get('discuss_allowed')) preferences.push('💬 Discussions bienvenues');
-
-        if (preferences.length > 0) {
-            modalContent += `
+        `;let u=[];e.get("no_smoking")&&u.push("\u{1F6AD} Non-fumeur"),e.get("music_allowed")&&u.push("\u{1F3B5} Musique autoris\xE9e"),e.get("discuss_allowed")&&u.push("\u{1F4AC} Discussions bienvenues"),u.length>0&&(t+=`
                 <div class="col-12">
-                    <h6 class="text-muted mb-2">Préférences</h6>
-                    <p class="small">${preferences.join(', ')}</p>
+                    <h6 class="text-muted mb-2">Pr\xE9f\xE9rences</h6>
+                    <p class="small">${u.join(", ")}</p>
                 </div>
-            `;
-        }
-
-        // Ajout du commentaire s'il existe
-        const comment = formData.get('comment');
-        if (comment && comment.trim()) {
-            modalContent += `
+            `);let g=e.get("comment");g&&g.trim()&&(t+=`
                 <div class="col-12">
                     <h6 class="text-muted mb-2">Commentaire</h6>
-                    <p class="small fst-italic">"${escapeHtml(comment.trim())}"</p>
+                    <p class="small fst-italic">"${_(g.trim())}"</p>
                 </div>
-            `;
-        }
-
-        modalContent += '</div>';
-        document.getElementById('modalText').innerHTML = modalContent;
-        confirmModal.show();
-    }
-
-    // Initialisation de la date minimale
-    function initializeDateInput() {
-        const dateInput = document.getElementById('departureDate');
-        if (dateInput && !dateInput.value) {
-            dateInput.min = getTodayDate();
-        }
-    }
-
-    // Fonction pour obtenir la date d'aujourd'hui au format YYYY-MM-DD
-    function getTodayDate() {
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
-
-    // Fonction pour formater la date en français
-    function formatDate(dateString) {
-        try {
-            const date = new Date(dateString + 'T00:00:00'); // Éviter problèmes timezone
-            return date.toLocaleDateString('fr-FR', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-        } catch (error) {
-            console.warn('Erreur formatage date:', error);
-            return dateString; // Fallback
-        }
-    }
-
-    // Fonction pour afficher les erreurs
-    function showError(message) {
-        const errorAlert = document.getElementById('errorAlert');
-        const errorMessage = document.getElementById('errorMessage');
-
-        if (errorAlert && errorMessage) {
-            errorMessage.textContent = message;
-            errorAlert.classList.remove('d-none');
-            errorAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-            // Masquer l'erreur après 5 secondes
-            setTimeout(() => {
-                errorAlert.classList.add('d-none');
-            }, 5000);
-        } else {
-            alert(message);
-        }
-    }
-
-    // Initialisation de l'autocomplétion des villes
-    function initializeCityAutocomplete() {
-        // Création des conteneurs de suggestions s'ils n'existent pas
-        createSuggestionContainer('startCity', 'startCitySuggestions');
-        createSuggestionContainer('endCity', 'endCitySuggestions');
-
-        // Configuration de l'autocomplétion
-        setupCustomAutocomplete('startCity', 'startCitySuggestions');
-        setupCustomAutocomplete('endCity', 'endCitySuggestions');
-    }
-
-    // Création du conteneur de suggestions
-    function createSuggestionContainer(inputId, suggestionId) {
-        const input = document.getElementById(inputId);
-        if (!input) return;
-
-        const parent = input.closest('.input-group');
-        if (!parent) return;
-
-        // Vérifier si le conteneur existe déjà
-        if (document.getElementById(suggestionId)) return;
-
-        const suggestionBox = document.createElement('div');
-        suggestionBox.id = suggestionId;
-        suggestionBox.className = 'suggestion-box';
-        suggestionBox.style.cssText = `
+            `),t+="</div>",document.getElementById("modalText").innerHTML=t,L.show()}function D(){let e=document.getElementById("departureDate");e&&!e.value&&(e.min=$())}function $(){let e=new Date,t=e.getFullYear(),s=String(e.getMonth()+1).padStart(2,"0"),n=String(e.getDate()).padStart(2,"0");return`${t}-${s}-${n}`}function S(e){try{return new Date(e+"T00:00:00").toLocaleDateString("fr-FR",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}catch(t){return console.warn("Erreur formatage date:",t),e}}function d(e){let t=document.getElementById("errorAlert"),s=document.getElementById("errorMessage");t&&s?(s.textContent=e,t.classList.remove("d-none"),t.scrollIntoView({behavior:"smooth",block:"center"}),setTimeout(()=>{t.classList.add("d-none")},5e3)):alert(e)}function T(){y("startCity","startCitySuggestions"),y("endCity","endCitySuggestions"),b("startCity","startCitySuggestions"),b("endCity","endCitySuggestions")}function y(e,t){let s=document.getElementById(e);if(!s)return;let n=s.closest(".input-group");if(!n||document.getElementById(t))return;let i=document.createElement("div");i.id=t,i.className="suggestion-box",i.style.cssText=`
             position: absolute;
             top: 100%;
             left: 0;
@@ -287,113 +46,9 @@ document.addEventListener('DOMContentLoaded', function() {
             z-index: 1000;
             display: none;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        `;
-
-        // Positionner le parent en relatif
-        parent.style.position = 'relative';
-        parent.appendChild(suggestionBox);
-    }
-
-    // Configuration de l'autocomplétion personnalisée
-    function setupCustomAutocomplete(inputId, suggestionBoxId) {
-        const input = document.getElementById(inputId);
-        const suggestionBox = document.getElementById(suggestionBoxId);
-
-        if (!input || !suggestionBox) {
-            console.error(`Éléments non trouvés: ${inputId} ou ${suggestionBoxId}`);
-            return;
-        }
-
-        let debounceTimer;
-
-        input.addEventListener('input', () => {
-            const query = input.value.trim();
-            clearTimeout(debounceTimer);
-
-            if (query.length < 2) {
-                suggestionBox.style.display = 'none';
-                suggestionBox.innerHTML = '';
-                return;
-            }
-
-            debounceTimer = setTimeout(async () => {
-                try {
-                    const response = await fetch(
-                        `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(query)}&fields=nom,codeDepartement&boost=population&limit=8`
-                    );
-
-                    if (!response.ok) {
-                        throw new Error('Erreur réseau');
-                    }
-
-                    const cities = await response.json();
-                    suggestionBox.innerHTML = '';
-
-                    if (cities.length === 0) {
-                        suggestionBox.style.display = 'none';
-                        return;
-                    }
-
-                    cities.forEach(city => {
-                        const suggestionItem = document.createElement('div');
-                        suggestionItem.className = 'suggestion-item';
-                        suggestionItem.style.cssText = `
+        `,n.style.position="relative",n.appendChild(i)}function b(e,t){let s=document.getElementById(e),n=document.getElementById(t);if(!s||!n){console.error(`\xC9l\xE9ments non trouv\xE9s: ${e} ou ${t}`);return}let i;s.addEventListener("input",()=>{let a=s.value.trim();if(clearTimeout(i),a.length<2){n.style.display="none",n.innerHTML="";return}i=setTimeout(async()=>{try{let l=await fetch(`https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(a)}&fields=nom,codeDepartement&boost=population&limit=8`);if(!l.ok)throw new Error("Erreur r\xE9seau");let r=await l.json();if(n.innerHTML="",r.length===0){n.style.display="none";return}r.forEach(o=>{let c=document.createElement("div");c.className="suggestion-item",c.style.cssText=`
                             padding: 10px 15px;
                             cursor: pointer;
                             border-bottom: 1px solid #f8f9fa;
                             transition: background-color 0.2s;
-                        `;
-                        suggestionItem.textContent = `${city.nom} (${city.codeDepartement})`;
-
-                        suggestionItem.addEventListener('mouseenter', () => {
-                            suggestionItem.style.backgroundColor = '#f8f9fa';
-                        });
-
-                        suggestionItem.addEventListener('mouseleave', () => {
-                            suggestionItem.style.backgroundColor = 'white';
-                        });
-
-                        suggestionItem.addEventListener('click', () => {
-                            input.value = city.nom;
-                            suggestionBox.style.display = 'none';
-                            suggestionBox.innerHTML = '';
-                            // Déclencher l'événement input pour la validation
-                            input.dispatchEvent(new Event('input', { bubbles: true }));
-                        });
-
-                        suggestionBox.appendChild(suggestionItem);
-                    });
-
-                    suggestionBox.style.display = 'block';
-                } catch (error) {
-                    console.error('Erreur lors de l\'autocomplétion :', error);
-                    suggestionBox.style.display = 'none';
-                }
-            }, 300);
-        });
-
-        // Fermer les suggestions quand on clique ailleurs
-        document.addEventListener('click', (event) => {
-            if (!input.contains(event.target) && !suggestionBox.contains(event.target)) {
-                suggestionBox.style.display = 'none';
-            }
-        });
-
-        // Fermer avec Escape
-        input.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                suggestionBox.style.display = 'none';
-            }
-        });
-    }
-
-    // Fonction pour échapper le HTML (sécurité)
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    // Initialisation du calcul de prix au chargement
-    updatePriceCalculation();
-});
+                        `,c.textContent=`${o.nom} (${o.codeDepartement})`,c.addEventListener("mouseenter",()=>{c.style.backgroundColor="#f8f9fa"}),c.addEventListener("mouseleave",()=>{c.style.backgroundColor="white"}),c.addEventListener("click",()=>{s.value=o.nom,n.style.display="none",n.innerHTML="",s.dispatchEvent(new Event("input",{bubbles:!0}))}),n.appendChild(c)}),n.style.display="block"}catch(l){console.error("Erreur lors de l'autocompl\xE9tion :",l),n.style.display="none"}},300)}),document.addEventListener("click",a=>{!s.contains(a.target)&&!n.contains(a.target)&&(n.style.display="none")}),s.addEventListener("keydown",a=>{a.key==="Escape"&&(n.style.display="none")})}function _(e){let t=document.createElement("div");return t.textContent=e,t.innerHTML}p()});})();
