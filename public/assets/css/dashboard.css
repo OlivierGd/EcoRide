@@ -1,0 +1,49 @@
+:root {
+    --sidebar-width: 220px;
+}
+
+/* Sidebar fixe */
+.sidebar-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
+    background-color: #212529; /* bg-dark */
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1rem;
+}
+
+/* Liens visibles sur fond sombre */
+.sidebar-fixed .nav-link {
+    color: #fff;
+    opacity: .9;
+}
+.sidebar-fixed .nav-link:hover,
+.sidebar-fixed .nav-link:focus {
+    color: #fff;
+    opacity: 1;
+    text-decoration: none;
+}
+
+
+/* Le contenu prend la place restante */
+.main-with-sidebar {
+    margin-left: var(--sidebar-width); /* pousse le contenu à droite */
+    padding: 1rem;
+}
+
+/* Responsive : sidebar cachée et contenu prend toute la largeur */
+@media (max-width: 768px) {
+    .sidebar-fixed {
+        position: static;
+        width: 100%;
+        height: auto;
+    }
+    .main-with-sidebar {
+        margin-left: 0;
+    }
+}

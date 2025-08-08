@@ -138,7 +138,7 @@ class CreditService
             ]);
 
             // Historique
-            $sql = "INSERT INTO postgres.public.credits_history(user_id, amounts, status, balance_before, balance_after, created_at) VALUES (:user_id, :amounts, :status, :before, :after, NOW())";
+            $sql = "INSERT INTO credits_history(user_id, amounts, status, balance_before, balance_after, created_at) VALUES (:user_id, :amounts, :status, :before, :after, NOW())";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 ':user_id' => $userId,
@@ -147,6 +147,7 @@ class CreditService
                 ':before' => $balanceBefore,
                 ':after' => $balanceAfter
             ]);
+
 
             $pdo->commit();
             return true;
