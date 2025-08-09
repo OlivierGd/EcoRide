@@ -13,7 +13,7 @@ function startSession(): void {
             'lifetime' => 0,
             'path' => '/',
             'domain' => '',
-            'secure' => false, // true si HTTPS en production
+            'secure' => strpos($_SERVER['HTTP_HOST'] ?? '', '.fly.dev') !== false,
             'httponly' => true,
             'samesite' => 'Lax'
         ]);
@@ -112,7 +112,7 @@ function createRememberToken(int $userId): void {
             'expires' => strtotime($tokenExpiry),
             'path' => '/',
             'domain' => '',
-            'secure' => false,  // true si HTTPS en production
+            'secure' => strpos($_SERVER['HTTP_HOST'] ?? '', '.fly.dev') !== false,
             'httponly' => true,
             'samesite' => 'Lax'
         ]);
@@ -136,7 +136,7 @@ function limitUserTokens(int $userId, int $maxTokens): void {
                     WHERE token_id IN ( 
                     SELECT token_id FROM user_tokens
                     WHERE user_id = ? AND expires_at > NOW() AND is_active = true
-                    ORDER BY last_used_at ASC LIMIT ?";
+                    ORDER BY last_used ASC LIMIT ?)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$userId, $count - $maxTokens +1]);
         }
@@ -147,7 +147,7 @@ function limitUserTokens(int $userId, int $maxTokens): void {
 
 // Vérifie le token "Remeber Me"
 function checkRememberToken(): void {
-    if (isset($_COOKIE['ecoride_remember'])) {
+    if (!isset($_COOKIE['ecoride_remember'])) {
         return;
     }
     $token = $_COOKIE['ecoride_remember'];
@@ -174,7 +174,7 @@ function checkRememberToken(): void {
                 $_SESSION['auto_login'] = true;  //Marque comme connexion automatique
 
                 // Met à jour last_used
-                $sql = "UPDATE user_tokens SET last_used_at = NOW() WHERE token_hash = ?";
+                $sql = "UPDATE user_tokens SET last_used = NOW() WHERE token_hash = ?";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([$tokenHash]);
 
@@ -182,7 +182,14 @@ function checkRememberToken(): void {
                 logLogin($tokenUser['user_id'], 'remember_token', true);
         } else {
                 // Token invalide, supprime le cookie
-                setcookie('ecoride_remember', '', time() - 3600, '/');
+                setcookie('ecoride_remember', '', [
+                    'expires' => time() - 3600,
+                    'path' => '/',
+                    'domain' => '',
+                    'secure' => strpos($_SERVER['HTTP_HOST'] ?? '', '.fly.dev') !== false,
+                    'httponly' => true,
+                    'samesite' => 'Lax'
+                ]);
             }
     } catch (Exception $e) {
             error_log("Erreur vérification token EcoRide : " . $e->getMessage());
@@ -204,7 +211,7 @@ function getDeviceInfo(): string {
     return $deviceType . ' - ' . substr($userAgent, 0, 100);
 }
 
-// Log des connexion
+// Log des connexions
 function logLogin(int $userId, string $method, bool $success): void {
     try {
         $pdo = Database::getConnection();
@@ -236,7 +243,14 @@ function logoutUser(): void
                 error_log("Erreur désactivation du token EcoRide : " . $e->getMessage());
             }
             // Supprime le cookie
-            setcookie('ecoride_remember', '', time() - 3600, '/');
+            setcookie('ecoride_remember', '', [
+                'expires' => time() - 3600,
+                'path' => '/',
+                'domain' => '',
+                'secure' => strpos($_SERVER['HTTP_HOST'] ?? '', '.fly.dev') !== false,
+                'httponly' => true,
+                'samesite' => 'Lax'
+            ]);
         }
     }
     // Supprime la session
