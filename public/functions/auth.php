@@ -112,7 +112,7 @@ function createRememberToken(int $userId): void {
             'expires' => strtotime($tokenExpiry),
             'path' => '/',
             'domain' => '',
-            'secure' => strpos($_SERVER['HTTP_HOST'] ?? '', '.fly.dev') !== false,
+            'secure' => str_contains($_SERVER['HTTP_HOST'] ?? '', '.fly.dev'),
             'httponly' => true,
             'samesite' => 'Lax'
         ]);
@@ -186,7 +186,7 @@ function checkRememberToken(): void {
                     'expires' => time() - 3600,
                     'path' => '/',
                     'domain' => '',
-                    'secure' => strpos($_SERVER['HTTP_HOST'] ?? '', '.fly.dev') !== false,
+                    'secure' => str_contains($_SERVER['HTTP_HOST'] ?? '', '.fly.dev') !== false,
                     'httponly' => true,
                     'samesite' => 'Lax'
                 ]);
@@ -247,7 +247,7 @@ function logoutUser(): void
                 'expires' => time() - 3600,
                 'path' => '/',
                 'domain' => '',
-                'secure' => strpos($_SERVER['HTTP_HOST'] ?? '', '.fly.dev') !== false,
+                'secure' => str_contains($_SERVER['HTTP_HOST'] ?? '', '.fly.dev') !== false,
                 'httponly' => true,
                 'samesite' => 'Lax'
             ]);
