@@ -147,11 +147,7 @@ class Car
                     $this->marque,
                     $this->modele,
                     $this->carburant,
-                    $this->immatriculation,
-                    $this->places,
-                    $this->actif,
-                    $this->vehicleId
-                ]);
+                    $this->immatriculation ]);
 
             } else {
                 $sql = "INSERT INTO vehicule (id_conducteur, marque, modele, type_carburant,plaque_immatriculation, nbr_places, actif, date_creation) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";

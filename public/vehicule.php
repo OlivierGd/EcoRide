@@ -9,9 +9,7 @@ startSession();
 requireAuth();
 updateActivity();
 
-require_once __DIR__ . '/../src/Model/Car.php';
 require_once __DIR__ . '/../src/Helpers/helpers.php';
-
 
 // Si le formulaire est soumis
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -21,11 +19,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data = array_intersect_key($_POST, array_flip(['id_vehicule', 'marque', 'modele', 'type_carburant', 'nbr_places', 'plaque_immatriculation']));
         $voiture = Car::findCarById((int)$data['id_vehicule']);
 
-        $voiture->marque = htmlspecialchars(trim($data['marque']));
-        $voiture->modele = trim($data['modele']);
-        $voiture->carburant = trim($data['type_carburant']);
-        $voiture->places = (int)$data['nbr_places'];
-        $voiture->immatriculation = trim($data['plaque_immatriculation']);
+        $voiture-> setMarque(htmlspecialchars(trim($data['marque'])));
+        $voiture->setModele(trim($data['modele']));
+        $voiture->setCarburant(trim($data['type_carburant']));
+        $voiture->setPlaces((int)$data['nbr_places']);
+        $voiture->setImmatriculation(trim($data['plaque_immatriculation']));
 
         if ($voiture->validateCar()) {
             if ($voiture->saveVehicleToDatabase()) {
@@ -34,23 +32,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['flash_error'] = 'Erreur lors de la modification du véhicule';
             }
         } else {
-            $_SESSION['flash_error'] = implode('<br>', $voiture->errors);
+            $_SESSION['flash_error'] = implode('<br>', $voiture->getErrors());
         }
     } else {
         // Ajout d'un nouveau véhicule
         $data = array_intersect_key($_POST, array_flip(['marque', 'modele', 'type_carburant', 'nbr_places', 'plaque_immatriculation']));
-        $voiture = new Car($_POST);
-        $voiture->user_id = getUserId();
+        $data['user_id'] = getUserId();
+
+        $voiture = new Car($data);
 
         if ($voiture->validateCar()) {
             if ($voiture->saveVehicleToDatabase()) {
                 $_SESSION['flash_success'] = 'Véhicule ajouté avec succès !';
             } else {
-                $_SESSION['flash_error'] = implode('<br>', $voiture->errors);
+                $_SESSION['flash_error'] = implode('<br>', $voiture->getErrors());;
                 $_SESSION['form_data'] = $_POST;
             }
         } else {
-            $_SESSION['flash_error'] = implode('<br>', $voiture->errors);
+            $_SESSION['flash_error'] = implode('<br>', $voiture->getErrors());;
             $_SESSION['form_data'] = $_POST;
         }
         header('Location: vehicule.php');
@@ -131,7 +130,7 @@ $pageTitle = 'Mes véhicules';
                             class="btn btn-link text-muted p-0"
                             data-bs-toggle="modal"
                             data-bs-target="#editVehiculeModal"
-                            data-id="<?= htmlspecialchars($vehicule->getVehiculeId()) ?>"
+                            data-id="<?= htmlspecialchars($vehicule->getVehicleId()) ?>"
                             data-marque="<?= htmlspecialchars($vehicule->getMarque()) ?>"
                             data-modele="<?= htmlspecialchars($vehicule->getModele()) ?>"
                             data-carburant="<?= htmlspecialchars($vehicule->getCarburant()) ?>"

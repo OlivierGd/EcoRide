@@ -17,6 +17,15 @@ $userID = getUserId();
 $voyages = Trip::findTripsByDriver($userID);
 $vehicles = Car::findActiveVehiclesByUser($userID);
 
+// Prépa des données des véhicules pour JavaScript
+$vehicleData = [];
+foreach ($vehicles as $vehicle) {
+    $vehicleData[] = [
+            'id' => $vehicle->getVehicleId(),
+            'places'=> $vehicle->getPlaces(),
+    ];
+}
+
 // Adapter l'affichage si pas de véhicule
 $hasVehicles = !empty($vehicles);
 $canCreateTrip = $hasVehicles; // Peut créer un trajet seulement s'il a des véhicules
@@ -138,7 +147,7 @@ $pageTitle = 'Proposer un trajet - EcoRide';
             <a class="navbar-brand" href="index.php">
                 <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="60" class="d-inline-block align-text-center rounded">
             </a>
-            <h2 class="fw-bold mb-1 text-success">Proposer un trajet</h2>
+            <h2 class="fw-bold mb-1 text-success">Proposer un voyage</h2>
             <?= displayInitialsButton(); ?>
         </div>
     </nav>
@@ -311,12 +320,12 @@ $pageTitle = 'Proposer un trajet - EcoRide';
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label text-muted small mb-2">Véhicule utilisé</label>
-                        <select class="form-select bg-light border-0 rounded-3" name="vehicle_id" required>
+                        <select class="form-select bg-light border-0 rounded-3" name="vehicle_id" id="vehicleSelect" required>
                             <?php if ($hasVehicles): ?>
                                 <option value="" disabled selected>Choisissez votre véhicule</option>
                                 <?php foreach ($vehicles as $vehicle): ?>
-                                    <option value="<?= htmlspecialchars($vehicle->id) ?>">
-                                        <?= htmlspecialchars($vehicle->marque . ' ' . $vehicle->modele . ' (' . $vehicle->carburant . ')') ?>
+                                    <option value="<?= htmlspecialchars($vehicle->getVehicleId()) ?>">
+                                        <?= htmlspecialchars($vehicle->getMarque() . ' ' . $vehicle->getModele() . ' (' . $vehicle->getCarburant() . ')') ?>
                                     </option>
                                 <?php endforeach; ?>
                             <?php else: ?>
@@ -331,19 +340,14 @@ $pageTitle = 'Proposer un trajet - EcoRide';
                         <?php endif; ?>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label text-muted small mb-2">Places disponibles</label>
-                        <div class="btn-group w-100" role="group">
-                            <input type="radio" class="btn-check" name="available_seats" id="place1" value="1">
-                            <label class="btn btn-outline-success flex-fill" for="place1">1</label>
-                            <input type="radio" class="btn-check" name="available_seats" id="place2" value="2">
-                            <label class="btn btn-outline-success flex-fill" for="place2">2</label>
-                            <input type="radio" class="btn-check" name="available_seats" id="place3" value="3" checked>
-                            <label class="btn btn-outline-success flex-fill" for="place3">3</label>
-                            <input type="radio" class="btn-check" name="available_seats" id="place4" value="4">
-                            <label class="btn btn-outline-success flex-fill" for="place4">4</label>
-                            <input type="radio" class="btn-check" name="available_seats" id="place5" value="5">
-                            <label class="btn btn-outline-success flex-fill" for="place5">5</label>
-                        </div>
+                        <label class="form-label text-muted small mb-2">Places disponibles pour les passagers</label>
+                        <select class="form-select bg-light border-0 rounded-3" name="available_seats" id="placesSelect" required>
+                            <option value="" disabled selected>Sélectionnez d'abord un véhicule</option>
+                        </select>
+                        <small class="text-muted mt-1 d-block">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Nombre de places que vous proposez aux passagers
+                        </small>
                     </div>
                 </div>
             </div>
@@ -443,6 +447,7 @@ $pageTitle = 'Proposer un trajet - EcoRide';
             <?php endif; ?>
         </div>
     </form>
+    <div class="container pb-5"></div>
 
     <!-- Modale de confirmation -->
     <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
@@ -480,6 +485,10 @@ $pageTitle = 'Proposer un trajet - EcoRide';
     <?php include 'footer.php'; ?>
 </footer>
 
+<script>
+    // Données des véhicules passées du PHP vers JavaScript
+    const vehiclesData = <?= json_encode($vehicleData) ?>;
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/js/cities-autocomplete.js"></script>
 <script src="assets/js/proposer.js"></script>

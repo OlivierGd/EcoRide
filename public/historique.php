@@ -115,7 +115,7 @@ $pageTitle = 'Historique des trajets';
                 <?php endif; ?>
 
                 <?php if (!empty($tripsPasses)): ?>
-                    <h3 class="fw-bold mb-4"><i class="bi bi-archive text-success me-2"></i>Trajets passés</h3>
+                    <h3 class="fw-bold m-4"><i class="bi bi-archive text-success me-2"></i>Trajets passés</h3>
                     <div class="d-flex flex-column gap-3">
                         <?php foreach ($tripsPasses as $item): ?>
                             <?php include 'components/_card_trip.php'; ?>
