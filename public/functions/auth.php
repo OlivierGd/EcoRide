@@ -184,7 +184,7 @@ function logLogin(int $userId, string $method, bool $success): void {
         $stmt->execute([
             $userId,
             $method,
-            $success,
+            $success ? 'true' : 'false',
             $_SERVER['REMOTE_ADDR'] ?? null,
             $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown'
         ]);

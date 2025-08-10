@@ -33,10 +33,20 @@ if (!empty($_POST['emailUser']) && !empty($_POST['passwordUser'])) {
         $stmt->execute([$email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        $erreur = 'Adresse e-mail ou mot de passe incorrect';
-        // Log de la tentative de connexion échoué
-        if ($user) {
-            logLogin($user['user_id'], 'password', false);
+        if ($user && password_verify($password, $user['password'])) {
+            // Connecter l'utilisateur avec toutes ses données
+            loginUserComplete($user, $remember);
+            header('Location: rechercher.php');
+            exit;
+
+        } else {
+            // Connexion échouée
+            $erreur = 'Adresse e-mail ou mot de passe incorrect';
+
+            // Log de la tentative échouée
+            if ($user) {
+                logLogin($user['user_id'], 'password', false);
+            }
         }
 
     } catch (Exception $e) {

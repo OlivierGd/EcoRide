@@ -10,13 +10,13 @@ services:
       - "8081:80"
     volumes:
       - ../:/var/www/html
-    # Supprimé depends_on: db car vous utilisez Supabase
     networks:
       - ecoride_net
+    env_file:
+      - ../.env
     environment:
-      # Mode avec Supabase (recommandé pour votre cas)
+      # Mode avec Supabase
       APP_ENV: docker_development
-      DATABASE_URL: ${DATABASE_URL}
 
       # Alternative: Mode avec DB locale
       # Décommentez ces lignes et commentez DATABASE_URL pour utiliser la DB locale
@@ -53,8 +53,8 @@ services:
 #    profiles:
 #      - local-db
 
-volumes:
-  db_data:
+#volumes:
+ # db_data:
 
 networks:
   ecoride_net:

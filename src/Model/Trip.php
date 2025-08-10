@@ -171,9 +171,25 @@ class Trip
     {
         if (is_string($this->estimatedDuration) && $this->estimatedDuration !== '') {
             try {
+                // Si le format est "HH:MM:SS", convertir en format ISO 8601
+                if (preg_match('/^(\d{1,2}):(\d{2}):(\d{2})$/', $this->estimatedDuration, $matches)) {
+                    $hours = $matches[1];
+                    $minutes = $matches[2];
+                    $seconds = $matches[3];
+                    $isoFormat = "PT{$hours}H{$minutes}M{$seconds}S";
+                    return new \DateInterval($isoFormat);
+                }
+
+                // Si déjà au format ISO 8601 (PT1H30M)
+                if (str_starts_with($this->estimatedDuration, 'PT')) {
+                    return new \DateInterval($this->estimatedDuration);
+                }
+
+                // Sinon, essayer le format original
                 return new \DateInterval($this->estimatedDuration);
+
             } catch (\Exception $e) {
-                error_log("Erreur DateInterval: " . $e->getMessage());
+                error_log("Erreur DateInterval: " . $e->getMessage() . " pour durée: " . $this->estimatedDuration);
                 return null;
             }
         }

@@ -119,11 +119,11 @@ $pageTitle = 'Mes véhicules';
                     <i class="bi bi-car-front-fill text-primary fs-5"></i>
                 </div>
                 <div class="flex-grow-1">
-                    <h6 class="mb-1 fw-semibold"><?= htmlspecialchars($vehicule->marque . ' ' . $vehicule->modele) ?></h6>
+                    <h6 class="mb-1 fw-semibold"><?= htmlspecialchars($vehicule->getMarque() . ' ' . $vehicule->getModele()) ?></h6>
                     <div class="d-flex align-items-center flex-wrap">
-                        <span class="badge bg-success-subtle text-success border border-success me-2"><?= htmlspecialchars($vehicule->carburant) ?></span>
-                        <small class="text-muted me-2">Places disponibles max : <?= htmlspecialchars($vehicule->places) ?></small>
-                        <small class="text-muted">Immatriculation : <?= htmlspecialchars($vehicule->immatriculation) ?></small>
+                        <span class="badge bg-success-subtle text-success border border-success me-2"><?= htmlspecialchars($vehicule->getCarburant()) ?></span>
+                        <small class="text-muted me-2">Places disponibles max : <?= htmlspecialchars($vehicule->getPlaces()) ?></small>
+                        <small class="text-muted">Immatriculation : <?= htmlspecialchars($vehicule->getImmatriculation()) ?></small>
                     </div>
                 </div>
                 <div class="ms-2">
@@ -131,12 +131,12 @@ $pageTitle = 'Mes véhicules';
                             class="btn btn-link text-muted p-0"
                             data-bs-toggle="modal"
                             data-bs-target="#editVehiculeModal"
-                            data-id="<?= htmlspecialchars($vehicule->id) ?>"
-                            data-marque="<?= htmlspecialchars($vehicule->marque) ?>"
-                            data-modele="<?= htmlspecialchars($vehicule->modele) ?>"
-                            data-carburant="<?= htmlspecialchars($vehicule->carburant) ?>"
-                            data-places="<?= htmlspecialchars($vehicule->places) ?>"
-                            data-immatriculation="<?= htmlspecialchars($vehicule->immatriculation) ?>">
+                            data-id="<?= htmlspecialchars($vehicule->getVehiculeId()) ?>"
+                            data-marque="<?= htmlspecialchars($vehicule->getMarque()) ?>"
+                            data-modele="<?= htmlspecialchars($vehicule->getModele()) ?>"
+                            data-carburant="<?= htmlspecialchars($vehicule->getCarburant()) ?>"
+                            data-places="<?= htmlspecialchars($vehicule->getPlaces()) ?>"
+                            data-immatriculation="<?= htmlspecialchars($vehicule->getImmatriculation()) ?>">
                         <i class="bi bi-three-dots-vertical fs-4"></i>
                     </button>
                 </div>
