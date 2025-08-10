@@ -10,5 +10,5 @@ logoutUser();
 
 // Redirection vers la page de connexion
 
-header('Location: login.php');
+header('Location: rechercher.php');
 exit;

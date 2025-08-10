@@ -8,6 +8,7 @@ use Olivierguissard\EcoRide\Model\CreditsHistory;
 use Olivierguissard\EcoRide\Service\DateFilterService;
 
 require_once 'functions/auth.php';
+startSession();
 requireAuth();
 updateActivity();
 

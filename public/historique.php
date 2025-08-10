@@ -7,6 +7,7 @@ use Olivierguissard\EcoRide\Model\Trip;
 use Olivierguissard\EcoRide\Model\Users;
 
 require_once 'functions/auth.php';
+startSession();
 requireAuth();
 updateActivity();
 

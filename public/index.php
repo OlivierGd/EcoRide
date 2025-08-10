@@ -7,7 +7,6 @@ use Olivierguissard\EcoRide\Model\Users;
 
 require_once 'functions/auth.php';
 startSession();
-// Met à jour l'activité si connecté
 if (isAuthenticated()) {
     updateActivity();
 }

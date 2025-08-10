@@ -13,14 +13,14 @@ function startSession(): void {
             'lifetime' => 0,
             'path' => '/',
             'domain' => '',
-            'secure' => strpos($_SERVER['HTTP_HOST'] ?? '', '.fly.dev') !== false,
+            'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
             'httponly' => true,
             'samesite' => 'Lax'
         ]);
         session_start();
 
-        // Vérification auto-login si pas de session active
-        if (isset($_SESSION['connecte']) && !($_SESSION['connecte'])) {
+        // Vérification auto-login SEULEMENT si pas connecté
+        if (!isAuthenticated()) {
             checkRememberToken();
         }
 
@@ -34,27 +34,31 @@ function startSession(): void {
     }
 }
 
-// Vérifie si l'utilisateur est connecté / authentifié
+// Vérifie si l'utilisateur est connecté
 function isAuthenticated(): bool {
-      startSession();
-      return !empty($_SESSION['user_id']);
+    startSession();
+    // Vérification plus robuste
+    return !empty($_SESSION['user_id']) && !empty($_SESSION['connecte']) && $_SESSION['connecte'] === true;
 }
 
 // Retourne le user_id
 function getUserId(): ?int {
     startSession();
-    return isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null ;
+    return isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null;
 }
 
 // Sécuriser les pages privées (auth. obligatoire)
 function requireAuth(): void {
+    startSession(); // S'assurer que la session est démarrée
     if (!isAuthenticated()) {
+        // Debug: Log la raison de la redirection
+        error_log("requireAuth: Redirection vers login - user_id: " . ($_SESSION['user_id'] ?? 'null') . ", connecte: " . ($_SESSION['connecte'] ?? 'null'));
         header('Location: login.php');
         exit;
     }
 }
 
-// Met à jour l'acitivité de l'utilisateur
+// Met à jour l'activité de l'utilisateur
 function updateActivity(): void {
     startSession();
     if (isAuthenticated()) {
@@ -62,11 +66,13 @@ function updateActivity(): void {
     }
 }
 
-// === Fonctionnalités pour REMEBER ME ===
+// === REMEMBER ME ===
 
 // connecte l'utilisateur avec toutes ses données
 function loginUserComplete(array $user, bool $remember = false): void {
     startSession();
+
+    // S'assurer que toutes les variables de session sont définies
     $_SESSION['connecte']   = true;
     $_SESSION['email']      = $user['email'];
     $_SESSION['firstName']  = $user['firstname'];
@@ -75,20 +81,221 @@ function loginUserComplete(array $user, bool $remember = false): void {
     $_SESSION['role']       = $user['role'];
     $_SESSION['credits']    = $user['credits'];
     $_SESSION['ranking']    = $user['ranking'];
-    $_SESSION['user_id']    = $user['user_id'];
+    $_SESSION['user_id']    = (int)$user['user_id']; // S'assurer que c'est un entier
     $_SESSION['login_time'] = time();
     $_SESSION['last_activity'] = time();
+
+    // Debug
+    error_log("loginUserComplete: Session créée pour user_id: " . $_SESSION['user_id']);
 
     // log de connexion
     logLogin($user['user_id'], 'password', true);
 
-    // Crée un token "Remeber si demandé
+    // Crée un token "Remember" si demandé
     if ($remember) {
         createRememberToken($user['user_id']);
     }
 }
 
-// Crée un token "Remeber" pour l'utilisateur
+// Vérifie le token "Remember Me"
+function checkRememberToken(): void {
+    if (!isset($_COOKIE['ecoride_remember'])) {
+        return;
+    }
+
+    $token = $_COOKIE['ecoride_remember'];
+
+    try {
+        $pdo = Database::getConnection();
+
+        // Utiliser password_verify pour vérifier le token
+        $sql = "SELECT ut.token_hash, u.* 
+                FROM users u 
+                JOIN user_tokens ut ON u.user_id = ut.user_id 
+                WHERE ut.expires_at > NOW() AND ut.is_active = true";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+        $tokens = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $tokenUser = null;
+        foreach ($tokens as $tokenData) {
+            if (password_verify($token, $tokenData['token_hash'])) {
+                $tokenUser = $tokenData;
+                break;
+            }
+        }
+
+        if ($tokenUser) {
+            // Reconnexion automatique avec toutes les données
+            $_SESSION['connecte']   = true;
+            $_SESSION['email']      = $tokenUser['email'];
+            $_SESSION['firstName']  = $tokenUser['firstname'];
+            $_SESSION['lastName']   = $tokenUser['lastname'];
+            $_SESSION['status']     = $tokenUser['status'];
+            $_SESSION['role']       = $tokenUser['role'];
+            $_SESSION['credits']    = $tokenUser['credits'];
+            $_SESSION['ranking']    = $tokenUser['ranking'];
+            $_SESSION['user_id']    = (int)$tokenUser['user_id'];
+            $_SESSION['login_time'] = time();
+            $_SESSION['last_activity'] = time();
+            $_SESSION['auto_login'] = true;  // Marque comme connexion automatique
+
+            // Debug
+            error_log("checkRememberToken: Auto-login réussi pour user_id: " . $_SESSION['user_id']);
+
+            // Met à jour last_used
+            $sql = "UPDATE user_tokens SET last_used = NOW() WHERE token_hash = ?";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$tokenUser['token_hash']]);
+
+            // log de connexion
+            logLogin($tokenUser['user_id'], 'remember_token', true);
+        } else {
+            // Token invalide, supprime le cookie
+            error_log("checkRememberToken: Token invalide, suppression du cookie");
+            setcookie('ecoride_remember', '', [
+                'expires' => time() - 3600,
+                'path' => '/',
+                'domain' => '',
+                'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+                'httponly' => true,
+                'samesite' => 'Lax'
+            ]);
+        }
+    } catch (Exception $e) {
+        error_log("Erreur vérification token EcoRide : " . $e->getMessage());
+    }
+}
+
+// Information sur l'appareil
+function getDeviceInfo(): string {
+    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown';
+
+    // Détection de l'appareil
+    if (preg_match('/Mobile|Android|iPhone/', $userAgent)) {
+        $deviceType = 'Mobile';
+    } elseif (preg_match('/Tablet|iPad/', $userAgent)) { // CORRECTION: Tablet au lieu de Tablettet
+        $deviceType = 'Tablet';
+    } else {
+        $deviceType = 'Desktop';
+    }
+    return $deviceType . ' - ' . substr($userAgent, 0, 100);
+}
+
+// Log des connexions
+function logLogin(int $userId, string $method, bool $success): void {
+    try {
+        $pdo = Database::getConnection();
+        $sql = "INSERT INTO login_history (user_id, login_method, success, ip_address, user_agent) VALUES (?, ?, ?, ?, ?)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            $userId,
+            $method,
+            $success,
+            $_SERVER['REMOTE_ADDR'] ?? null,
+            $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown'
+        ]);
+    } catch (Exception $e) {
+        error_log("Erreur log de connexion EcoRide : " . $e->getMessage());
+    }
+}
+
+// Déconnexion complète du compte
+function logoutUser(): void {
+    startSession();
+
+    if (isset($_SESSION['user_id'])) {
+        // Désactive le token de cet appareil
+        if (isset($_COOKIE['ecoride_remember'])) {
+            $token = $_COOKIE['ecoride_remember'];
+
+            try {
+                $pdo = Database::getConnection();
+
+                // Chercher et désactiver le token correspondant
+                $sql = "SELECT token_hash FROM user_tokens WHERE user_id = ? AND is_active = true";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$_SESSION['user_id']]);
+                $tokens = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                foreach ($tokens as $tokenData) {
+                    if (password_verify($token, $tokenData['token_hash'])) {
+                        $sql = "UPDATE user_tokens SET is_active = false WHERE token_hash = ?";
+                        $stmt = $pdo->prepare($sql);
+                        $stmt->execute([$tokenData['token_hash']]);
+                        break;
+                    }
+                }
+            } catch (Exception $e) {
+                error_log("Erreur désactivation du token EcoRide : " . $e->getMessage());
+            }
+
+            // Supprime le cookie
+            setcookie('ecoride_remember', '', [
+                'expires' => time() - 3600,
+                'path' => '/',
+                'domain' => '',
+                'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+                'httponly' => true,
+                'samesite' => 'Lax'
+            ]);
+        }
+    }
+
+    // Supprime la session
+    $_SESSION = array();
+
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000,
+            $params["path"], $params["domain"],
+            $params["secure"], $params["httponly"]
+        );
+    }
+    session_destroy();
+}
+
+// === FONCTION DE DEBUG ===
+function debugAuthStatus(): array {
+    startSession();
+    return [
+        'session_status' => session_status(),
+        'session_id' => session_id(),
+        'user_id' => $_SESSION['user_id'] ?? 'null',
+        'connecte' => $_SESSION['connecte'] ?? 'null',
+        'isAuthenticated' => isAuthenticated() ? 'true' : 'false',
+        'cookie_remember' => isset($_COOKIE['ecoride_remember']) ? 'exists' : 'not_exists',
+        'session_data' => $_SESSION
+    ];
+}
+
+
+function limitUserTokens(int $userId, int $maxTokens): void {
+    try {
+        $pdo = Database::getConnection();
+        $sql = "SELECT COUNT(*) FROM user_tokens 
+                WHERE user_id = ? AND expires_at > NOW() AND is_active = true";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$userId]);
+        $count = $stmt->fetchColumn();
+
+        if ($count >= $maxTokens) {
+            $sql = "DELETE FROM user_tokens 
+                    WHERE token_id IN ( 
+                        SELECT token_id FROM (
+                            SELECT token_id FROM user_tokens
+                            WHERE user_id = ? AND expires_at > NOW() AND is_active = true
+                            ORDER BY last_used ASC LIMIT ?
+                        ) as subquery
+                    )";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$userId, $count - $maxTokens + 1]);
+        }
+    } catch (Exception $e) {
+        error_log("Erreur limitation tokens EcoRide (5 appareils max) : " . $e->getMessage());
+    }
+}
+
 function createRememberToken(int $userId): void {
     try {
         $pdo = Database::getConnection();
@@ -112,7 +319,7 @@ function createRememberToken(int $userId): void {
             'expires' => strtotime($tokenExpiry),
             'path' => '/',
             'domain' => '',
-            'secure' => str_contains($_SERVER['HTTP_HOST'] ?? '', '.fly.dev'),
+            'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
             'httponly' => true,
             'samesite' => 'Lax'
         ]);
@@ -121,152 +328,6 @@ function createRememberToken(int $userId): void {
     }
 }
 
-// Limite le nombre de token par utilisateur
-function limitUserTokens(int $userId, int $maxTokens): void {
-    try {
-        $pdo = Database::getConnection();
-        $sql = "SELECT COUNT(*) FROM user_tokens 
-                WHERE user_id = ? AND expires_at > NOW() AND is_active = true";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$userId]);
-        $count = $stmt->fetchColumn();
-
-        if ($count >= $maxTokens) {
-            $sql = "DELETE FROM user_tokens 
-                    WHERE token_id IN ( 
-                    SELECT token_id FROM user_tokens
-                    WHERE user_id = ? AND expires_at > NOW() AND is_active = true
-                    ORDER BY last_used ASC LIMIT ?)";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([$userId, $count - $maxTokens +1]);
-        }
-    } catch (Exception $e) {
-        error_log("Erreur limitation tokens EcoRide (5 appareils max) : " . $e->getMessage());
-    }
-}
-
-// Vérifie le token "Remeber Me"
-function checkRememberToken(): void {
-    if (!isset($_COOKIE['ecoride_remember'])) {
-        return;
-    }
-    $token = $_COOKIE['ecoride_remember'];
-    $tokenHash = hash('sha256', $token);
-        try {
-            $pdo = Database::getConnection();
-            $sql = "SELECT u.* FROM users u JOIN user_tokens ut ON u.user_id = ut.user_id WHERE ut.token_hash = ? AND ut.expires_at > NOW() AND ut.is_active = true";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([$tokenHash]);
-            $tokenUser = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($tokenUser) {
-                // Reconnexion automatique
-                $_SESSION['connecte']   = true;
-                $_SESSION['email']      = $tokenUser['email'];
-                $_SESSION['firstName']  = $tokenUser['firstname'];
-                $_SESSION['lastName']   = $tokenUser['lastname'];
-                $_SESSION['status']     = $tokenUser['status'];
-                $_SESSION['role']       = $tokenUser['role'];
-                $_SESSION['credits']    = $tokenUser['credits'];
-                $_SESSION['ranking']    = $tokenUser['ranking'];
-                $_SESSION['user_id']    = $tokenUser['user_id'];
-                $_SESSION['login_time'] = time();
-                $_SESSION['last_activity'] = time();
-                $_SESSION['auto_login'] = true;  //Marque comme connexion automatique
-
-                // Met à jour last_used
-                $sql = "UPDATE user_tokens SET last_used = NOW() WHERE token_hash = ?";
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute([$tokenHash]);
-
-                // log de connexion
-                logLogin($tokenUser['user_id'], 'remember_token', true);
-        } else {
-                // Token invalide, supprime le cookie
-                setcookie('ecoride_remember', '', [
-                    'expires' => time() - 3600,
-                    'path' => '/',
-                    'domain' => '',
-                    'secure' => str_contains($_SERVER['HTTP_HOST'] ?? '', '.fly.dev') !== false,
-                    'httponly' => true,
-                    'samesite' => 'Lax'
-                ]);
-            }
-    } catch (Exception $e) {
-            error_log("Erreur vérification token EcoRide : " . $e->getMessage());
-        }
-}
-
-// Information sur l'appreil
-function getDeviceInfo(): string {
-    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown';
-    
-    // Dectection de l'appareil
-    if (preg_match('/Mobile|Android|iPhone/', $userAgent)) {
-        $deviceType = 'Mobile';
-    } elseif (preg_match('/Tablettet|iPad/', $userAgent)) {
-        $deviceType = 'Tablet';
-    } else {
-        $deviceType = 'Desktop';
-    }
-    return $deviceType . ' - ' . substr($userAgent, 0, 100);
-}
-
-// Log des connexions
-function logLogin(int $userId, string $method, bool $success): void {
-    try {
-        $pdo = Database::getConnection();
-        $sql = "INSERT INTO login_history (user_id, login_method, success, ip_address, user_agent) VALUES (?, ?, ?, ?, ?)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$userId, $method, $success, $_SERVER['REMOTE_ADDR'] ?? null , $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown']);;
-    } catch (Exception $e) {
-        error_log("Erreur log de connexion EcoRide : " . $e->getMessage());
-    }
-}
-
-// Deconnexion complète du compte
-function logoutUser(): void
-{
-    startSession();
-    
-    if (isset($_SESSION['user_id'])) {
-        // Desactive le token de cet appareil
-        if (isset($_COOKIE['ecoride_remember'])) {
-            $token = $_COOKIE['ecoride_remember'];
-            $tokenHash = hash('sha256', $token);
-
-            try {
-                $pdo = Database::getConnection();
-                $sql = "UPDATE user_tokens SET is_active = false WHERE token_hash = ?";
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute([$tokenHash]);
-            } catch (Exception $e) {
-                error_log("Erreur désactivation du token EcoRide : " . $e->getMessage());
-            }
-            // Supprime le cookie
-            setcookie('ecoride_remember', '', [
-                'expires' => time() - 3600,
-                'path' => '/',
-                'domain' => '',
-                'secure' => str_contains($_SERVER['HTTP_HOST'] ?? '', '.fly.dev') !== false,
-                'httponly' => true,
-                'samesite' => 'Lax'
-            ]);
-        }
-    }
-    // Supprime la session
-    $_SESSION = array();
-
-    if (ini_get("session.use_cookies")) {
-        $params = session_get_cookie_params();
-        setcookie(session_name(), '', time() - 42000,
-        $params["path"], $params["domain"],
-        $params["secure"], $params["httponly"]
-        );
-    }
-    session_destroy();
-}    
-
-// Deconnexion de tous les appareils
 function logoutAllDevices(int $userId): void {
     try {
         $pdo = Database::getConnection();
@@ -278,14 +339,13 @@ function logoutAllDevices(int $userId): void {
     }
 }
 
-// Récupère les appareils connectés d'un utilisateur
 function getUserDevices(int $userId): array {
     try {
         $pdo = Database::getConnection();
-        $sql = "SELECT token_id, device_info, created_at,last_used,ip_address 
-                    FROM user_tokens WHERE user_id = ? 
-                    AND expires_at > NOW() 
-                    AND is_active = true ORDER BY last_used DESC ";
+        $sql = "SELECT token_id, device_info, created_at, last_used, ip_address 
+                FROM user_tokens WHERE user_id = ? 
+                AND expires_at > NOW() 
+                AND is_active = true ORDER BY last_used DESC";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$userId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -295,9 +355,7 @@ function getUserDevices(int $userId): array {
     }
 }
 
-// Révoque un appareil spécifique
 function revokeDevice(int $tokenId, int $userId): bool {
-    // Validation des paramètres
     if ($tokenId <= 0 || $userId <= 0) {
         error_log("Paramètres invalides pour revokeDevice: tokenId=$tokenId, userId=$userId");
         return false;
@@ -308,8 +366,7 @@ function revokeDevice(int $tokenId, int $userId): bool {
         $sql = "UPDATE user_tokens SET is_active = false WHERE token_id = ? AND user_id = ? AND is_active = true";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$tokenId, $userId]);
-        
-        // Vérifier si au moins une ligne a été mise à jour
+
         if ($stmt->rowCount() > 0) {
             return true;
         } else {

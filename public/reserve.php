@@ -8,6 +8,7 @@ use Olivierguissard\EcoRide\Model\Payment;
 use Olivierguissard\EcoRide\Service\CreditService;
 
 require_once 'functions/auth.php';
+startSession();
 requireAuth();
 updateActivity();
 

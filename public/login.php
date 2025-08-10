@@ -5,9 +5,12 @@ use Olivierguissard\EcoRide\Config\Database;
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once 'functions/auth.php';
 startSession();
+if (isAuthenticated()) {
+    updateActivity();
+}
 
 $erreur = null;
-$debug_info = []; // Pour stocker les infos de debug
+$debug_info = []; // Stocke les infos de debug
 
 // Debug silencieux (pas d'echo)
 $debug_info[] = "SESSION: " . print_r($_SESSION, true);
@@ -15,7 +18,7 @@ $debug_info[] = "isAuthenticated(): " . (isAuthenticated() ? 'TRUE' : 'FALSE');
 $debug_info[] = "User ID: " . (getUserId() ?? 'NULL');
 
 if (isAuthenticated()) {
-    header('Location: profil.php');
+    header('Location: rechercher.php');
     exit;
 }
 

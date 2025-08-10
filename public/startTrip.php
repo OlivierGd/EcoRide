@@ -5,6 +5,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use Olivierguissard\EcoRide\Model\Trip;
 
 require_once 'functions/auth.php';
+startSession();
 requireAuth();
 updateActivity();
 
