@@ -15,7 +15,7 @@ require_once __DIR__ . '/../src/Helpers/helpers.php';
 
 $userID = getUserId();
 $voyages = Trip::findTripsByDriver($userID);
-$vehicles = Car::findByUser($userID);
+$vehicles = Car::findActiveVehiclesByUser($userID);
 
 // Adapter l'affichage si pas de véhicule
 $hasVehicles = !empty($vehicles);
@@ -23,7 +23,6 @@ $canCreateTrip = $hasVehicles; // Peut créer un trajet seulement s'il a des vé
 
 // Soumettre le formulaire SEULEMENT si l'utilisateur a des véhicules
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $canCreateTrip) {
-    error_log('Données POST reçues : ' . print_r($_POST, true));
     $keys = [
             'trip_id',
             'driver_id',
@@ -68,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $canCreateTrip) {
         $voyage->setDiscussAllowed(isset($data['discuss_allowed']));
         $voyage->setEstimatedDuration($data['estimated_duration']);
     } else {
-        $data['driver_id'] = $_SESSION['user_id'];
+        $data['driver_id'] = getUserId();
         $voyage = new Trip($data);
 
         try {

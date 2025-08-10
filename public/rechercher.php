@@ -84,9 +84,9 @@ $ratings = [];
 
 foreach ($trips as $trip) {
     // Énergie du véhicule utilisé
-    $car = Car::find($trip->getVehicleId());
-    if ($car && !in_array($car->carburant, $energies)) {
-        $energies[] = $car->carburant;
+    $car = Car::findCarById($trip->getVehicleId());
+    if ($car && !in_array($car->getCarburant(), $energies)) {
+        $energies[] = $car->getCarburant();
     }
 
     // Nombre de places disponibles
@@ -224,7 +224,7 @@ $pageTitle = 'Rechercher un voyage';
         // Le conducteur
         $driver = Users::findUser($trip->getDriverId());
         // Le véhicule utilisé
-        $car = Car::find($trip->getVehicleId());
+        $car = Car::findCarById($trip->getVehicleId());
         if (!$driver || !$car) continue;
 
         // Calcul du nombre de places
@@ -242,13 +242,13 @@ $pageTitle = 'Rechercher un voyage';
         $nameLabel  = htmlspecialchars($driver->getFirstName() . ' ' . strtoupper(substr($driver->getLastName(),0,1)));
         $stars      = renderStars($driver->getRanking());
         $ranking    = htmlspecialchars($driver->getRanking());
-        $energy     = htmlspecialchars($car->carburant);
+        $energy     = htmlspecialchars($car->getCarburant());;
         $startCity  = htmlspecialchars($trip->getStartCity());
         $endCity    = htmlspecialchars($trip->getEndCity());
         $time       = htmlspecialchars($trip->getDepartureTime());
         $date       = htmlspecialchars($trip->getDepartureDateFr());
         $price      = htmlspecialchars($trip->getPricePerPassenger());
-        $vehicleLabel = htmlspecialchars($car->marque . ' ' . $car->modele);
+        $vehicleLabel = htmlspecialchars($car->getMarque() . ' ' . $car->getModele());
         ?>
             <div class="container p-0">
                 <?php if ($showError && isset($flashError['message'])): ?>
@@ -358,7 +358,7 @@ $pageTitle = 'Rechercher un voyage';
                                 <?= $trip->getMusicAllowed() ? '🎵 Musique autorisée, ' : '' ?>
                                 <?= $trip->getDiscussAllowed() ? '💬 Discussion autorisée' : '' ?>
                             </p>
-                            <p><strong>Véhicule :</strong> <?= htmlspecialchars($car->marque . ' ' . $car->modele) ?></p>
+                            <p><strong>Véhicule :</strong> <?= htmlspecialchars($car->getMarque() . ' ' . $car->getModele()) ?></p>
                         </div>
                     </div>
                 </div>

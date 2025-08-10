@@ -7,7 +7,7 @@ use Olivierguissard\EcoRide\Model\Users;
 use Olivierguissard\EcoRide\Model\Car;
 $trip = $item['trip'];
 $driver = Users::findUser($trip->getDriverId());
-$car = Car::find($trip->getVehicleId());
+$car = Car::findCarById($trip->getVehicleId());
 ?>
 
 <div class="card shadow-sm mb-3 rounded-4">
@@ -32,7 +32,7 @@ $car = Car::find($trip->getVehicleId());
                 </div>
             <?php endif; ?>
             <?php if ($car): ?>
-                <span class="badge rounded-pill bg-success ms-auto"><?= htmlspecialchars($car->carburant) ?></span>
+                <span class="badge rounded-pill bg-success ms-auto"><?= htmlspecialchars($car->getCarburant()) ?></span>
             <?php endif; ?>
         </div>
 

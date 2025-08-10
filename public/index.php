@@ -211,7 +211,7 @@ $pageTitle = 'Accueil - EcoRide';
                         <div class="mb-3">
                             <?php
                             $driver = Users::findUser($trip->getDriverId());
-                            $car = Car::find($trip->getVehicleId());
+                            $car = Car::findCarById($trip->getVehicleId());
                             // Préparer les données pour _card_trip_simple.php
                             $item = [
                                 'trip' => $trip,

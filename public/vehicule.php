@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!empty($_POST['id_vehicule'])) {
         $data = array_intersect_key($_POST, array_flip(['id_vehicule', 'marque', 'modele', 'type_carburant', 'nbr_places', 'plaque_immatriculation']));
-        $voiture = Car::find((int)$data['id_vehicule']);
+        $voiture = Car::findCarById((int)$data['id_vehicule']);
 
         $voiture->marque = htmlspecialchars(trim($data['marque']));
         $voiture->modele = trim($data['modele']);
@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $voiture->immatriculation = trim($data['plaque_immatriculation']);
 
         if ($voiture->validateCar()) {
-            if ($voiture->saveToDatabase()) {
+            if ($voiture->saveVehicleToDatabase()) {
                 $_SESSION['flash_success'] = 'Véhicule modifié !';
             } else {
                 $_SESSION['flash_error'] = 'Erreur lors de la modification du véhicule';
@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $voiture->user_id = getUserId();
 
         if ($voiture->validateCar()) {
-            if ($voiture->saveToDatabase()) {
+            if ($voiture->saveVehicleToDatabase()) {
                 $_SESSION['flash_success'] = 'Véhicule ajouté avec succès !';
             } else {
                 $_SESSION['flash_error'] = implode('<br>', $voiture->errors);
@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
 }
-$vehicules = Car::findByUser($_SESSION['user_id']);
+$vehicules = Car::findActiveVehiclesByUser($_SESSION['user_id']);
 
 $pageTitle = 'Mes véhicules';
 ?>

@@ -8,32 +8,110 @@ use PDO;
 
 class Car
 {
-    public ?int $id;
-    public int $user_id;
-    public string $marque;
-    public string $modele;
-    public string $carburant;
-    public string $immatriculation;
-    public int $places;
-    public bool $actif;
-    public string $created_at;
-    public array $errors = [];
+    private ?int $vehicleId;
+    private int $userId;
+    private string $marque;
+    private string $modele;
+    private string $carburant;
+    private string $immatriculation;
+    private int $places;
+    private bool $actif;
+    private string $createdAt;
+    private array $errors = [];
 
     public function __construct(array $data = [])
     {
-        $this->id               = $data['id_vehicule'] ?? null;
-        $this->user_id          = (int)($data['id_conducteur'] ?? 0);
-        $this->marque           = trim($data['marque'] ?? '');
-        $this->modele            = trim($data['modele'] ?? '');
-        $this->carburant        = $data['type_carburant'] ?? '';
-        $this->immatriculation  = trim($data['plaque_immatriculation'] ?? '');
-        $this->places           = (int)($data['nbr_places'] ?? 1);
-        $this->actif            = isset($data['actif']) ? (bool)$data['actif'] : true;
-        $this->created_at       = $data['date_creation'] ?? date('Y-m-d H:i:s');
+        $this->vehicleId       = $data['id_vehicule'] ?? null;
+        $this->userId          = (int)($data['id_conducteur'] ?? 0);
+        $this->marque          = trim($data['marque'] ?? '');
+        $this->modele          = trim($data['modele'] ?? '');
+        $this->carburant       = $data['type_carburant'] ?? '';
+        $this->immatriculation = trim($data['plaque_immatriculation'] ?? '');
+        $this->places          = (int)($data['nbr_places'] ?? 1);
+        $this->actif           = isset($data['actif']) ? (bool)$data['actif'] : true;
+        $this->createdAt       = $data['date_creation'] ?? date('Y-m-d H:i:s');
     }
+    public function getVehicleId(): ?int
+    {
+        return $this->vehicleId;
+    }
+    public function getUserId(): int
+    {
+        return $this->userId;
+    }
+    public function getMarque(): string
+    {
+        return $this->marque;
+    }
+    public function getModele(): string
+    {
+        return $this->modele;
+    }
+    public function getCarburant(): string
+    {
+        return $this->carburant;
+    }
+    public function getImmatriculation(): string
+    {
+        return $this->immatriculation;
+    }
+    public function getPlaces(): int
+    {
+        return $this->places;
+    }
+    public function getActif(): bool
+    {
+        return $this->actif;
+    }
+    public function getCreatedAt(): string
+    {
+        return $this->createdAt;
+    }
+    public function getErrors(): array
+    {
+        return $this->errors;
+    }
+    // === Setters ===
+    public function setMarque(string $marque): void
+    {
+        $this->marque = trim($marque);
+    }
+    public function setModele(string $modele): void
+    {
+        $this->modele = trim($modele);
+    }
+    public function setCarburant(string $carburant): void
+    {
+        $allowedCarburants = ['Electrique', 'Hybride', 'Essence', 'Gasoil'];
+        if (in_array(trim($carburant), $allowedCarburants, true)) {
+            $this->carburant = trim($carburant);
+        } else {
+            $this->errors['carburant'] = 'Type de carburant invalide.';
+        }
+    }
+    public function setImmatriculation(string $immatriculation): void
+    {
+        $this->immatriculation = trim($immatriculation);
+    }
+    public function setPlaces(int $places): void
+    {
+        if ($places >= 1 && $places <= 5) {
+            $this->places = $places;
+        } else {
+            $this->errors['places'] = 'Le nombre de places doit être compris entre 1 et 8.';
+        }
+    }
+    public function setActif(bool $actif): void
+    {
+        $this->actif = $actif;
+    }
+
+
 
     public function validateCar(): bool
     {
+        $this->errors = []; // Reset des erreurs
+
         if ($this->marque === '') {
             $this->errors['marque'] = 'La marque de la voiture est requise.';
         }
@@ -46,14 +124,14 @@ class Car
         if (!preg_match('/^[A-Z0-9-]{2,10}$/', $this->immatriculation)) {
             $this->errors['immatriculation'] = 'Plaque invalide.';
         }
-        if ($this->places < 1 || $this->places > 5) {
-            $this->errors['places'] = 'Le nombre de places de la voiture doit-être compris entre 1 et 5.';
+        if ($this->places < 1 || $this->places > 8) {
+            $this->errors['places'] = 'Le nombre de places de la voiture doit-être compris entre 1 et 8.';
         }
         return empty($this->errors);
     }
 
 
-    public function saveToDatabase() : bool
+    public function saveVehicleToDatabase() : bool
     {
         try {
             if (!$this->validateCar()) {
@@ -62,25 +140,24 @@ class Car
             }
 
             $pdo = Database::getConnection();
-            if ($this->id) {
+            if ($this->vehicleId) {
                 $sql = "UPDATE vehicule SET marque=?, modele=?, type_carburant=?, plaque_immatriculation=?, nbr_places=?, actif=? WHERE id_vehicule = ?";
                 $stmt = $pdo->prepare($sql);
-                $ok = $stmt->execute([
+                $success = $stmt->execute([
                     $this->marque,
                     $this->modele,
                     $this->carburant,
                     $this->immatriculation,
                     $this->places,
                     $this->actif,
-                    $this->id
+                    $this->vehicleId
                 ]);
-                return $ok;
+
             } else {
                 $sql = "INSERT INTO vehicule (id_conducteur, marque, modele, type_carburant,plaque_immatriculation, nbr_places, actif, date_creation) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                 $stmt = $pdo->prepare($sql);
 
-                // Debug - Afficher les valeurs à insérer
-                error_log('Tentative d\'insertion avec les valeurs : ' . print_r([
+                error_log('Tentative d\'insertion véhicule avec les valeurs : ' . print_r([
                         $this->user_id,
                         $this->marque,
                         $this->modele,
@@ -91,23 +168,23 @@ class Car
                         $this->created_at,
                     ], true));
 
-                $ok = $stmt->execute([
-                    $this->user_id,
+                $success = $stmt->execute([
+                    $this->userId,
                     $this->marque,
                     $this->modele,
                     $this->carburant,
                     $this->immatriculation,
                     $this->places,
                     $this->actif,
-                    $this->created_at,
+                    $this->createdAt,
                 ]);
-                if ($ok) {
-                    $this->id = (int)$pdo->lastInsertId();
-                    error_log('Insertion réussie avec l\'ID : ' . $this->id);
+                if ($success) {
+                    $this->vehicleId = (int)$pdo->lastInsertId();
+                    error_log('Insertion réussie avec l\'ID : ' . $this->vehicleId);
                 } else {
                     error_log('Erreur lors de l\'insertion : ' . print_r($stmt->errorInfo(), true));
                 }
-                return $ok;
+                return $success;
             }
         } catch (PDOException $e) {
             error_log('Exception PDO : ' . $e->getMessage());
@@ -122,16 +199,16 @@ class Car
 
     public function deleteCar(): bool
     {
-        $this->actif = false;
-        return $this->saveToDatabase();
+        $this->setActif(false);
+        return $this->saveVehicleToDatabase();
     }
 
-    public static function findByUser(int $user_id): array
+    public static function findActiveVehiclesByUser(int $userId): array
     {
         $pdo = Database::getConnection();
         $sql = "SELECT * FROM vehicule WHERE id_conducteur = ? AND actif = true ORDER BY date_creation DESC";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$user_id]);
+        $stmt->execute([$userId]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return array_map(fn($r) => new self($r), $rows);
         }
@@ -139,16 +216,29 @@ class Car
     /**
      * Finds and retrieves an instance of the object based on the provided ID.
      *
-     * @param int $id The unique identifier of the record to be fetched from the database.
+     * @param int $carId The unique identifier of the record to be fetched from the database.
      * @return self|null Returns an instance of the object if the record is found, or null if no matching record exists.
      */
-    public static function find(int $id): ?self
+    public static function findCarById(int $carId): ?self
         {
             $pdo = Database::getConnection();
             $sql = "SELECT * FROM vehicule WHERE id_vehicule = ?";
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([$id]);
+            $stmt->execute([$carId]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             return $row ? new self($row) : null;
+        }
+
+        /**
+         * Recupère le nombre de place d'un véhicule par son ID
+         */
+        public static function getPlacesByVehiculeId(int $vehiculeId): int
+        {
+            $pdo = Database::getConnection();
+            $sql = "SELECT nbr_places FROM vehicule WHERE id_vehicule = ?";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$vehiculeId]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ? (int)$result['nbr_places'] : 0;
         }
     }
