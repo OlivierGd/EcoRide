@@ -51,8 +51,6 @@ function getUserId(): ?int {
 function requireAuth(): void {
     startSession(); // S'assurer que la session est démarrée
     if (!isAuthenticated()) {
-        // Debug: Log la raison de la redirection
-        error_log("requireAuth: Redirection vers login - user_id: " . ($_SESSION['user_id'] ?? 'null') . ", connecte: " . ($_SESSION['connecte'] ?? 'null'));
         header('Location: login.php');
         exit;
     }
@@ -84,9 +82,6 @@ function loginUserComplete(array $user, bool $remember = false): void {
     $_SESSION['user_id']    = (int)$user['user_id']; // S'assurer que c'est un entier
     $_SESSION['login_time'] = time();
     $_SESSION['last_activity'] = time();
-
-    // Debug
-    error_log("loginUserComplete: Session créée pour user_id: " . $_SESSION['user_id']);
 
     // log de connexion
     logLogin($user['user_id'], 'password', true);
@@ -140,9 +135,6 @@ function checkRememberToken(): void {
             $_SESSION['last_activity'] = time();
             $_SESSION['auto_login'] = true;  // Marque comme connexion automatique
 
-            // Debug
-            error_log("checkRememberToken: Auto-login réussi pour user_id: " . $_SESSION['user_id']);
-
             // Met à jour last_used
             $sql = "UPDATE user_tokens SET last_used = NOW() WHERE token_hash = ?";
             $stmt = $pdo->prepare($sql);
@@ -150,9 +142,9 @@ function checkRememberToken(): void {
 
             // log de connexion
             logLogin($tokenUser['user_id'], 'remember_token', true);
+
         } else {
             // Token invalide, supprime le cookie
-            error_log("checkRememberToken: Token invalide, suppression du cookie");
             setcookie('ecoride_remember', '', [
                 'expires' => time() - 3600,
                 'path' => '/',
@@ -162,6 +154,7 @@ function checkRememberToken(): void {
                 'samesite' => 'Lax'
             ]);
         }
+
     } catch (Exception $e) {
         error_log("Erreur vérification token EcoRide : " . $e->getMessage());
     }
