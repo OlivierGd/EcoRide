@@ -42,7 +42,7 @@ $pageTitle = 'Accueil - EcoRide';
             <a class="navbar-brand" href="index.php">
                 <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="60" class="d-inline-block align-text-center rounded">
             </a>
-            <h2 class="fw-bold mb-1 text-success fs-2">EcoRide::</h2>
+            <h2 class="fw-bold mb-1 text-success fs-2">EcoRide</h2>
             <?= displayInitialsButton(); ?>
         </div>
     </nav>
@@ -253,9 +253,55 @@ $pageTitle = 'Accueil - EcoRide';
                     </div>
                 </div>
             </div>
-            <div style="height: 5rem"></div>
         </section>
     </div>
+    <!-- Section légale -->
+    <section class="mb-5">
+        <div class="border-top pt-4">
+            <div class="row g-3">
+                <!-- Informations du webmaster -->
+                <div class="col-12 col-md-4">
+                    <h6 class="fw-bold text-muted mb-2">
+                        <i class="bi bi-code-slash text-success me-1"></i>
+                        Webmaster
+                    </h6>
+                    <p class="small mb-1">Olivier Guissard</p>
+                    <p class="small text-muted mb-0">Développeur web</p>
+                </div>
+
+                <!-- Contact -->
+                <div class="col-12 col-md-4">
+                    <h6 class="fw-bold text-muted mb-2">
+                        <i class="bi bi-envelope text-success me-1"></i>
+                        Contact
+                    </h6>
+                    <a href="mailto:contact@ecoride.fr" class="text-decoration-none small">
+                        contact@ecoride.fr
+                    </a>
+                </div>
+
+                <!-- Mentions légales -->
+                <div class="col-12 col-md-4">
+                    <h6 class="fw-bold text-muted mb-2">
+                        <i class="bi bi-file-text text-success me-1"></i>
+                        Informations légales
+                    </h6>
+                    <div class="d-flex flex-column gap-1">
+                        <a href="cgv.php" class="text-decoration-none small">Conditions Générales de Vente</a>
+                        <a href="cgu.php" class="text-decoration-none small">Conditions Générales d'Utilisation</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="text-center mt-4 pt-3 border-top">
+                <p class="small text-muted mb-0">
+                    © <?= date('Y') ?> EcoRide - Tous droits réservés
+                </p>
+            </div>
+        </div>
+    </section>
+    <div class="pb-5"></div>
 </main>
 
 <!-- Tab bar-->
