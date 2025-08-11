@@ -53,7 +53,7 @@ $pageTitle = 'Mon profil - EcoRide';
     <header>
         <nav class="navbar bg-body-tertiary">
             <div class="container" style="max-width: 900px;">
-                <a class="navbar-brand" href="/index.php">
+                <a class="navbar-brand" href="index.php">
                     <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="60" class="d-inline-block align-text-center rounded">
                 </a>
                 <h2 class="fw-bold mb-1 text-success">Mon profil</h2>
@@ -101,7 +101,7 @@ $pageTitle = 'Mon profil - EcoRide';
     <section class="bg-light py-4">
         <div class="container">
             <div class="row text-center">
-                <div class="col-4">
+                <a href="historique.php" class="col-4">
                     <div class="card border-0 shadow-sm">
                         <div class="card-body">
                             <i class="bi bi-ev-front text-success fs-2"></i>
@@ -109,7 +109,7 @@ $pageTitle = 'Mon profil - EcoRide';
                             <div class="text-muted small">Trajets effectués</div>
                         </div>
                     </div>
-                </div>
+                </a>
                 <div class="col-4">
                     <div class="card border-0 shadow-sm">
                         <div class="card-body">
@@ -119,7 +119,7 @@ $pageTitle = 'Mon profil - EcoRide';
                         </div>
                     </div>
                 </div>
-                <div class="col-4">
+                <a href="buyCredits.php" class="col-4">
                     <div class="card border-0 shadow-sm">
                         <div class="card-body">
                             <i class="bi bi-currency-euro text-success fs-2"></i>
@@ -127,7 +127,7 @@ $pageTitle = 'Mon profil - EcoRide';
                             <div class="text-muted small">Solde de crédits</div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
     </section>
