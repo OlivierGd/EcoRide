@@ -3,26 +3,67 @@
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 use Olivierguissard\EcoRide\Config\Database;
+use Olivierguissard\EcoRide\Model\Users;
 
-// Vérifie si le paramètre existe avant de faire un trim lorsqu'on utilise query
-if (!isset($_GET['query'])) {
-    http_response_code(400);
-    echo json_encode([]);
-    exit;
-}
+require_once '../functions/auth.php';
+startSession();
+requireAuth();
 
-$query = trim($_GET['query']);
+header('Content-Type: application/json');
+
 try {
-    $pdo = Database::getConnection();// Récupère objet de connexion à la BDD
-    $sql = "SELECT user_id, firstname, lastname, email, role, status FROM users WHERE lastname ILIKE :query OR firstname ILIKE :query OR email ILIKE :query ";
+    $currentUserRole = (int)$_SESSION['role'];
+
+    // Vérifier les permissions d'accès
+    if ($currentUserRole < 2) { // Moins que gestionnaire
+        throw new Exception('Permissions insuffisantes');
+    }
+
+    $query = $_GET['query'] ?? '';
+    $role = $_GET['role'] ?? '';
+    $status = $_GET['status'] ?? '';
+
+    $pdo = Database::getConnection();
+
+    $sql = "SELECT user_id, firstname, lastname, email, role, status, credits, ranking, created_at 
+            FROM users WHERE 1=1";
+    $params = [];
+
+    if ($query) {
+        $sql .= " AND (firstname ILIKE ? OR lastname ILIKE ? OR email ILIKE ?)";
+        $searchTerm = '%' . $query . '%';
+        $params[] = $searchTerm;
+        $params[] = $searchTerm;
+        $params[] = $searchTerm;
+    }
+
+    if ($role !== '') {
+        $sql .= " AND role = ?";
+        $params[] = (int)$role;
+    }
+
+    if ($status) {
+        $sql .= " AND status = ?";
+        $params[] = $status;
+    }
+
+    $sql .= " ORDER BY created_at DESC LIMIT 50";
+
     $stmt = $pdo->prepare($sql);
-    $stmt->execute(['query' => '%' . $query . '%']);
-    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);// Récupère tous les résultats sous forme de tableau associatif
-    header('Content-Type: application/json');// Spécifie que la réponse sera du JSON
-    echo json_encode($users);// Transforme le tableau PHP en JSON pour le front-end JS
-    exit;
-} catch (\PDOException $e) {
-    header('Content-Type: application/json');
-    echo json_encode(['error' => 'Une erreur est survenue lors de la récupération des données : '. $e->getMessage()]);
-    exit;
+    $stmt->execute($params);
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Ajouter les permissions pour chaque utilisateur
+    foreach ($users as &$user) {
+        $user['permissions'] = Users::getAllowedActionsForUser(
+            $currentUserRole,
+            (int)$user['role']
+        );
+    }
+
+    echo json_encode($users);
+
+} catch (Exception $e) {
+    http_response_code(400);
+    echo json_encode(['error' => $e->getMessage()]);
 }

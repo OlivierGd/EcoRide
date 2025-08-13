@@ -1,22 +1,29 @@
 <?php
 
-require_once __DIR__ . '/../../vendor/autoload.php'; // adapte le chemin si besoin
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 use Olivierguissard\EcoRide\Config\Database;
 
-// 1. Vérifie la présence de l’id
-if (!isset($_GET['user_id'])) {
+// Vérifier la présence de l'id (soit user_id, soit id)
+$userId = null;
+if (isset($_GET['user_id'])) {
+    $userId = (int)$_GET['user_id'];
+} elseif (isset($_GET['id'])) {
+    $userId = (int)$_GET['id'];
+}
+
+if (!$userId) {
     http_response_code(400);
     echo json_encode(['error' => 'ID utilisateur manquant']);
     exit;
 }
 
-$userId = intval(getUserId());
-
 try {
     $pdo = Database::getConnection();
-    // 2. Requête pour récupérer les infos principales de l’utilisateur
-    $sql = "SELECT user_id, firstname, lastname, email, role, status, created_at FROM users WHERE user_id = :id";
+
+    // Requête pour récupérer les infos complètes de l'utilisateur
+    $sql = "SELECT user_id, firstname, lastname, email, role, status, credits, ranking, created_at 
+            FROM users WHERE user_id = :id";
     $stmt = $pdo->prepare($sql);
     $stmt->execute(['id' => $userId]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -27,8 +34,6 @@ try {
         exit;
     }
 
-    // Ajoute ici d’autres requêtes pour compléter (trajets, crédits, véhicules…)
-
     header('Content-Type: application/json');
     echo json_encode($user);
     exit;
@@ -37,4 +42,3 @@ try {
     echo json_encode(['error' => 'Erreur BDD : ' . $e->getMessage()]);
     exit;
 }
-

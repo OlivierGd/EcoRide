@@ -118,6 +118,7 @@ $pageTitle = 'Proposer un trajet - EcoRide';
     <link rel="icon" type="image/png" href="assets/pictures/logoEcoRide.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="assets/css/proposer.css">
     <title><?= $pageTitle ?? 'EcoRide - Covoiturage écologique' ?></title>
     <style>
         /* Styles pour l'état désactivé */
@@ -261,6 +262,9 @@ $pageTitle = 'Proposer un trajet - EcoRide';
             <div class="p-4 bg-white rounded-4 shadow-sm mb-4">
                 <div class="row g-3">
                     <div class="col-md-4">
+                        <label class="form-label text-muted small mb-1">
+                            Date du trajet
+                        </label>
                         <div class="input-group bg-light rounded-3">
                             <span class="input-group-text bg-transparent border-0">
                                 <i class="bi bi-calendar-date text-secondary"></i>
@@ -270,6 +274,9 @@ $pageTitle = 'Proposer un trajet - EcoRide';
                         </div>
                     </div>
                     <div class="col-md-4">
+                        <label class="form-label text-muted small mb-1">
+                            Heure de départ
+                        </label>
                         <div class="input-group bg-light rounded-3">
                             <span class="input-group-text bg-transparent border-0">
                                 <i class="bi bi-clock text-secondary"></i>
@@ -372,13 +379,6 @@ $pageTitle = 'Proposer un trajet - EcoRide';
                             <span class="input-group-text bg-transparent border-0 text-muted">crédits</span>
                         </div>
                     </div>
-                    <div class="col-md-8">
-                        <div class="alert alert-info border-0 bg-light mb-0">
-                            <i class="bi bi-info-circle me-2"></i>
-                            <strong id="totalPrice">60</strong> crédits maximum pour ce trajet avec
-                            <strong id="placeFree">3</strong> passagers
-                        </div>
-                    </div>
                 </div>
             </div>
         </section>
@@ -412,6 +412,12 @@ $pageTitle = 'Proposer un trajet - EcoRide';
                                 <input type="checkbox" name="discuss_allowed" class="form-check-input" id="discussTogether" checked>
                                 <label class="form-check-label" for="discussTogether">
                                     <i class="bi bi-chat-dots me-1"></i>Discussions bienvenues
+                                </label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input type="checkbox" name="pet_allowed" class="form-check-input" id="petaAllowed" checked>
+                                <label class="form-check-label" for="petaAllowed">
+                                    <i class="bi bi-github me-1"></i>Petits animaux bienvenus
                                 </label>
                             </div>
                         </div>

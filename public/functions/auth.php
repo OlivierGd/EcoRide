@@ -348,7 +348,8 @@ function getUserDevices(int $userId): array {
     }
 }
 
-function revokeDevice(int $tokenId, int $userId): bool {
+function revokeDevice(int $tokenId, int $userId): bool
+{
     if ($tokenId <= 0 || $userId <= 0) {
         error_log("Paramètres invalides pour revokeDevice: tokenId=$tokenId, userId=$userId");
         return false;
@@ -372,5 +373,99 @@ function revokeDevice(int $tokenId, int $userId): bool {
     } catch (Exception $e) {
         error_log("Erreur générale lors de la révocation appareil: " . $e->getMessage());
         return false;
+    }
+}
+/**
+ * Nettoie les tokens de réinitialisation de mot de passe expirés
+ *
+ * Supprime automatiquement les tokens expirés depuis plus de 24 heures
+ * pour éviter l'accumulation de données inutiles en base de données.
+ *
+ * @return int|false Le nombre de tokens supprimés ou false en cas d'erreur
+ * @throws PDOException Si la connexion à la base de données échoue
+ * @since 1.0.0
+ * @author Olivier Guissard
+ *
+ * @example
+ * $deleted = cleanupExpiredTokens();
+ * if ($deleted !== false) {
+ *     echo "$deleted tokens supprimés";
+ * }
+ */
+function cleanupExpiredTokens() {
+    try {
+        $pdo = Database::getConnection();
+
+        // Supprimer les tokens expirés depuis plus de 24h
+        $sql = "DELETE FROM password_reset_tokens WHERE expires_at < NOW() - INTERVAL '24 hours'";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->rowCount(); // Nombre de tokens supprimés
+
+    } catch (Exception $e) {
+        error_log("Erreur cleanup tokens: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Nettoyage probabiliste automatique des tokens expirés
+ *
+ * Exécute cleanupExpiredTokens() avec une probabilité de 1% à chaque appel
+ * pour maintenir la base de données propre sans impact sur les performances.
+ *
+ * Statistiques : Avec 100 connexions/jour = ~1 nettoyage quotidien
+ *
+ * @see cleanupExpiredTokens() La fonction de nettoyage appelée
+ */
+// Appeler automatiquement le nettoyage (1 chance sur 100 à chaque session)
+if (mt_rand(1, 100) === 1) {
+    cleanupExpiredTokens();
+}
+
+/**
+ * Vérifie si l'utilisateur connecté a le rôle minimum requis
+ *
+ * @param int $minimumRole Rôle minimum requis (0=passager, 1=chauffeur, 2=gestionnaire, 3=admin)
+ * @return bool True si l'utilisateur a le rôle suffisant
+ */
+function hasMinimumRole(int $minimumRole): bool {
+    if (!isAuthenticated()) {
+        return false;
+    }
+
+    $userRole = (int)$_SESSION['role'];
+    return $userRole >= $minimumRole;
+}
+
+/**
+ * Vérifie si l'utilisateur connecté est un gestionnaire ou admin
+ *
+ * @return bool True si gestionnaire ou admin
+ */
+function isManagerOrAdmin(): bool {
+    return hasMinimumRole(2); // Gestionnaire = 2
+}
+
+/**
+ * Vérifie si l'utilisateur connecté est un admin
+ *
+ * @return bool True si admin
+ */
+function isAdmin(): bool {
+    return hasMinimumRole(3); // Admin = 3
+}
+
+/**
+ * Require un rôle minimum ou redirige
+ *
+ * @param int $minimumRole Rôle minimum requis
+ * @param string $redirectTo Page de redirection si pas autorisé
+ */
+function requireMinimumRole(int $minimumRole, string $redirectTo = 'index.php'): void {
+    if (!hasMinimumRole($minimumRole)) {
+        header("Location: $redirectTo");
+        exit;
     }
 }

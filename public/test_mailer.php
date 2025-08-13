@@ -4,7 +4,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->load();
 
-use Olivierguissard\EcoRide\Helpers\Mailer;
+use Olivierguissard\EcoRide\Model\Mailer;
 
 
 // Instanciation du mailer

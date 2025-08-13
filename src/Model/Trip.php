@@ -457,10 +457,9 @@ class Trip
         try {
             $pdo = Database::getConnection();
             $sql = "SELECT * 
-                FROM trips
+                FROM trips 
+                WHERE departure_at > now() 
                 LIMIT 3";
-
-
             $stmt = $pdo->prepare($sql);
             $stmt->execute();
             $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);

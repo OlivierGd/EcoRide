@@ -170,7 +170,7 @@ $pageTitle = 'Mon profil - EcoRide';
         </div>
     </section>
 
-    <!-- Préférences écologiques -->
+    <!-- Préférences de voyages -->
     <section>
         <div class="container my-5">
             <h3 class="fw-bold mb-4"><i class="bi bi-leaf text-success me-2"></i>Préférences de voyages</h3>
@@ -245,22 +245,24 @@ $pageTitle = 'Mon profil - EcoRide';
                         <div class="small text-muted">Mes transactions</div>
                     </div>
                 </a>
-                <a href="dashboard.php" class="list-group-item list-group-item-action d-flex align-items-center">
-                    <i class="bi bi-kanban fs-4 me-2 text-primary"></i>
-                    <div>
-                        <strong>Console d'administration</strong>
-                        <div class="small text-muted">Management</div>
-                    </div>
-                </a>
+                <?php if (isset($_SESSION['role']) && $_SESSION['role'] > 1): ?>
+                    <a href="dashboard.php" class="list-group-item list-group-item-action d-flex align-items-center">
+                        <i class="bi bi-kanban fs-4 me-2 text-primary"></i>
+                        <div>
+                            <strong>Console d'administration</strong>
+                            <div class="small text-muted">Management</div>
+                        </div>
+                    </a>
+                <?php endif; ?>
                 <!-- ESPACE pour le footer -->
                 <div style="height: 1.5rem;"></div>
-                <a href="/logout.php" class="list-group-item list-group-item-action d-flex align-items-center bg-danger text-white rounded mb-3 mt-auto">
+                <a href="logout.php" class="list-group-item list-group-item-action d-flex align-items-center bg-danger text-white rounded mb-3 mt-auto">
                     <i class="bi bi-box-arrow-right fs-4 me-2"></i>
                     <strong>Se déconnecter</strong>
                 </a>
             </div>
             <!-- Ajoute une marge basse supplémentaire pour dégager le bouton du footer -->
-            <div style="height: 80px;"></div>
+            <div style="height: 4em;"></div>
         </div>
     </section>
 

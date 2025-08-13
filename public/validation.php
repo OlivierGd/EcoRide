@@ -94,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmtPayDriver->execute([$totalCredits, $trip->getDriverId()]);
 
             // Générer l'email de notification au chauffeur
-            $mailer = new \Olivierguissard\EcoRide\Helpers\Mailer();
+            $mailer = new \Olivierguissard\EcoRide\Model\Mailer();
 
             $subject = "EcoRide : Vous avez reçu un paiement pour le trajet #{$trip->getTripId()}";
             $htmlContent = "

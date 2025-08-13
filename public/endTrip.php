@@ -7,10 +7,10 @@ startSession();
 requireAuth();
 updateActivity();
 
-use Olivierguissard\EcoRide\Model\Trip;
 use Olivierguissard\EcoRide\Model\Bookings;
+use Olivierguissard\EcoRide\Model\Mailer;
+use Olivierguissard\EcoRide\Model\Trip;
 use Olivierguissard\EcoRide\Model\Users;
-use Olivierguissard\EcoRide\Helpers\Mailer;
 
 
 if (!isset($_POST['trip_id'])) {

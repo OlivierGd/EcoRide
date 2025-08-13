@@ -125,7 +125,7 @@ if (!empty($_POST['emailUser']) && !empty($_POST['passwordUser'])) {
                             <span class="text-muted d-block" style="font-size: 0.8rem;">Rester connecté pendant 6 mois</span>
                         </label>
                     </div>
-                    <a href="#" class="text-decoration-none text-success small">Mot de passe oublié ?</a>
+                    <a href="forgot_password.php" class="text-decoration-none text-success small">Mot de passe oublié ?</a>
                 </div>
 
                 <button type="submit" class="btn btn-success w-100">Se connecter</button>
