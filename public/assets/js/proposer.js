@@ -156,20 +156,37 @@
                 }
             }
 
-            // Validation de la durée estimée du trajet
+            // Validation de la durée du trajet
             let hoursSelect = document.querySelector('select[name="duration_hours"]');
             let minutesSelect = document.querySelector('select[name="duration_minutes"]');
-            if (!hoursSelect || !minutesSelect || !hoursSelect.value || !minutesSelect.value) {
-                showErrorMessage("Veuillez indiquer la durée estimée du trajet");
-                (hoursSelect && !hoursSelect.value ? hoursSelect : minutesSelect)?.focus();
+
+            if (!hoursSelect || !minutesSelect) {
+                console.error(`Le champ de sélection de l'heure ou des minutes est introuvable`);
+                return false;
+            }
+            if (hoursSelect.value && !minutesSelect.value) {
+                minutesSelect.value = "0";
+            }
+            if (!hoursSelect.value || !minutesSelect.value) {
+                showErrorMessage('Veuillez indiquer la durée estimée du trajet.');
                 return false;
             }
 
+             if (!hoursSelect.value && !minutesSelect.value) {
+                showErrorMessage('Veuillez indiquer la durée estimée du trajet.');
+                 (hoursSelect.value ? minutesSelect : hoursSelect)?.focus();
+                return false;
+             }
+
+
             // Validation du véhicule sélectionné
             let vehicleSelector = document.querySelector('select[name="vehicle_id"]');
-            if (!vehicleSelector || !vehicleSelector.value) {
-                showErrorMessage("Veuillez sélectionner un véhicule");
-                vehicleSelector?.focus();
+            if (!vehicleSelector) {
+                console.error("Le champ de sélection est introuvable");
+                return false;
+            }
+            if (!vehicleSelector.value.trim()) {
+                showErrorMessage('Veuillez sélectionner un véhicule');
                 return false;
             }
 
