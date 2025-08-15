@@ -119,7 +119,7 @@ $pageTitle = 'Mon profil - EcoRide';
                         </div>
                     </div>
                 </div>
-                <a href="buyCredits.php" class="col-4">
+                <a href="paiements.php" class="col-4">
                     <div class="card border-0 shadow-sm">
                         <div class="card-body">
                             <i class="bi bi-currency-euro text-success fs-2"></i>

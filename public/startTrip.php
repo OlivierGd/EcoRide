@@ -16,7 +16,7 @@ if (!isset($_POST['trip_id'])) {
 
 $tripId = (int)$_POST['trip_id'];
 $userId = getUserId();
-$trip = Trip::find($tripId);
+$trip = Trip::loadTripById($tripId);
 
 if (!$trip) {
     header('Location: historique.php?error=not_found');

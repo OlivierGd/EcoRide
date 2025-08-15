@@ -26,8 +26,6 @@ $ratingSelected = $_GET['rating'] ?? '';
 $sort = $_GET['sort'] ?? '';
 
 
-
-
 // Requête SQL dynamique pour les filtres avancés
 $pdo = Database::getConnection();
 $sql = "SELECT t.* FROM trips t 
@@ -139,6 +137,32 @@ $pageTitle = 'Rechercher un voyage';
 
 <!-- Main Content -->
 <main class="container px-3 py-2 mt-1 pt-5">
+    <?php if (isset($_SESSION['flash_error']) && is_array($_SESSION['flash_error']) && $_SESSION['flash_error']['type'] === 'insufficient_credits'): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <h5><i class="bi bi-exclamation-triangle"></i> Réservation impossible</h5>
+            <p class="mb-3"><?= htmlspecialchars($_SESSION['flash_error']['message']) ?></p>
+            <a href="buyCredits.php?trip_id=<?= $_SESSION['flash_error']['trip_id'] ?>" class="btn btn-success">
+                <i class="bi bi-credit-card"></i> Ajouter des crédits
+            </a>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <?php unset($_SESSION['flash_error']); ?>
+    <?php elseif (isset($_SESSION['flash_error'])): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <?= is_array($_SESSION['flash_error']) ? $_SESSION['flash_error']['message'] : $_SESSION['flash_error'] ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <?php unset($_SESSION['flash_error']); ?>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['flash_success'])): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <?= is_array($_SESSION['flash_success']) ? $_SESSION['flash_success']['message'] : $_SESSION['flash_success'] ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <?php unset($_SESSION['flash_success']); ?>
+    <?php endif; ?>
+
     <!-- Search Summary -->
     <section class="mt-1">
         <h3 class="fw-bold mb-4"><i class="bi bi-search text-success me-2"></i>Recherche un trajet</h3>
@@ -236,6 +260,7 @@ $pageTitle = 'Rechercher un voyage';
         if (is_array($flashError) && isset($flashError['trip_id']) && $flashError['trip_id'] == $trip->getTripId()) {
             $showError = true;
         }
+
 
         // Données affichées
         $initialsBtn = displayInitialsButton($driver);
@@ -413,7 +438,7 @@ $pageTitle = 'Rechercher un voyage';
                     Économisez jusqu'à 3.2 kg de CO₂
                 </h3>
                 <p class="small text-secondary-emphasis">
-                    En choisissant un trajet électrique pour votre voyage Paris-Lyon,
+                    En choisissant un trajet électrique pour votre voyage,
                     vous contribuez à réduire votre empreinte carbone.
                 </p>
             </div>

@@ -4,7 +4,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use Olivierguissard\EcoRide\Model\Trip;
 use Olivierguissard\EcoRide\Model\Car;
-use Olivierguissard\EcoRide\Service\CreditService;
+use Olivierguissard\EcoRide\Service\PaymentService;
 
 require_once 'functions/auth.php';
 startSession();
@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $canCreateTrip) {
     $data['estimated_duration'] = sprintf('PT%dH%dM', $hours, $minutes);
 
     if (!empty($data['trip_id'])) {
-        $voyage = Trip::find((int)$data['trip_id']);
+        $voyage = Trip::loadTripById((int)$data['trip_id']);
         $voyage->setDriverId((int)$data['driver_id']);
         $voyage->setStartCity($data['start_city']);
         $voyage->setEndCity($data['end_city']);
@@ -80,11 +80,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $canCreateTrip) {
         $voyage = new Trip($data);
 
         try {
-            CreditService::debitForTripPublication($userID);
+            PaymentService::debitForTripPublication($userID, $voyage->getTripId() ?? null);
         } catch (Exception $e) {
             $error = $e->getMessage();
             echo "<div class='alert alert-danger' role='alert'>Erreur : $error.
-        <a href='paiements.php'>Ajoutez des crédits ici</a></div>";
+                    <a href='paiements.php'>Ajoutez des crédits ici</a></div>";
             exit;
         }
     }

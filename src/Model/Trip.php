@@ -24,7 +24,7 @@ class Trip
     private ?string $roleForTrip = null;
     private ?int $bookingId = null;
     private ?string $bookingStatus = null;
-    private string $tripStatus;
+    private string $tripStatus; // a_venir, en_cours, termine, annule
     private string $startLocation;
     private string $endLocation;
     private ?string $estimatedDuration = null;
@@ -167,6 +167,7 @@ class Trip
     {
         $this->estimatedDuration = $duration;
     }
+
     public function getEstimatedDurationAsInterval(): ?\DateInterval
     {
         if (is_string($this->estimatedDuration) && $this->estimatedDuration !== '') {
@@ -196,8 +197,6 @@ class Trip
         return null;
     }
 
-
-
     public function validateTrip(): bool
     {
         if ($this->startCity === '') {
@@ -214,6 +213,7 @@ class Trip
         }
         return empty($this->errors);
     }
+
     // Enregistrement du trajet : update et sauvegarde
     public function saveToDatabase() : bool
     {
@@ -315,10 +315,18 @@ class Trip
        return array_map(fn($r) => new self($r), $rows);
     }
 
+    /**
+     * Récupère une liste des voyages à venir en fonction de leur date de départ.
+     *
+     * @param int|null $limit Optional limit on the number of trips to retrieve.
+     * @return array An array of trip instances representing the upcoming trips.
+     */
     public static function findTripsUpcoming(int $limit = null): array
     {
         $pdo = Database::getConnection();
-        $sql = "SELECT * FROM trips WHERE departure_at > now() ORDER BY departure_at ASC";
+        $sql = "SELECT * FROM trips WHERE departure_at > now() 
+                    AND (status IS NULL OR status = 'a_venir') 
+                    ORDER BY departure_at ASC";
         if ($limit !== null) {
             $sql .= " LIMIT " . (int)$limit;
         }
@@ -361,7 +369,7 @@ class Trip
     /**
      * Charge un objet Trip par son ID, ou null s’il n’existe pas
      */
-    public static function find(int $tripId): ?self
+    public static function loadTripById(int $tripId): ?self
     {
         $pdo = Database::getConnection();
         $sql = "SELECT * FROM trips WHERE trip_id = ?";
@@ -371,12 +379,6 @@ class Trip
         return $row ? new self($row) : null;
     }
 
-    /**
-     * Met à jour le statut d'un voyage spécifique.
-     *
-     * @param string $newStatus Le nouveau statut à définir pour le voyage.
-     * @return bool Retourne true si la mise à jour a réussi, sinon false.
-     */
 
     /**
      * Checks if the trip's status should be updated by comparing the departure time with the current time.
@@ -456,9 +458,10 @@ class Trip
     {
         try {
             $pdo = Database::getConnection();
-            $sql = "SELECT * 
-                FROM trips 
-                WHERE departure_at > now() 
+            $sql = "SELECT * FROM trips 
+                WHERE departure_at > now()
+                AND (status IS NULL OR status = 'a_venir')
+                ORDER BY departure_at ASC
                 LIMIT 3";
             $stmt = $pdo->prepare($sql);
             $stmt->execute();
@@ -471,6 +474,89 @@ class Trip
         }
     }
 
+    /**
+     * Vérifie si un trajet peut encore accepter des réservations
+     */
+    public function canAcceptBookings(): bool
+    {
+        // Vérifie si le trajet est dans le futur
+        if (!$this->isTripUpcoming()) {
+            return false;
+        }
+        // Vérifie le statut
+        if ($this->tripStatus === 'annule' || $this->tripStatus === 'termine' || $this->tripStatus === 'en_cours') {
+            return false;
+        }
+        // Vérifie s'il reste des places
+        return $this->getRemainingSeats() > 0;
+    }
 
+    public static function searchTrips(array $filters = []): array
+    {
+        $pdo = Database::getConnection();
+
+        $sql = "SELECT * FROM trips WHERE departure_at > NOW() 
+                AND (status IS NULL OR status = 'a_venir')";
+        $params = [];
+
+        if (!empty($filters['start_city'])) {
+            $sql .= " AND start_city LIKE ?";
+            $params[] = '%' . $filters['start_city'] . '%';
+        }
+
+        if (!empty($filters['end_city'])) {
+            $sql .= " AND end_city LIKE ?";
+            $params[] = '%' . $filters['end_city'] . '%';
+        }
+
+        if (!empty($filters['departure_date'])) {
+            $sql .= " AND DATE(departure_at) = ?";
+            $params[] = $filters['departure_date'];
+        }
+
+        $sql .= " ORDER BY departure_at ASC";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(fn($r) => new self($r), $rows);
+    }
+
+    /**
+     * Met à jour automatiquement les statuts des trajets expirés
+     * @return void
+     */
+    public static function updateExpiredTripsStatus(): void
+    {
+        try {
+            $pdo = Database::getConnection();
+
+            // Mettre à jour tous les trajets passés qui sont encore "a_venir"
+            $sql = "UPDATE trips 
+                SET status = 'termine' 
+                WHERE departure_at < NOW() 
+                AND (status IS NULL OR status = 'a_venir')";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute();
+
+            $updatedCount = $stmt->rowCount();
+            if ($updatedCount > 0) {
+                error_log("Mis à jour $updatedCount trajets expirés vers le statut 'termine'");
+            }
+
+        } catch (\PDOException $e) {
+            error_log("Erreur lors de la mise à jour des statuts expirés: " . $e->getMessage());
+        }
+    }
+
+    public function setMusicAllowed(bool $isset)
+    {
+    }
+
+    public function setDiscussAllowed(bool $isset)
+    {
+    }
 
 }

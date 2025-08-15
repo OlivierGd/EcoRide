@@ -13,6 +13,9 @@ if (isAuthenticated()) {
 
 require_once __DIR__ . '/../src/Helpers/helpers.php';
 
+// Met à jour les statuts expirés avant de récupérer les données
+Trip::updateExpiredTripsStatus();
+
 // Récupération des statistiques dynamiques
 $totalGreenTrips = Trip::countGreenTrips();
 $totalUsers = Users::countAllUsers();

@@ -1,5 +1,4 @@
 <?php
-// forgot_password.php
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -26,8 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo = Database::getConnection();
 
-            // Vérifier si l'email existe
-            $sql = "SELECT user_id, firstname, lastname FROM users WHERE email = ? AND status = 'actif'";
+            // Permet aux comptes créés par admin (même non encore activés) de recevoir l'email
+            $sql = "SELECT user_id, firstname, lastname, password FROM users WHERE email = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -53,28 +52,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $resetUrl = "http://" . $_SERVER['HTTP_HOST'] . "/reset_password.php?token=" . $token;
 
                 $subject = "Réinitialisation de votre mot de passe EcoRide";
-                $htmlContent = "
-                    <h2>Réinitialisation de mot de passe</h2>
-                    <p>Bonjour {$user['firstname']},</p>
-                    <p>Vous avez demandé à réinitialiser votre mot de passe EcoRide.</p>
-                    <p>Cliquez sur le lien ci-dessous pour créer un nouveau mot de passe :</p>
-                    <p><a href='{$resetUrl}' style='background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Réinitialiser mon mot de passe</a></p>
-                    <p>Ce lien expire dans 1 heure.</p>
-                    <p>Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.</p>
-                    <p>L'équipe EcoRide</p>
-                ";
 
-                $result = $mailer->sendEmail(
-                    $email,
-                    $user['firstname'] . ' ' . $user['lastname'],
-                    $subject,
-                    $htmlContent
-                );
-
-                if ($result['success']) {
-                    $message = 'Un email de réinitialisation a été envoyé à votre adresse.';
+                // Message adapté si le compte a déjà un mot de passe ou non
+                if (empty($user['password'])) {
+                    // Compte créé par admin, pas encore activé
+                    $htmlContent = "
+                        <h2>Activation de votre compte EcoRide</h2>
+                        <p>Bonjour {$user['firstname']},</p>
+                        <p>Votre compte EcoRide a été créé par un administrateur.</p>
+                        <p>Cliquez sur le lien ci-dessous pour définir votre mot de passe et activer votre compte :</p>
+                        <p><a href='{$resetUrl}' style='background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Activer mon compte</a></p>
+                        <p>Ce lien expire dans 1 heure.</p>
+                        <p>L'équipe EcoRide</p>
+                    ";
                 } else {
+                    // Compte normal avec mot de passe existant
+                    $htmlContent = "
+                        <h2>Réinitialisation de mot de passe</h2>
+                        <p>Bonjour {$user['firstname']},</p>
+                        <p>Vous avez demandé à réinitialiser votre mot de passe EcoRide.</p>
+                        <p>Cliquez sur le lien ci-dessous pour créer un nouveau mot de passe :</p>
+                        <p><a href='{$resetUrl}' style='background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Réinitialiser mon mot de passe</a></p>
+                        <p>Ce lien expire dans 1 heure.</p>
+                        <p>Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.</p>
+                        <p>L'équipe EcoRide</p>
+                    ";
+                }
+
+                $textContent = strip_tags(str_replace('<br>', "\n", $htmlContent));
+
+                try {
+                    $result = $mailer->sendEmail(
+                            $email,
+                            $user['firstname'] . ' ' . $user['lastname'],
+                            $subject,
+                            $htmlContent,
+                            $textContent
+                    );
+
+                    if ($result['success']) {
+                        $message = 'Un email de réinitialisation a été envoyé à votre adresse.';
+                    } else {
+                        $error = 'Erreur lors de l\'envoi de l\'email. Veuillez réessayer.';
+                        error_log("Erreur Mailjet: " . print_r($result, true));
+                    }
+                } catch (Exception $e) {
                     $error = 'Erreur lors de l\'envoi de l\'email. Veuillez réessayer.';
+                    error_log("Exception Mailer: " . $e->getMessage());
                 }
             } else {
                 // Même message pour éviter l'énumération d'emails

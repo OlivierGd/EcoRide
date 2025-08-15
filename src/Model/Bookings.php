@@ -366,4 +366,98 @@ class Bookings
         return (int)$stmt->fetchColumn();
     }
 
+    /**
+     * Vérifie si au moins un passager a validé le trajet
+     */
+    public static function hasAtLeastOneValidation(int $tripId): bool
+    {
+        $pdo = \Olivierguissard\EcoRide\Config\Database::getConnection();
+        $sql = "SELECT COUNT(*) FROM bookings 
+            WHERE trip_id = ? 
+            AND status = 'valide'";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$tripId]);
+        return (int)$stmt->fetchColumn() > 0;
+    }
+
+    /**
+     * Calcule le montant total à payer au chauffeur (tous les passagers qui ont payé)
+     */
+    public static function calculateDriverPayment(int $tripId): float
+    {
+        $pdo = \Olivierguissard\EcoRide\Config\Database::getConnection();
+
+        // Récupérer le prix par passager
+        $sqlTrip = "SELECT price_per_passenger FROM trips WHERE trip_id = ?";
+        $stmtTrip = $pdo->prepare($sqlTrip);
+        $stmtTrip->execute([$tripId]);
+        $pricePerPassenger = (float)$stmtTrip->fetchColumn();
+
+        // Compter TOUS les passagers qui ont payé (même ceux qui n'ont pas validé)
+        $sqlBookings = "SELECT SUM(b.seats_reserved) as total_seats
+                    FROM bookings b
+                    JOIN payments p ON b.booking_id = p.booking_id
+                    WHERE b.trip_id = ? 
+                    AND b.status != 'annule'
+                    AND p.type_transaction = 'reservation'
+                    AND p.statut_transaction = 'debite'";
+        $stmtBookings = $pdo->prepare($sqlBookings);
+        $stmtBookings->execute([$tripId]);
+        $totalSeats = (int)$stmtBookings->fetchColumn();
+
+        return $pricePerPassenger * $totalSeats;
+    }
+
+    /**
+     * Vérifie que le chauffeur a payé les frais de publication
+     */
+    public static function hasDriverPaidPublicationFees(int $tripId, int $driverId): bool
+    {
+        $pdo = \Olivierguissard\EcoRide\Config\Database::getConnection();
+        $sql = "SELECT COUNT(*) FROM payments 
+            WHERE trip_id = ? 
+            AND user_id = ? 
+            AND type_transaction = 'publication_trajet'
+            AND statut_transaction = 'debite'
+            AND montant = 2";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$tripId, $driverId]);
+        return (int)$stmt->fetchColumn() > 0;
+    }
+
+    /**
+     * Vérifie qu'au moins un passager a payé sa réservation
+     */
+    public static function hasAtLeastOnePassengerPaid(int $tripId): bool
+    {
+        $pdo = \Olivierguissard\EcoRide\Config\Database::getConnection();
+
+        $sqlPayments = "SELECT COUNT(DISTINCT b.booking_id) 
+                    FROM bookings b
+                    JOIN payments p ON b.booking_id = p.booking_id
+                    WHERE b.trip_id = ? 
+                    AND b.status != 'annule'
+                    AND p.type_transaction = 'reservation'
+                    AND p.statut_transaction = 'debite'";
+        $stmt = $pdo->prepare($sqlPayments);
+        $stmt->execute([$tripId]);
+        return (int)$stmt->fetchColumn() > 0;
+    }
+
+    /**
+     * Vérifie si le chauffeur a déjà été payé pour ce trajet
+     */
+    public static function hasDriverBeenPaid(int $tripId, int $driverId): bool
+    {
+        $pdo = \Olivierguissard\EcoRide\Config\Database::getConnection();
+        $sql = "SELECT COUNT(*) FROM payments 
+            WHERE trip_id = ? 
+            AND user_id = ? 
+            AND type_transaction = 'gain_course'
+            AND statut_transaction = 'credite'";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$tripId, $driverId]);
+        return (int)$stmt->fetchColumn() > 0;
+    }
+
 }

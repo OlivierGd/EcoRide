@@ -9,7 +9,7 @@ require_once 'functions/auth.php';
 startSession();
 if (isAuthenticated()) {
     updateActivity();
-    header('Location: profil.php');
+    header('Location: index.php');
     exit;
 }
 

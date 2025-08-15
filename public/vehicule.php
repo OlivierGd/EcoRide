@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // Ajout d'un nouveau véhicule
         $data = array_intersect_key($_POST, array_flip(['marque', 'modele', 'type_carburant', 'nbr_places', 'plaque_immatriculation']));
-        $data['user_id'] = getUserId();
+        $data['id_conducteur'] = getUserId();
 
         $voiture = new Car($data);
 

@@ -12,49 +12,30 @@ services:
       - ../:/var/www/html
     networks:
       - ecoride_net
+
+    # env_file seulement si le fichier existe (dev local)
     env_file:
       - ../.env
+
     environment:
       # Mode avec Supabase
-      APP_ENV: docker_development
+      APP_ENV: ${APP_ENV:-docker_development}
+
+      # Variables Mailjet - Fonctionnent dans les deux cas :
+      # - Dev local : chargées depuis .env
+      # - Prod Fly : injectées par fly secrets
+      MAILJET_API_KEY: ${MAILJET_API_KEY}
+      MAILJET_API_SECRET: ${MAILJET_API_SECRET}
+      MAILJET_FROM_EMAIL: ${MAILJET_FROM_EMAIL}
+      MAILJET_FROM_NAME: ${MAILJET_FROM_NAME}
 
       # Alternative: Mode avec DB locale
-      # Décommentez ces lignes et commentez DATABASE_URL pour utiliser la DB locale
+      # Décommenter les lignes et commenter DATABASE_URL pour utiliser la DB locale
       # DB_HOST: db
       # DB_PORT: 5432
       # DB_NAME: ecoride_dev
       # DB_USER: postgres
       # DB_PASSWORD: password123
-
-      # Variables Mailjet
-      MAILJET_API_KEY: ${MAILJET_API_KEY:-fake_key_dev}
-      MAILJET_API_SECRET: ${MAILJET_API_SECRET:-fake_secret_dev}
-      MAILJET_FROM_EMAIL: ${MAILJET_FROM_EMAIL:-dev@ecoride.local}
-      MAILJET_FROM_NAME: ${MAILJET_FROM_NAME:-EcoRide Dev}
-
-  # Base de données PostgreSQL locale (Si besoin)
-  # Décommenter cette section pour utiliser db locale
-#  db:
-#    image: postgres:15
-#    container_name: ecoride_db
-#    restart: unless-stopped
-#    environment:
-#      POSTGRES_DB: ecoride_dev
-#      POSTGRES_USER: postgres
-#      POSTGRES_PASSWORD: password123
-#    ports:
-#      - "5433:5432"
-#    volumes:
-#      - db_data:/var/lib/postgresql/data
-#      - ../sql/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
-#    networks:
-#      - ecoride_net
-#    # Profil optionnel - activez avec: docker-compose --profile local-db up
-#    profiles:
-#      - local-db
-
-#volumes:
- # db_data:
 
 networks:
   ecoride_net:

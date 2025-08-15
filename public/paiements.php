@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use Olivierguissard\EcoRide\Config\Database;
+use Olivierguissard\EcoRide\Service\PaymentService;
 
 require_once 'functions/auth.php';
 startSession();
@@ -14,41 +15,11 @@ require_once __DIR__ . '/../src/Helpers/helpers.php';
 $user_id = getUserId();
 $totalCredits = 0;
 
-try {
-    $pdo = Database::getConnection();
-    $sql = "SELECT credits FROM users WHERE users.user_id = :user_id";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute(['user_id' => $user_id]);
-    $totalCredits = $stmt->fetchColumn();
-    $totalCredits = (int) $totalCredits;
+$userId = getUserId();
 
-} catch (PDOException $e) {
-    error_log("Erreur de récupération des crédits : " . $e->getMessage());
-}
-
-$transactions = [];
-
-try {
-    $sql = "SELECT amounts, balance_before, balance_after, type, date_credit, status, created_at 
-                FROM credits_history WHERE user_id = :user_id ORDER BY created_at DESC ";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute(['user_id' => $user_id]);
-    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    foreach ($results as $result) {
-        $transactions[] = [
-            'date' => $result['created_at'],
-            'type' => $result['type'],
-            'montant' => $result['amounts'],
-            'solde_depart' => $result['balance_before'],
-            'solde_arrive' => $result['balance_after'],
-            'statut' => $result['status']
-        ];
-    }
-} catch (PDOException $e) {
-    error_log("Erreur lors de la récupération des transactions : " . $e->getMessage());
-    $transactions = []; // fallback vide
-}
+// Paiements avec PaymentService
+$totalCredits = PaymentService::getUserBalance($userId);
+$transactions = PaymentService::getUserPaymentHistory($userId, 50);
 
 $pageTitle = 'Mes paiements - EcoRide';
 ?>
@@ -79,26 +50,24 @@ $pageTitle = 'Mes paiements - EcoRide';
 <main>
     <?php if (isset($_SESSION['flash_success'])): ?>
         <div class="alert alert-success text-center">
-            <?php 
-            // Gestion des messages de succès en tableau ou string
+            <?php
             if (is_array($_SESSION['flash_success'])) {
                 echo $_SESSION['flash_success']['message'] ?? 'Opération réussie';
             } else {
                 echo $_SESSION['flash_success'];
             }
-            unset($_SESSION['flash_success']); 
+            unset($_SESSION['flash_success']);
             ?>
         </div>
     <?php elseif (isset($_SESSION['flash_error'])): ?>
         <div class="alert alert-danger text-center">
-            <?php 
-            // Gestion des messages d'erreur en tableau ou string
+            <?php
             if (is_array($_SESSION['flash_error'])) {
                 echo $_SESSION['flash_error']['message'] ?? 'Erreur inconnue';
             } else {
                 echo $_SESSION['flash_error'];
             }
-            unset($_SESSION['flash_error']); 
+            unset($_SESSION['flash_error']);
             ?>
         </div>
     <?php endif; ?>
@@ -157,19 +126,33 @@ $pageTitle = 'Mes paiements - EcoRide';
                                         <span class="d-none d-md-inline"><?= date('d/m/Y H:i', strtotime($tx['date'])) ?></span>
                                     </td>
                                     <td class="d-none d-md-table-cell">
-                                        <?php if ($tx['type'] === 'Achat'): ?>
-                                            <span class="badge bg-success">Achat</span>
-                                        <?php else: ?>
-                                            <span class="badge bg-info text-dark"><?= htmlspecialchars($tx['type']) ?></span>
-                                        <?php endif; ?>
+                                        <?php
+                                        $typeLabels = [
+                                                'achat' => 'Achat',
+                                                'reservation' => 'Réservation',
+                                                'gain_course' => 'Gain trajet',
+                                                'publication_trajet' => 'Publication',
+                                                'remboursement' => 'Remboursement'
+                                        ];
+                                        $typeColors = [
+                                                'achat' => 'bg-success',
+                                                'reservation' => 'bg-warning text-dark',
+                                                'gain_course' => 'bg-primary',
+                                                'publication_trajet' => 'bg-info text-dark',
+                                                'remboursement' => 'bg-warning text-dark'
+                                        ];
+                                        $typeLabel = $typeLabels[$tx['type']] ?? $tx['type'];
+                                        $badgeClass = $typeColors[$tx['type']] ?? 'bg-secondary';
+                                        ?>
+                                        <span class="badge <?= $badgeClass ?>"><?= $typeLabel ?></span>
                                     </td>
                                     <td class="<?= $tx['montant'] < 0 ? 'text-danger' : 'text-success' ?>">
                                         <?= $tx['montant'] > 0 ? '+' : '' ?><?= htmlspecialchars($tx['montant']) ?>
                                     </td>
-                                    <td class="d-none d-sm-table-cell"><?= htmlspecialchars($tx['solde_depart']) ?></td>
-                                    <td class="d-none d-sm-table-cell"><?= htmlspecialchars($tx['solde_arrive']) ?></td>
-                                    <td class="d-none d-sm-table-cell">
-                                        <?= displayTypeTransactionBadge($tx['statut']) ?>
+                                    <td class="d-none d-sm-table-cell"><?= $tx['balance_before'] ?? '-' ?></td>
+                                    <td class="d-none d-sm-table-cell"><?= $tx['balance_after'] ?? '-' ?></td>
+                                    <td>
+                                        <small class="text-muted"><?= htmlspecialchars(substr($tx['description'], 0, 30)) ?><?= strlen($tx['description']) > 30 ? '...' : '' ?></small>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

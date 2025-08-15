@@ -166,7 +166,6 @@ class Car
                 error_log('Validation échouée avant sauvegarde');
                 return false;
             }
-
             $pdo = Database::getConnection();
             if ($this->vehicleId) {
                 $sql = "UPDATE vehicule SET marque=?, modele=?, type_carburant=?, plaque_immatriculation=?, 
@@ -187,7 +186,6 @@ class Car
                 $sql = "INSERT INTO vehicule (id_conducteur, marque, modele, type_carburant, plaque_immatriculation, 
                         nbr_places, actif, statut, date_creation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 $stmt = $pdo->prepare($sql);
-
                 $success = $stmt->execute([
                     $this->userId,
                     $this->marque,
@@ -225,17 +223,59 @@ class Car
     }
 
     /**
-     * Récupère les véhicules actifs d'un utilisateur (exclut les supprimés)
-     */
-    public static function findActiveVehiclesByUser(int $userId): array
-    {
+ * Récupère les véhicules actifs d'un utilisateur (exclut les supprimés)
+ */
+public static function findActiveVehiclesByUser(int $userId): array
+{
+    try {
         $pdo = Database::getConnection();
+
         $sql = "SELECT * FROM vehicule WHERE id_conducteur = ? AND statut != ? ORDER BY date_creation DESC";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$userId, self::STATUT_SUPPRIME]);
+        $result = $stmt->execute([$userId, self::STATUT_SUPPRIME]);
+        if (!$result) {
+            error_log("ERREUR: Échec de l'exécution de la requête");
+            error_log("Erreur PDO: " . print_r($stmt->errorInfo(), true));
+            return [];
+        }
+
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return array_map(fn($r) => new self($r), $rows);
+        error_log("Nombre de lignes récupérées: " . count($rows));
+
+        if (!empty($rows)) {
+            error_log("Première ligne: " . print_r($rows[0], true));
+        }
+
+        $vehicles = [];
+        foreach ($rows as $index => $row) {
+            error_log("Traitement ligne $index...");
+            try {
+                $vehicle = new self($row);
+                $vehicles[] = $vehicle;
+                error_log("Véhicule créé: ID=" . $vehicle->getVehicleId() . ", Marque=" . $vehicle->getMarque());
+            } catch (Exception $e) {
+                error_log("ERREUR lors de la création du véhicule $index: " . $e->getMessage());
+            }
+        }
+
+        error_log("Nombre d'objets Car créés: " . count($vehicles));
+        error_log("=== FIN findActiveVehiclesByUser ===");
+
+        return $vehicles;
+
+    } catch (PDOException $e) {
+        error_log('ERREUR PDO dans findActiveVehiclesByUser: ' . $e->getMessage());
+        error_log('Code erreur: ' . $e->getCode());
+        error_log('Stack trace: ' . $e->getTraceAsString());
+        return [];
+    } catch (Exception $e) {
+        error_log('ERREUR générale dans findActiveVehiclesByUser: ' . $e->getMessage());
+        error_log('Stack trace: ' . $e->getTraceAsString());
+        return [];
     }
+}
+
+
 
     /**
      * Récupère tous les véhicules d'un utilisateur (y compris supprimés, pour l'admin)

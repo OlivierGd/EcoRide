@@ -1,8 +1,9 @@
 <?php
 
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../src/Helpers/mailer.php';
+require_once __DIR__ . '/../src/Model/Mailer.php';
 require_once __DIR__ . '/../src/Helpers/helpers.php';
+
 require_once 'functions/auth.php';
 startSession();
 requireAuth();
@@ -11,7 +12,7 @@ updateActivity();
 use Olivierguissard\EcoRide\Model\Bookings;
 use Olivierguissard\EcoRide\Model\Trip;
 use Olivierguissard\EcoRide\Model\Users;
-
+use Olivierguissard\EcoRide\Service\PaymentService;
 
 $bookingId = isset($_GET['booking_id']) ? (int)$_GET['booking_id'] : 0;
 $booking = Bookings::findBookingByBookingId($bookingId);
@@ -28,7 +29,7 @@ if ($booking->getUserId() !== getUserId()) {
     die('Vous ne pouvez pas valider ce trajet.');
 }
 
-$trip = Trip::find($booking->getTripId());
+$trip = Trip::loadTripById($booking->getTripId());
 $driver = Users::findUser($trip->getDriverId());
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -44,14 +45,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sql = 'INSERT INTO reviews (trip_id, booking_id, user_id, rating, commentaire) VALUES (?, ?, ?, ?, ?)';
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
-            $booking->getTripId(),
-            $bookingId,
-            $booking->getUserId(),
-            $rating,
-            $commentaire
+                $booking->getTripId(),
+                $bookingId,
+                $booking->getUserId(),
+                $rating,
+                $commentaire
         ]);
 
-        // Mettre à jour le booking
+        // Mettre à jour le booking en "valide"
         $booking->updateStatusValidation('valide');
 
         /**
@@ -68,75 +69,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmtUp->execute([$newRanking, $trip->getDriverId()]);
 
         /**
-         * Vérifier si tous les bookings (non annulés) sont valides pour ce trip
+         * Payer le chauffeur
          */
-        $pdo = \Olivierguissard\EcoRide\Config\Database::getConnection();
-        $sql = "SELECT COUNT(*) FROM bookings WHERE trip_id = ? AND status != 'annule' AND status != 'valide'";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$booking->getTripId()]);
-        $restants = $stmt->fetchColumn();
+        try {
+            // Vérifier si déjà payé
+            $sqlCheckPaid = "SELECT COUNT(*) FROM payments 
+                     WHERE trip_id = ? AND user_id = ? AND type_transaction = 'gain_course'";
+            $stmtCheckPaid = $pdo->prepare($sqlCheckPaid);
+            $stmtCheckPaid->execute([$booking->getTripId(), $trip->getDriverId()]);
+            $alreadyPaid = $stmtCheckPaid->fetchColumn() > 0;
 
-        if ((int)$restants === 0) {
-            // Tous les bookings validés -> trip passe à 'termine'
-            $sqlUpdateTrip = "UPDATE trips SET status = 'termine' WHERE trip_id = ?";
-            $stmtUpdateTrip = $pdo->prepare($sqlUpdateTrip);
-            $stmtUpdateTrip->execute([$booking->getTripId()]);
+            if (!$alreadyPaid) {
+                // Calculer le total des réservations payées
+                $sqlCredits = "SELECT SUM(ABS(montant)) AS total
+                      FROM payments p
+                      WHERE p.trip_id = ?
+                      AND p.type_transaction = 'reservation'
+                      AND p.statut_transaction = 'paye'";
+                $stmtCredits = $pdo->prepare($sqlCredits);
+                $stmtCredits->execute([$booking->getTripId()]);
+                $totalCredits = (float)$stmtCredits->fetchColumn();
 
-            // Récupérer les montants payés pour ce trip
-            $sqlCredits = "SELECT SUM(seats_reserved * ?) AS total FROM bookings WHERE trip_id = ? AND status = 'valide'";
-            $stmtCredits = $pdo->prepare($sqlCredits);
-            $stmtCredits->execute([$trip->getPricePerPassenger(), $booking->getTripId()]);
-            $totalCredits = (float)$stmtCredits->fetchColumn();
-
-            // Crediter le chauffeur
-            $sqlPayDriver = "UPDATE users SET credits = credits + ? WHERE user_id = ?";
-            $stmtPayDriver = $pdo->prepare($sqlPayDriver);
-            $stmtPayDriver->execute([$totalCredits, $trip->getDriverId()]);
-
-            // Générer l'email de notification au chauffeur
-            $mailer = new \Olivierguissard\EcoRide\Model\Mailer();
-
-            $subject = "EcoRide : Vous avez reçu un paiement pour le trajet #{$trip->getTripId()}";
-            $htmlContent = "
-                <p>Bonjour <strong>{$driver->getFirstName()} {$driver->getLastName()}</strong>,</p>
-                <p>Félicitations, tous vos passagers ont validé le trajet <b>{$trip->getStartCity()} &rarr; {$trip->getEndCity()}</b> du " . $trip->getDepartureDateFr() . ".</p>
-                <p>Vous venez de recevoir <strong>{$totalCredits} crédits</strong> sur votre compte EcoRide.</p>
-                <p>Merci pour votre confiance, à bientôt sur EcoRide !</p>";
-
-            try {
-                $mailer->sendEmail(
-                    $driver->getEmail(),
-                    $driver->getFirstName(),
-                    $subject,
-                    $htmlContent,
-                    strip_tags($htmlContent)
-                );
-            } catch (\Exception $e) {
-                error_log("Erreur d'envoi du mail (Mailjet) : " . $e->getMessage());
+                if ($totalCredits > 0) {
+                    // Payer le chauffeur via PaymentService
+                    PaymentService::payDriver($trip->getDriverId(), $totalCredits, $trip->getTripId());
+                }
             }
-
-            // Log payment et credits_history
-            try {
-                $sqlInsertPayment = "INSERT INTO payments (user_id, trip_id, booking_id, type_transaction, montant, description, statut_transaction, commission_plateforme) VALUES (?, ?, ?, 'gain_course', ?, 'Gain chauffeur course #{$trip->getTripId()}', 'valide', 0)";
-                $stmtInsertPayment = $pdo->prepare($sqlInsertPayment);
-                $stmtInsertPayment->execute([
-                    $trip->getDriverId(),
-                    $trip->getTripId(),
-                    null, // booking_id = null pour les paiements chauffeur (gain_course)
-                    $totalCredits
-                ]);
-            } catch (Exception $e) {
-                error_log("Erreur lors de l'enregistrement du paiement : " . $e->getMessage());
-            }
-
-            // log pour credits_history
-            try {
-                $sqlLogCredits = "INSERT INTO credits_history (user_id, credits, date_credit, type, status, created_at) VALUES (?, ?, now(), ?, ?, now())";
-                $stmtLogCredits = $pdo->prepare($sqlLogCredits);
-                $stmtLogCredits->execute([$trip->getDriverId(), $totalCredits, 'gain_course', 'Gain chauffeur course #' . $trip->getTripId()]);
-            } catch (Exception $e) {
-                error_log("Erreur lors de l'enregistrement des logs : " . $e->getMessage());
-            }
+        } catch (Exception $e) {
+            error_log("Erreur paiement chauffeur : " . $e->getMessage());
         }
 
         // Rediriger ou afficher message succès
@@ -144,7 +104,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 }
-
 
 $pageTitle = 'Validation de votre trajet';
 ?>
@@ -164,7 +123,7 @@ $pageTitle = 'Validation de votre trajet';
 <header>
     <nav class="navbar bg-body-tertiary">
         <div class="container" style="max-width: 900px;">
-            <a class="navbar-brand" href="/index.php">
+            <a class="navbar-brand" href="index.php">
                 <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="60" class="d-inline-block align-text-center rounded">
             </a>
             <h2 class="fw-bold mb-1 text-success">Validation du trajet</h2>
@@ -194,10 +153,16 @@ $pageTitle = 'Validation de votre trajet';
         <?php if (isset($error)) : ?>
             <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
-        <?php if (isset($_GET['success'])): ?>
+        <?php if (isset($_GET['success']) && $booking->getStatus() === 'valide'): ?>
             <div class="alert alert-success text-center">
                 <i class="bi bi-check-circle fs-2 mb-2 d-block"></i>
                 Merci, votre trajet a bien été validé !
+                <div class="mt-2 text-muted">Le chauffeur a reçu ses crédits.</div>
+            </div>
+        <?php elseif ($booking->getStatus() === 'valide'): ?>
+            <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle fs-2 mb-2 d-block"></i>
+                Vous avez déjà validé ce trajet.
             </div>
         <?php else: ?>
             <form method="post" class="p-4 bg-white rounded-4 shadow-sm">
@@ -235,13 +200,11 @@ $pageTitle = 'Validation de votre trajet';
     </section>
 </main>
 
-    <footer>
-        <?php include('footer.php'); ?>
-    </footer>
+<footer>
+    <?php include('footer.php'); ?>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
 <script type="module" src="assets/js/index.js"></script>
 </body>
 </html>
-
-

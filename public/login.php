@@ -33,7 +33,7 @@ if (!empty($_POST['emailUser']) && !empty($_POST['passwordUser'])) {
         $stmt->execute([$email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user && password_verify($password, $user['password'])) {
+        if ($user && !empty($user['password']) && password_verify($password, $user['password'])) {
             // Connecter l'utilisateur avec toutes ses données
             loginUserComplete($user, $remember);
             header('Location: rechercher.php');
