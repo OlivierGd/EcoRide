@@ -78,19 +78,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $canCreateTrip) {
     } else {
         $data['driver_id'] = getUserId();
         $voyage = new Trip($data);
-
-        try {
-            PaymentService::debitForTripPublication($userID, $voyage->getTripId() ?? null);
-        } catch (Exception $e) {
-            $error = $e->getMessage();
-            echo "<div class='alert alert-danger' role='alert'>Erreur : $error.
-                    <a href='paiements.php'>Ajoutez des crédits ici</a></div>";
-            exit;
-        }
     }
 
     if ($voyage->validateTrip()) {
         if ($voyage->saveToDatabase()) {
+            try {
+                PaymentService::debitForTripPublication($userID, $voyage->getTripId());
+            } catch (Exception $e) {
+
+                $_SESSION['flash_error'] = 'Trajet créé mais erreur de paiement : ' . $e->getMessage() .
+                        ' <a href="paiements.php">Ajoutez des crédits ici</a>';
+                header('Location: /proposer.php');
+                exit;
+            }
+
             $_SESSION['flash_success'] = 'Le voyage est enregistré !';
             $success = true;
             header('Location: /rechercher.php');

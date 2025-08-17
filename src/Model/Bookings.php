@@ -4,8 +4,10 @@ namespace Olivierguissard\EcoRide\Model;
 
 use DateTime;
 use Olivierguissard\EcoRide\Config\Database;
+use Olivierguissard\EcoRide\Service\PaymentService;
 use PDO;
 use PDOException;
+
 class Bookings
 {
     private ?int $bookingId;
@@ -44,6 +46,7 @@ class Bookings
     {
         return $this->seatsReserved;
     }
+
     public function setSeatsReserved(int $seatsReserved): void
     {
         $this->seatsReserved = $seatsReserved;
@@ -53,6 +56,7 @@ class Bookings
     {
         return $this->status;
     }
+
     public function setStatus(string $status): void
     {
         $this->status = $status;
@@ -62,6 +66,7 @@ class Bookings
     {
         return $this->createdAt;
     }
+
     public function setCreatedAt(DateTime $createdAt): void
     {
         $this->createdAt = $createdAt;
@@ -72,12 +77,9 @@ class Bookings
         try {
             $pdo = Database::getConnection();
             if ($this->bookingId !== null) {
-
-                $sql = "UPDATE bookings SET trip_id=?, user_id=?, seats_reserved=?, status=?, created_at=? WHERE booking_id = ? ";
-                error_log("DEBUG: SQL = " . $sql);
-                error_log("DEBUG: UPDATE booking_id=" . $this->bookingId . " | status=" . $this->status);
+                $sql = "UPDATE bookings SET trip_id=?, user_id=?, seats_reserved=?, status=?, created_at=? WHERE booking_id = ?";
                 $stmt = $pdo->prepare($sql);
-                return $stmt->execute([
+                $result = $stmt->execute([
                     $this->tripId,
                     $this->userId,
                     $this->seatsReserved,
@@ -85,9 +87,8 @@ class Bookings
                     $this->createdAt->format('Y-m-d H:i:s'),
                     $this->bookingId
                 ]);
-                error_log("DEBUG: ROWS UPDATED = " . $stmt->rowCount());
+                return $result;
             } else {
-                error_log("DEBUG: INSERT booking");
                 $sql = "INSERT INTO bookings (trip_id, user_id, seats_reserved, status, created_at) VALUES (?, ?, ?, ?, ?) RETURNING booking_id";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([
@@ -97,9 +98,7 @@ class Bookings
                     $this->status,
                     $this->createdAt->format('Y-m-d H:i:s')
                 ]);
-                $bookingId = $stmt->fetchColumn(); // pour debug a supprimer après
-                error_log("DEBUG: fetchColumn() = " . print_r($bookingId, true)); // pour debug a supprimer après
-                // Récupère l'ID généré
+                $bookingId = $stmt->fetchColumn();
                 $this->bookingId = (int)$bookingId;
                 return true;
             }
@@ -133,7 +132,6 @@ class Bookings
         return $result ? (int)$result['booking_id'] : null;
     }
 
-
     /**
      * Annule une réservation à la demande du passager, rembourse les crédits et logue le mouvement.
      * @param int $bookingId L'ID de la réservation à annuler
@@ -142,61 +140,86 @@ class Bookings
      * @throws Exception en cas d'échec
      */
     public static function cancelByPassenger(int $bookingId, int $userId): bool
-{
-    $pdo = \Olivierguissard\EcoRide\Config\Database::getConnection();
+    {
+        $pdo = \Olivierguissard\EcoRide\Config\Database::getConnection();
 
-    try {
-        $pdo->beginTransaction();
-        
-        // 1. Vérifier l'existence de la réservation
-        $sql = "SELECT b.*, t.departure_at FROM bookings b 
-            JOIN trips t ON b.trip_id = t.trip_id 
-            WHERE b.booking_id = ? AND b.user_id = ? AND b.status != 'annule'";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$bookingId, $userId]);
-        $bookingData = $stmt->fetch(\PDO::FETCH_ASSOC);
+        try {
+            $pdo->beginTransaction();
 
-        if (!$bookingData) {
-            throw new \Exception("Réservation introuvable ou déjà annulée.");
-        }
-
-        // 2. Annuler la réservation
-        $sql = "UPDATE bookings SET status = 'annule' WHERE booking_id = ?";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$bookingId]);
-
-        // 3. Vérifier s'il y a un paiement à rembourser
-        $sql = "SELECT montant FROM payments WHERE booking_id = ? AND type_transaction = 'reservation'";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$bookingId]);
-        $montant = $stmt->fetchColumn();
-        
-        // 4. Rembourser seulement s'il y a un paiement (logique métier)
-        if ($montant !== false && $montant > 0) {
-            $sql = "UPDATE users SET credits = credits + ? WHERE user_id = ?";
+            // 1. Vérifier l'existence de la réservation
+            $sql = "SELECT b.*, t.departure_at FROM bookings b 
+                JOIN trips t ON b.trip_id = t.trip_id 
+                WHERE b.booking_id = ? AND b.user_id = ? AND b.status != 'annule'";
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([$montant, $userId]);
-            
-            // Mettre à jour la session si c'est l'utilisateur courant
-            if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $userId) {
-                $newCredits = \Olivierguissard\EcoRide\Model\Users::getUsersCredits($userId);
-                $_SESSION['credits'] = $newCredits;
+            $stmt->execute([$bookingId, $userId]);
+            $bookingData = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$bookingData) {
+                throw new \Exception("Réservation introuvable ou déjà annulée.");
             }
+
+            // 2. Vérifier s'il y a un paiement à rembourser
+            $sql = "SELECT montant FROM payments 
+                WHERE booking_id = ? AND type_transaction = 'reservation'
+                ORDER BY date_transaction DESC LIMIT 1";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$bookingId]);
+            $montant = $stmt->fetchColumn();
+
+            // 3. Annuler la réservation
+            $sql = "UPDATE bookings SET status = 'annule' WHERE booking_id = ?";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$bookingId]);
+
+            // 4. Rembourser si un paiement existe (même négatif)
+            if ($montant !== false && $montant != 0) {
+                $montantRemboursement = abs((float)$montant);
+
+                // Récupérer le solde actuel avec verrou
+                $sql = "SELECT credits FROM users WHERE user_id = ? FOR UPDATE";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$userId]);
+                $currentBalance = (int)$stmt->fetchColumn();
+
+                // Calculer le nouveau solde
+                $newBalance = $currentBalance + $montantRemboursement;
+
+                // Mettre à jour le solde
+                $sql = "UPDATE users SET credits = ? WHERE user_id = ?";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$newBalance, $userId]);
+
+                // Enregistrer la transaction de remboursement
+                $sql = "INSERT INTO payments 
+                    (user_id, trip_id, booking_id, type_transaction, montant, description, 
+                     statut_transaction, balance_before, balance_after, date_transaction, commission_plateforme) 
+                    VALUES (?, ?, ?, 'remboursement', ?, 'Remboursement annulation passager', 
+                            'credite', ?, ?, NOW(), 0)";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                    $userId, $bookingData['trip_id'], $bookingId, $montantRemboursement,
+                    $currentBalance, $newBalance
+                ]);
+
+                // Mettre à jour la session si nécessaire
+                if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $userId) {
+                    $_SESSION['credits'] = $newBalance;
+                }
+            }
+
+            // 5. Libérer les places dans le trajet
+            $sql = "UPDATE trips SET available_seats = available_seats + ? WHERE trip_id = ?";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$bookingData['seats_reserved'], $bookingData['trip_id']]);
+
+            $pdo->commit();
+            return true;
+
+        } catch (\Exception $e) {
+            $pdo->rollBack();
+            throw $e;
         }
-
-        // 5. Libérer les places dans le trajet
-        $sql = "UPDATE trips SET available_seats = available_seats + ? WHERE trip_id = ?";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$bookingData['seats_reserved'], $bookingData['trip_id']]);
-
-        $pdo->commit();
-        return true;
-
-    } catch (\Exception $e) {
-        $pdo->rollBack();
-        throw $e;
     }
-}
 
     /**
      * Annule un trajet à la demande du conducteur.
@@ -213,8 +236,9 @@ class Bookings
         try {
             $pdo->beginTransaction();
 
-            // 1. Vérifier que le trajet existe, appartient au conducteur, et n'est pas déjà annulé/terminé
-            $sql = "SELECT * FROM trips WHERE trip_id = ? AND driver_id = ? AND departure_at > NOW() AND (status IS NULL OR status != 'annule')";
+            // 1. Vérifier que le trajet existe et appartient au conducteur
+            $sql = "SELECT * FROM trips WHERE trip_id = ? AND driver_id = ? 
+                AND departure_at > NOW() AND (status IS NULL OR status != 'annule')";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$tripId, $driverId]);
             $trip = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -223,78 +247,79 @@ class Bookings
                 throw new \Exception("Trajet introuvable ou déjà annulé/démarré/terminé.");
             }
 
-            // 2. Récupérer toutes les réservations actives du trajet
-            $sql = "SELECT * FROM bookings WHERE trip_id = ? AND status != 'annule'";
+            // 2. Récupérer toutes les réservations actives avec leurs paiements
+            $sql = "SELECT b.*, p.montant, p.statut_transaction
+                FROM bookings b 
+                LEFT JOIN payments p ON (b.booking_id = p.booking_id AND p.type_transaction = 'reservation')
+                WHERE b.trip_id = ? AND b.status != 'annule'";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$tripId]);
-            $bookings = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $bookingsWithPayments = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-            // 3. Pour chaque réservation, procéder à l'annulation/remboursement
-            foreach ($bookings as $booking) {
+            // 3. Traiter chaque réservation
+            foreach ($bookingsWithPayments as $booking) {
                 $bookingId = $booking['booking_id'];
                 $userId = $booking['user_id'];
+                $montantPaiement = isset($booking['montant']) ? abs((float)$booking['montant']) : 0;
 
-                // a. Paiement d'origine (montant à rembourser)
-                $sqlPay = "SELECT * FROM payments WHERE booking_id = ? AND type_transaction = 'reservation'";
-                $stmtPay = $pdo->prepare($sqlPay);
-                $stmtPay->execute([$bookingId]);
-                $payment = $stmtPay->fetch(\PDO::FETCH_ASSOC);
+                // a. Annuler la réservation
+                $sqlCancel = "UPDATE bookings SET status = 'annule' WHERE booking_id = ?";
+                $stmtCancel = $pdo->prepare($sqlCancel);
+                $stmtCancel->execute([$bookingId]);
 
-                if (!$payment) {
-                    // Pas de paiement, skip (ou lance une exception selon ta politique)
-                    continue;
+                // b. Rembourser si un paiement existe
+                if ($montantPaiement > 0) {
+                    // Récupérer le solde actuel avec un verrou (FOR UPDATE)
+                    $sqlBalance = "SELECT credits FROM users WHERE user_id = ? FOR UPDATE";
+                    $stmtBalance = $pdo->prepare($sqlBalance);
+                    $stmtBalance->execute([$userId]);
+                    $currentBalance = (int)$stmtBalance->fetchColumn();
+
+                    // Calculer le nouveau solde
+                    $newBalance = $currentBalance + $montantPaiement;
+
+                    // Mettre à jour le solde
+                    $sqlUpdate = "UPDATE users SET credits = ? WHERE user_id = ?";
+                    $stmtUpdate = $pdo->prepare($sqlUpdate);
+                    $stmtUpdate->execute([$newBalance, $userId]);
+
+                    // Enregistrer la transaction de remboursement
+                    $sqlPayment = "INSERT INTO payments 
+                        (user_id, trip_id, booking_id, type_transaction, montant, description, 
+                         statut_transaction, balance_before, balance_after, date_transaction, commission_plateforme) 
+                        VALUES (?, ?, ?, 'remboursement', ?, 'Remboursement trajet annulé par conducteur', 
+                                'credite', ?, ?, NOW(), 0)";
+                    $stmtPayment = $pdo->prepare($sqlPayment);
+                    $stmtPayment->execute([
+                        $userId, $tripId, $bookingId, $montantPaiement,
+                        $currentBalance, $newBalance
+                    ]);
+
+                    // Mettre à jour la session si c'est l'utilisateur courant
+                    if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $userId) {
+                        $_SESSION['credits'] = $newBalance;
+                    }
                 }
-                $montant = (float)$payment['montant'];
-
-                // b. Annuler la réservation
-                $sqlUpdate = "UPDATE bookings SET status = 'annule' WHERE booking_id = ?";
-                $stmtUpdate = $pdo->prepare($sqlUpdate);
-                $stmtUpdate->execute([$bookingId]);
-
-                // c. Rembourser le passager
-                $sqlUser = "UPDATE users SET credits = credits + ? WHERE user_id = ?";
-                $stmtUser = $pdo->prepare($sqlUser);
-                $stmtUser->execute([$montant, $userId]);
-
-                // d. Log paiement remboursement
-                \Olivierguissard\EcoRide\Model\Payment::create([
-                    'user_id'             => $userId,
-                    'trip_id'             => $tripId,
-                    'booking_id'          => $bookingId,
-                    'type_transaction'    => 'remboursement',
-                    'montant'             => $montant,
-                    'description'         => 'Remboursement suite à annulation trajet par conducteur',
-                    'statut_transaction'  => 'rembourse',
-                    'commission_plateforme'=> 0
-                ]);
-
-                // e. Log credits_history
-                $sqlHistory = "INSERT INTO credits_history (user_id, amounts, type, status, created_at)
-                           VALUES (?, ?, 'remboursement', ?, NOW())";
-                $stmtHistory = $pdo->prepare($sqlHistory);
-                $stmtHistory->execute([
-                    $userId,
-                    $montant,
-                    'Remboursement trajet annulé par conducteur #'.$tripId
-                ]);
             }
 
-            // 4. Annuler le trajet lui-même (statut dans trips)
+            // 4. Annuler le trajet
             $sql = "UPDATE trips SET status = 'annule' WHERE trip_id = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$tripId]);
 
             $pdo->commit();
-
-            // 5. (TODO) Notifier tous les passagers concernés
-
             return true;
+
         } catch (\Exception $e) {
-            $pdo->rollBack();
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             throw $e;
         }
     }
-    public static function findBookingStatus(int $bookingId): ?string {
+
+    public static function findBookingStatus(int $bookingId): ?string
+    {
         $pdo = \Olivierguissard\EcoRide\Config\Database::getConnection();
         $sql = "SELECT status FROM bookings WHERE booking_id = ?";
         $stmt = $pdo->prepare($sql);
@@ -312,7 +337,8 @@ class Bookings
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
         return $result ? new self($result) : null;
     }
-// Retourne les bookings qui ne sont pas annulés
+
+    // Retourne les bookings qui ne sont pas annulés
     public static function findBookingsByTripId(int $tripId): array
     {
         $pdo = \Olivierguissard\EcoRide\Config\Database::getConnection();
@@ -459,5 +485,4 @@ class Bookings
         $stmt->execute([$tripId, $driverId]);
         return (int)$stmt->fetchColumn() > 0;
     }
-
 }

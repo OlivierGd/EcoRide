@@ -31,7 +31,8 @@ $pdo = Database::getConnection();
 $sql = "SELECT t.* FROM trips t 
         JOIN vehicule v ON t.vehicle_id = v.id_vehicule
         JOIN users u ON t.driver_id = u.user_id
-        WHERE t.departure_at > NOW()";
+        WHERE t.departure_at > NOW()
+        AND (t.status IS NULL OR t.status = 'a_venir')"; // Exclut les annulés
 $params = [];
 
 if ($startCity !== '') {

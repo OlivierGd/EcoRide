@@ -5,6 +5,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use Olivierguissard\EcoRide\Model\Bookings;
 
 require_once 'functions/auth.php';
+
 startSession();
 requireAuth();
 updateActivity();
@@ -20,7 +21,7 @@ if (!$bookingId || !$userId) {
 
 try {
     $success = Bookings::cancelByPassenger($bookingId, $userId);
-    
+
     if ($success) {
         $_SESSION['flash_success'] = "Réservation annulée avec succès !";
     } else {

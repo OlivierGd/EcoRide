@@ -176,7 +176,7 @@ if (!function_exists('displayTripStatusLabel')) {
                 </a>
             <?php endif; ?>
 
-            <?php if ($canCancel): ?>
+            <?php if ($canCancel && $status !== 'termine' && $status !== 'annule'): ?>
                 <?php if ($role === 'chauffeur'): ?>
                     <form method="POST" action="cancelTrip.php" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler ce trajet ? Tous les passagers seront remboursés.')">
                         <input type="hidden" name="trip_id" value="<?= $trip->getTripId() ?>">

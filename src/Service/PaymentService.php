@@ -28,7 +28,8 @@ class PaymentService
         string $description,
         ?int $tripId = null,
         ?int $bookingId = null,
-        string $statut = 'paye'
+        string $statut = 'paye',
+        float $commission = 0
     ): bool {
         $pdo = Database::getConnection();
 
@@ -54,13 +55,25 @@ class PaymentService
             $stmt->execute([$newBalance, $userId]);
 
             // 5. Pour les achats de crédits, trip_id = NULL
-            $finalTripId = ($type === 'achat') ? null : $tripId;
+            if ($type === 'achat') {
+                // Achat de crédits : toujours NULL
+                $finalTripId = null;
+            } elseif ($type === 'publication_trajet') {
+                // Publication de trajet : trip_id OBLIGATOIRE
+                if ($tripId === null) {
+                    throw new Exception("trip_id est requis pour une publication de trajet");
+                }
+                $finalTripId = $tripId;
+            } else {
+                // Autres types (reservation, remboursement, etc.) : utiliser $tripId tel quel
+                $finalTripId = $tripId;
+            }
 
             // 6. Insérer dans payments
             $sqlPayment = "INSERT INTO payments 
             (user_id, trip_id, booking_id, type_transaction, montant, description, 
              statut_transaction, balance_before, balance_after, date_transaction, commission_plateforme) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 0)";
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)";
 
             $stmtPayment = $pdo->prepare($sqlPayment);
             $stmtPayment->execute([
@@ -72,7 +85,8 @@ class PaymentService
                 $description,
                 $statut,
                 $currentBalance,
-                $newBalance
+                $newBalance,
+                $commission,
             ]);
 
             $pdo->commit();
@@ -137,6 +151,9 @@ class PaymentService
      */
     public static function debitForTripPublication(int $userId, ?int $tripId = null): bool
     {
+        if ($tripId === null) {
+            throw new Exception("trip_id est requis pour une publication de trajet");
+        }
         return self::processPayment(
             $userId,
             -2,
@@ -144,7 +161,8 @@ class PaymentService
             "Publication trajet" . ($tripId ? " #{$tripId}" : ""),
             $tripId,
             null,
-            'paye'
+            'debite',
+            2
         );
     }
 
@@ -184,7 +202,7 @@ class PaymentService
     {
         return self::processPayment(
             $userId,
-            $amount,
+            $amount,                    // Montant positif pour crédit
             'remboursement',
             "Remboursement trajet #{$tripId}",
             $tripId,
@@ -249,5 +267,4 @@ class PaymentService
     {
         return self::getUserBalance($userId) >= $amount;
     }
-
 }
