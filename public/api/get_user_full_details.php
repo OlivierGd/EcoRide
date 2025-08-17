@@ -1,5 +1,4 @@
 <?php
-// api/get_user_full_details.php
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 
@@ -43,7 +42,7 @@ try {
 
     // Récupérer les véhicules si autorisé
     if ($user['permissions']['can_view']) {
-        $sql = "SELECT * FROM vehicule WHERE id_vehicule = ? ORDER BY id_vehicule";
+        $sql = "SELECT * FROM vehicule WHERE id_conducteur = ? ORDER BY id_vehicule";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$userId]);
         $user['vehicles'] = $stmt->fetchAll(PDO::FETCH_ASSOC);

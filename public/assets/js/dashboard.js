@@ -30,6 +30,7 @@ function initializeUserManagement() {
     // Initialiser les gestionnaires d'événements
     setupUserSearchHandlers();
     setupUserCreationHandler();
+    setupUserEditHandler(); // 👈 Gestionnaire d'édition
 }
 
 /**
@@ -262,6 +263,144 @@ function setupUserCreationHandler() {
                 submitButton.innerHTML = originalButtonText;
             });
     });
+}
+
+/**
+ * Gestionnaire d'édition d'utilisateur
+ */
+function setupUserEditHandler() {
+    const editUserForm = document.getElementById('editUserForm');
+    if (!editUserForm) {
+        console.warn('Formulaire editUserForm non trouvé');
+        return;
+    }
+
+    editUserForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+        const submitButton = this.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.innerHTML;
+
+        // Debug : afficher les données envoyées
+        console.log('Données du formulaire d\'édition:');
+        for (let [key, value] of formData.entries()) {
+            console.log(`  ${key}: ${value}`);
+        }
+
+        // État de chargement
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="bi bi-hourglass-split"></i> Modification en cours...';
+
+        fetch('api/update_user.php', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                console.log('Statut de la réponse:', response.status);
+                return response.json();
+            })
+            .then(updateResult => {
+                console.log('Résultat de la mise à jour:', updateResult);
+
+                if (updateResult.success) {
+                    // Fermer la modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editUserModal'));
+                    if (modal) {
+                        modal.hide();
+                    }
+
+                    // Afficher un message de succès
+                    showSuccessMessage(updateResult.message || 'Utilisateur modifié avec succès');
+
+                    // Rafraîchir les résultats de recherche si affichés
+                    const userResults = document.getElementById('userResults');
+                    if (userResults && userResults.style.display !== 'none') {
+                        performUserSearch();
+                    }
+                } else {
+                    showErrorMessage('Erreur: ' + (updateResult.message || 'Erreur inconnue'));
+                }
+            })
+            .catch(error => {
+                console.error('Erreur modification utilisateur:', error);
+                showErrorMessage('Erreur de communication avec le serveur');
+            })
+            .finally(() => {
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
+            });
+    });
+}
+
+/**
+ * Affiche un message de succès
+ */
+function showSuccessMessage(message) {
+    // Supprimer les alertes existantes
+    const existingAlerts = document.querySelectorAll('.alert-floating');
+    existingAlerts.forEach(alert => alert.remove());
+
+    // Créer une alerte de succès temporaire
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-success alert-dismissible fade show alert-floating';
+    alertDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        max-width: 500px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    `;
+    alertDiv.innerHTML = `
+        <i class="bi bi-check-circle-fill"></i> ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+    document.body.appendChild(alertDiv);
+
+    // Supprimer automatiquement après 5 secondes
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+/**
+ * Affiche un message d'erreur
+ */
+function showErrorMessage(message) {
+    // Supprimer les alertes existantes
+    const existingAlerts = document.querySelectorAll('.alert-floating');
+    existingAlerts.forEach(alert => alert.remove());
+
+    // Créer une alerte d'erreur temporaire
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-danger alert-dismissible fade show alert-floating';
+    alertDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        max-width: 500px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    `;
+    alertDiv.innerHTML = `
+        <i class="bi bi-exclamation-triangle-fill"></i> ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+    document.body.appendChild(alertDiv);
+
+    // Supprimer automatiquement après 7 secondes
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 7000);
 }
 
 /**
@@ -599,16 +738,20 @@ window.editUser = function (userId) {
 };
 
 /**
- * Remplit le formulaire d'édition
+ * Remplit le formulaire d'édition avec les données utilisateur (VERSION FINALE)
  * @param {Object} userDetails - Détails de l'utilisateur
  */
 function fillEditUserForm(userDetails) {
+    console.log('Remplissage du formulaire avec:', userDetails);
+
+    // Remplir les champs de base
     document.getElementById('editUserId').value = userDetails.user_id;
     document.getElementById('editFirstName').value = userDetails.firstname;
     document.getElementById('editLastName').value = userDetails.lastname;
     document.getElementById('editEmail').value = userDetails.email;
     document.getElementById('editStatus').value = userDetails.status;
 
+    // Gestion du rôle avec permissions
     const editRoleSelect = document.getElementById('editRole');
     if (userDetails.permissions && !userDetails.permissions.can_edit_role) {
         editRoleSelect.innerHTML = `
@@ -617,8 +760,48 @@ function fillEditUserForm(userDetails) {
             </option>
         `;
         editRoleSelect.disabled = true;
+
+        // Ajouter un champ hidden pour envoyer le rôle actuel
+        const hiddenRoleInput = document.createElement('input');
+        hiddenRoleInput.type = 'hidden';
+        hiddenRoleInput.name = 'role';
+        hiddenRoleInput.value = userDetails.role;
+        editRoleSelect.parentNode.appendChild(hiddenRoleInput);
     } else {
+        editRoleSelect.disabled = false;
         loadEditableRoleOptions(userDetails.role);
+    }
+
+    // Gestion de l'affichage d'informations sur le changement de statut
+    const statusSelect = document.getElementById('editStatus');
+    const statusInfo = document.getElementById('statusChangeInfo');
+    const statusText = document.getElementById('statusChangeText');
+
+    if (statusSelect && statusInfo && statusText) {
+        // Supprimer les anciens listeners
+        statusSelect.removeEventListener('change', statusChangeHandler);
+
+        // Ajouter le nouveau listener
+        statusSelect.addEventListener('change', statusChangeHandler);
+
+        function statusChangeHandler() {
+            const newStatus = this.value;
+            const currentStatus = userDetails.status;
+
+            if (newStatus !== currentStatus) {
+                if (newStatus === 'inactif') {
+                    statusText.textContent = 'Désactiver cet utilisateur l\'empêchera de se connecter à l\'application.';
+                    statusInfo.classList.remove('d-none');
+                } else if (newStatus === 'actif' && currentStatus === 'inactif') {
+                    statusText.textContent = 'Réactiver cet utilisateur lui permettra de se reconnecter à l\'application.';
+                    statusInfo.classList.remove('d-none');
+                } else {
+                    statusInfo.classList.add('d-none');
+                }
+            } else {
+                statusInfo.classList.add('d-none');
+            }
+        }
     }
 }
 
@@ -696,3 +879,35 @@ window.retourRecherche = function() {
  * @returns {string} Date formatée
  */
 window.formatDateFr = formatDateForDisplay;
+
+/**
+ * FONCTION DE DEBUG : Testez cette fonction dans la console pour diagnostiquer
+ */
+function debugEditUserForm() {
+    const form = document.getElementById('editUserForm');
+    if (!form) {
+        console.error('❌ Formulaire editUserForm non trouvé');
+        return;
+    }
+
+    console.log('✅ Formulaire trouvé');
+
+    // Vérifier tous les champs
+    const fields = ['editUserId', 'editFirstName', 'editLastName', 'editEmail', 'editRole', 'editStatus'];
+    fields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            console.log(`✅ Champ ${fieldId}: "${field.value}"`);
+        } else {
+            console.error(`❌ Champ ${fieldId} non trouvé`);
+        }
+    });
+
+    // Vérifier les gestionnaires d'événements
+    const submitButton = form.querySelector('button[type="submit"]');
+    if (submitButton) {
+        console.log('✅ Bouton submit trouvé');
+    } else {
+        console.error('❌ Bouton submit non trouvé');
+    }
+}
