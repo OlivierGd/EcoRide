@@ -42,14 +42,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // 1. Insérer dans reviews
         $pdo = \Olivierguissard\EcoRide\Config\Database::getConnection();
-        $sql = 'INSERT INTO reviews (trip_id, booking_id, user_id, rating, commentaire) VALUES (?, ?, ?, ?, ?)';
+        $sql = 'INSERT INTO reviews (trip_id, booking_id, user_id, rating, commentaire, status_review) VALUES (?, ?, ?, ?, ?, ?)';
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
                 $booking->getTripId(),
                 $bookingId,
                 $booking->getUserId(),
                 $rating,
-                $commentaire
+                $commentaire,
+                'pending'
         ]);
 
         // Mettre à jour le booking en "valide"
