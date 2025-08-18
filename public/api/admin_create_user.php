@@ -1,5 +1,4 @@
 <?php
-// api/create_user.php (remplacer le contenu existant)
 
 require_once __DIR__ . '/../vendor/autoload.php';
 

@@ -75,6 +75,68 @@ $stmt->execute($params);
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $trips = array_map(fn($r) => new Trip($r), $rows);
 
+// Fallback: si une date précise est demandée mais aucun trajet n'existe ce jour, proposer les prochains trajets après cette date
+$fallbackMessage = '';
+if ($departureDate !== '' && count($trips) === 0) {
+    // Reconstruire la requête en remplaçant l'égalité de date par une recherche strictement après la date demandée
+    $sqlFallback = "SELECT t.* FROM trips t 
+        JOIN vehicule v ON t.vehicle_id = v.id_vehicule
+        JOIN users u ON t.driver_id = u.user_id
+        WHERE t.departure_at > NOW()
+        AND (t.status IS NULL OR t.status = 'a_venir')";
+    $paramsFallback = [];
+
+    if ($startCity !== '') {
+        $sqlFallback .= " AND t.start_city ILIKE :startCity";
+        $paramsFallback[':startCity'] = "%$startCity%";
+    }
+    if ($endCity !== '') {
+        $sqlFallback .= " AND t.end_city ILIKE :endCity";
+        $paramsFallback[':endCity'] = "%$endCity%";
+    }
+    // Remplacer le filtre de date exacte par une date future strictement supérieure
+    $sqlFallback .= " AND DATE(t.departure_at) > :departureDate";
+    $paramsFallback[':departureDate'] = $departureDate;
+
+    if ($energySelected !== '') {
+        $sqlFallback .= " AND v.type_carburant = :energy";
+        $paramsFallback[':energy'] = $energySelected;
+    }
+    if ($placesSelected !== '') {
+        $sqlFallback .= " AND t.available_seats >= :places";
+        $paramsFallback[':places'] = $placesSelected;
+    }
+    if ($ratingSelected !== '') {
+        $sqlFallback .= " AND u.ranking >= :rating";
+        $paramsFallback[':rating'] = $ratingSelected;
+    }
+
+    // Tri identique
+    $sqlFallback .= match ($sort) {
+        'price'  => " ORDER BY t.price_per_passenger ASC",
+        'time'   => " ORDER BY t.departure_at ASC",
+        'rating' => " ORDER BY u.ranking DESC",
+        default  => " ORDER BY t.departure_at ASC"
+    };
+
+    $stmt2 = $pdo->prepare($sqlFallback);
+    $stmt2->execute($paramsFallback);
+    $rows2 = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+    $trips = array_map(fn($r) => new Trip($r), $rows2);
+
+    // Construire un message utilisateur
+    try {
+        $dt = new DateTime($departureDate);
+        $dateFr = $dt->format('d/m/Y');
+    } catch (Exception $e) {
+        $dateFr = $departureDate;
+    }
+    if (count($trips) > 0) {
+        $fallbackMessage = "Aucun trajet disponible le $dateFr. Voici les prochains trajets disponibles aux dates ultérieures.";
+    } else {
+        $fallbackMessage = "Aucun trajet disponible le $dateFr ni aux dates ultérieures correspondant à vos critères.";
+    }
+}
 
 // Initialise les tableaux pour chaque filtre
 $energies = [];
@@ -240,6 +302,13 @@ $pageTitle = 'Rechercher un voyage';
 
         </form>
     </section>
+
+    <?php if (!empty($fallbackMessage)): ?>
+        <div class="alert alert-info alert-dismissible fade show mt-4" role="alert">
+            <i class="bi bi-info-circle me-1"></i> <?= htmlspecialchars($fallbackMessage) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+        </div>
+    <?php endif; ?>
 
     <!-- Rides List -->
     <section class="mt-5 mb-3">

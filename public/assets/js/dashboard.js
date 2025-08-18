@@ -3,7 +3,6 @@
  * Système de gestion des utilisateurs, statistiques et commentaires
  *
  * @author EcoRide Team
- * @version 2.0 - Refactorisé pour plus de clarté
  */
 
 /**
@@ -30,7 +29,7 @@ function initializeUserManagement() {
     // Initialiser les gestionnaires d'événements
     setupUserSearchHandlers();
     setupUserCreationHandler();
-    setupUserEditHandler(); // 👈 Gestionnaire d'édition
+    setupUserEditHandler();
 }
 
 /**
@@ -334,169 +333,10 @@ function setupUserEditHandler() {
 }
 
 /**
- * Affiche un message de succès
- */
-function showSuccessMessage(message) {
-    // Supprimer les alertes existantes
-    const existingAlerts = document.querySelectorAll('.alert-floating');
-    existingAlerts.forEach(alert => alert.remove());
-
-    // Créer une alerte de succès temporaire
-    const alertDiv = document.createElement('div');
-    alertDiv.className = 'alert alert-success alert-dismissible fade show alert-floating';
-    alertDiv.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-        min-width: 300px;
-        max-width: 500px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    `;
-    alertDiv.innerHTML = `
-        <i class="bi bi-check-circle-fill"></i> ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-
-    document.body.appendChild(alertDiv);
-
-    // Supprimer automatiquement après 5 secondes
-    setTimeout(() => {
-        if (alertDiv.parentNode) {
-            alertDiv.remove();
-        }
-    }, 5000);
-}
-
-/**
- * Affiche un message d'erreur
- */
-function showErrorMessage(message) {
-    // Supprimer les alertes existantes
-    const existingAlerts = document.querySelectorAll('.alert-floating');
-    existingAlerts.forEach(alert => alert.remove());
-
-    // Créer une alerte d'erreur temporaire
-    const alertDiv = document.createElement('div');
-    alertDiv.className = 'alert alert-danger alert-dismissible fade show alert-floating';
-    alertDiv.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-        min-width: 300px;
-        max-width: 500px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    `;
-    alertDiv.innerHTML = `
-        <i class="bi bi-exclamation-triangle-fill"></i> ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-
-    document.body.appendChild(alertDiv);
-
-    // Supprimer automatiquement après 7 secondes
-    setTimeout(() => {
-        if (alertDiv.parentNode) {
-            alertDiv.remove();
-        }
-    }, 7000);
-}
-
-/**
- * Affiche le modal de résultat de création d'utilisateur
- * @param {Object} creationData - Données retournées par l'API
- */
-function showUserCreationResultModal(creationData) {
-    const isEmailSentSuccessfully = creationData.email_sent;
-    const isEmailFailed = !creationData.email_sent;
-
-    const alertClass = isEmailSentSuccessfully ? 'alert-success' : 'alert-warning';
-    const alertIcon = isEmailSentSuccessfully ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
-    const headerClass = isEmailSentSuccessfully ? 'bg-success' : 'bg-warning';
-    const alertTitle = isEmailSentSuccessfully ?
-        'Utilisateur créé et email envoyé avec succès !' :
-        'Utilisateur créé, mais problème avec l\'email';
-
-    const modalHtml = `
-        <div class="modal fade" id="userCreationResultModal" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header ${headerClass} text-white">
-                        <h5 class="modal-title">
-                            <i class="bi bi-person-check-fill"></i> 
-                            Utilisateur créé avec succès
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="alert ${alertClass}">
-                            <i class="bi ${alertIcon}"></i> 
-                            <strong>${alertTitle}</strong>
-                            ${isEmailFailed ? `<br><small>Erreur email : ${creationData.email_error || 'Erreur inconnue'}</small>` : ''}
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6><i class="bi bi-person-fill"></i> Informations utilisateur :</h6>
-                                <div class="bg-light p-3 rounded">
-                                    <div class="mb-2"><strong>Nom :</strong> ${creationData.user_name}</div>
-                                    <div class="mb-2"><strong>Email :</strong> ${creationData.user_email}</div>
-                                    <div class="mb-2"><strong>ID :</strong> #${creationData.user_id}</div>
-                                    <div class="mb-2"><strong>Statut :</strong> <span class="badge bg-success">Créé en base</span></div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <h6><i class="bi bi-envelope-fill"></i> Statut email :</h6>
-                                <div class="bg-light p-3 rounded">
-                                    <div class="mb-2">
-                                        <strong>Email envoyé :</strong> 
-                                        <span class="badge ${isEmailSentSuccessfully ? 'bg-success">OUI' : 'bg-danger">NON'}</span>
-                                    </div>
-                                    <div class="small ${isEmailSentSuccessfully ? 'text-success' : 'text-danger'}">
-                                        ${isEmailSentSuccessfully ?
-        'L\'utilisateur peut maintenant créer son mot de passe' :
-        `Erreur : ${creationData.email_error || 'Inconnue'}`
-    }
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        ${isEmailFailed ? `
-                            <button type="button" class="btn btn-warning" onclick="retryEmailActivation(${creationData.user_id})">
-                                <i class="bi bi-arrow-repeat"></i> Renvoyer l'email
-                            </button>
-                        ` : ''}
-                        <button type="button" class="btn btn-success" data-bs-dismiss="modal">
-                            <i class="bi bi-check-lg"></i> Compris !
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    // Supprimer l'ancien modal et afficher le nouveau
-    const existingModal = document.getElementById('userCreationResultModal');
-    if (existingModal) existingModal.remove();
-
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-    const modal = new bootstrap.Modal(document.getElementById('userCreationResultModal'));
-    modal.show();
-
-    // Nettoyage après fermeture
-    document.getElementById('userCreationResultModal').addEventListener('hidden.bs.modal', function () {
-        this.remove();
-    });
-}
-
-/**
  * ===== MODULE DE GESTION DES COMMENTAIRES =====
  */
 function initializeCommentsModule() {
-    console.log('Initialisation du module commentaires');
+    console.log('Initialisation du module commentaires amélioré');
 
     // Chargement initial des commentaires
     loadCommentsWithFilters();
@@ -506,184 +346,312 @@ function initializeCommentsModule() {
     if (commentsFilterForm) {
         commentsFilterForm.addEventListener("submit", function (event) {
             event.preventDefault();
+            console.log('🔍 Soumission du formulaire de filtres');
 
-            const filtersData = {
-                rating: this.rating.value,
-                date_min: this.date_min.value,
-                date_max: this.date_max.value
-            };
+            const filtersData = extractFiltersFromForm();
+            console.log('Filtres extraits:', filtersData);
 
             loadCommentsWithFilters(filtersData);
+            updateActiveFiltersIndicator(filtersData);
         });
+    }
+
+    // Gestionnaire pour la sélection de période prédéfinie
+    const periodFilter = document.getElementById("periodFilter");
+    if (periodFilter) {
+        periodFilter.addEventListener("change", function() {
+            handlePeriodChange(this.value);
+        });
+    }
+
+    // Gestionnaire pour le bouton reset
+    const resetFiltersBtn = document.getElementById("resetFiltersBtn");
+    if (resetFiltersBtn) {
+        resetFiltersBtn.addEventListener("click", resetAllFilters);
+    }
+
+    // Gestionnaire pour supprimer tous les filtres
+    const clearAllFilters = document.getElementById("clearAllFilters");
+    if (clearAllFilters) {
+        clearAllFilters.addEventListener("click", resetAllFilters);
     }
 }
 
 /**
- * Charge et affiche les commentaires avec filtres optionnels
- * @param {Object} filters - Filtres à appliquer
+ * Extrait les filtres du formulaire
+ */
+function extractFiltersFromForm() {
+    const form = document.getElementById("commentsFilterForm");
+    if (!form) return {};
+
+    const formData = new FormData(form);
+    const filters = {};
+
+    for (let [key, value] of formData.entries()) {
+        if (value && value.trim() !== '') {
+            filters[key] = value.trim();
+        }
+    }
+
+    return filters;
+}
+
+/**
+ * Gère le changement de période prédéfinie
+ */
+function handlePeriodChange(selectedPeriod) {
+    const dateStart = document.getElementById("dateStart");
+    const dateEnd = document.getElementById("dateEnd");
+
+    if (!selectedPeriod) {
+        // Période personnalisée - ne rien faire
+        return;
+    }
+
+    const dates = calculatePeriodDates(selectedPeriod);
+    if (dates) {
+        dateStart.value = dates.start;
+        dateEnd.value = dates.end;
+
+        // Auto-submit si période sélectionnée
+        document.getElementById("commentsFilterForm").dispatchEvent(new Event('submit'));
+    }
+}
+
+/**
+ * Calcule les dates pour une période prédéfinie
+ */
+function calculatePeriodDates(period) {
+    const today = new Date();
+    const formatDate = (date) => date.toISOString().split('T')[0];
+
+    switch(period) {
+        case 'today':
+            return {
+                start: formatDate(today),
+                end: formatDate(today)
+            };
+
+        case 'yesterday':
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            return {
+                start: formatDate(yesterday),
+                end: formatDate(yesterday)
+            };
+
+        case 'last_7_days':
+            const week = new Date(today);
+            week.setDate(today.getDate() - 7);
+            return {
+                start: formatDate(week),
+                end: formatDate(today)
+            };
+
+        case 'last_30_days':
+            const month = new Date(today);
+            month.setDate(today.getDate() - 30);
+            return {
+                start: formatDate(month),
+                end: formatDate(today)
+            };
+
+        case 'this_month':
+            const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            return {
+                start: formatDate(startOfMonth),
+                end: formatDate(today)
+            };
+
+        case 'last_month':
+            const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            const endLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+            return {
+                start: formatDate(lastMonth),
+                end: formatDate(endLastMonth)
+            };
+
+        case 'this_year':
+            const startOfYear = new Date(today.getFullYear(), 0, 1);
+            return {
+                start: formatDate(startOfYear),
+                end: formatDate(today)
+            };
+
+        default:
+            return null;
+    }
+}
+
+/**
+ * Remet à zéro tous les filtres
+ */
+function resetAllFilters() {
+    const form = document.getElementById("commentsFilterForm");
+    if (form) {
+        form.reset();
+
+        // Réinitialiser aussi les dates
+        document.getElementById("dateStart").value = '';
+        document.getElementById("dateEnd").value = '';
+        document.getElementById("periodFilter").value = '';
+
+        // Recharger sans filtres
+        loadCommentsWithFilters({});
+        updateActiveFiltersIndicator({});
+    }
+}
+
+/**
+ * Met à jour l'indicateur de filtres actifs
+ */
+function updateActiveFiltersIndicator(filters) {
+    const indicator = document.getElementById("activeFiltersIndicator");
+    const textElement = document.getElementById("activeFiltersText");
+
+    if (!indicator || !textElement) return;
+
+    const activeFilters = Object.keys(filters).filter(key => filters[key]);
+
+    if (activeFilters.length === 0) {
+        indicator.style.display = 'none';
+        return;
+    }
+
+    indicator.style.display = 'block';
+
+    const filterDescriptions = [];
+
+    if (filters.comment_status) {
+        const statusLabels = {
+            'approved': 'Approuvé',
+            'pending': 'En attente',
+            'rejected': 'Rejeté'
+        };
+        filterDescriptions.push(`Statut: ${statusLabels[filters.comment_status]}`);
+    }
+
+    if (filters.rating) {
+        filterDescriptions.push(`Note: ${filters.rating}★ et plus`);
+    }
+
+    if (filters.period_preset) {
+        const periodLabels = {
+            'today': "Aujourd'hui",
+            'yesterday': 'Hier',
+            'last_7_days': '7 derniers jours',
+            'last_30_days': '30 derniers jours',
+            'this_month': 'Ce mois-ci',
+            'last_month': 'Mois dernier',
+            'this_year': 'Cette année'
+        };
+        filterDescriptions.push(`Période: ${periodLabels[filters.period_preset]}`);
+    } else if (filters.date_start || filters.date_end) {
+        let dateRange = 'Date: ';
+        if (filters.date_start && filters.date_end) {
+            dateRange += `du ${filters.date_start} au ${filters.date_end}`;
+        } else if (filters.date_start) {
+            dateRange += `depuis le ${filters.date_start}`;
+        } else if (filters.date_end) {
+            dateRange += `jusqu'au ${filters.date_end}`;
+        }
+        filterDescriptions.push(dateRange);
+    }
+
+    textElement.textContent = `Filtres actifs: ${filterDescriptions.join(', ')}`;
+}
+
+/**
+ * Charge et affiche les commentaires avec filtres (VERSION AMÉLIORÉE)
  */
 function loadCommentsWithFilters(filters = {}) {
     let apiUrl = "api/get_comments.php";
-    const urlParams = new URLSearchParams(filters).toString();
 
+    // Si pas de filtres explicites, récupérer depuis le formulaire
+    if (Object.keys(filters).length === 0) {
+        filters = extractFiltersFromForm();
+    }
+
+    const urlParams = new URLSearchParams(filters).toString();
     if (urlParams) {
         apiUrl += "?" + urlParams;
     }
 
+    console.log('🔍 URL API finale:', apiUrl);
+
+    const container = document.getElementById("commentsTableContainer");
+    if (container) {
+        container.innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border text-success" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                </div>
+                <p class="mt-2 text-muted">Application des filtres...</p>
+            </div>
+        `;
+    }
+
     fetch(apiUrl)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
         .then(commentsData => {
+            console.log('📊 Données reçues:', commentsData);
             displayCommentsTable(commentsData);
+
+            // Afficher le nombre de résultats
+            showResultsCount(commentsData.length, filters);
         })
         .catch(error => {
-            console.error('Erreur lors du chargement des commentaires:', error);
+            console.error('❌ Erreur lors du chargement des commentaires:', error);
+            if (container) {
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Erreur lors du chargement des commentaires: ${error.message}
+                    </div>
+                `;
+            }
         });
 }
 
 /**
- * Affiche les commentaires dans un tableau
- * @param {Array} commentsData - Liste des commentaires
+ * Affiche le nombre de résultats trouvés
  */
-function displayCommentsTable(commentsData) {
-    const commentsTableContainer = document.getElementById("commentsTableContainer");
-    if (!commentsTableContainer) return;
+function showResultsCount(count, filters) {
+    const hasFilters = Object.keys(filters).some(key => filters[key]);
 
-    if (!Array.isArray(commentsData) || commentsData.length === 0) {
-        commentsTableContainer.innerHTML = '<div class="alert alert-warning">Aucun commentaire trouvé</div>';
-        return;
-    }
+    // Chercher un endroit pour afficher le compteur
+    const tableContainer = document.getElementById("commentsTableContainer");
+    if (tableContainer && tableContainer.querySelector('.table')) {
+        const countText = hasFilters ?
+            `${count} commentaire(s) trouvé(s) avec les filtres appliqués` :
+            `${count} commentaire(s) au total`;
 
-    let commentsTableHtml = `
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>Voyage ID</th>
-                    <th>Date</th>
-                    <th>Voyageur</th>
-                    <th>Départ</th>
-                    <th>Arrivée</th>
-                    <th>Montant payé</th>
-                    <th>Ranking</th>
-                    <th>Commentaire</th>
-                    <th>Chauffeur</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
+        // Ajouter ou mettre à jour le compteur
+        let countElement = document.getElementById('resultsCount');
+        if (!countElement) {
+            countElement = document.createElement('div');
+            countElement.id = 'resultsCount';
+            countElement.className = 'text-muted small mb-2';
+            tableContainer.insertBefore(countElement, tableContainer.firstChild);
+        }
 
-    commentsData.forEach(comment => {
-        commentsTableHtml += `
-            <tr>
-                <td>${comment.trip_id}</td>
-                <td>${formatDateForDisplay(comment.trip_date)}</td>
-                <td>${comment.voyager_firstname} ${comment.voyager_lastname}</td>
-                <td>${comment.start_city}</td>
-                <td>${comment.end_city}</td>
-                <td>${comment.price_per_passenger || "-"}</td>
-                <td>${comment.rating} ⭐</td>
-                <td>${comment.commentaire}</td>
-                <td>${comment.driver_firstname} ${comment.driver_lastname}</td>
-            </tr>
+        countElement.innerHTML = `
+            <i class="bi bi-info-circle"></i> ${countText}
         `;
-    });
-
-    commentsTableHtml += "</tbody></table>";
-    commentsTableContainer.innerHTML = commentsTableHtml;
-}
-
-/**
- * ===== MODULE DE VISUALISATION (GRAPHIQUES) =====
- */
-function initializeChartsModule() {
-    console.log('Initialisation des graphiques');
-
-    initializeCommissionsChart();
-    initializeTripsChart();
-}
-
-/**
- * Initialise le graphique des commissions mensuelles
- */
-function initializeCommissionsChart() {
-    const commissionsChartCanvas = document.getElementById("chartCommissions");
-
-    if (commissionsChartCanvas && typeof monthlyData !== "undefined") {
-        new Chart(commissionsChartCanvas, {
-            type: "line",
-            data: {
-                labels: monthlyData.map(dataPoint => dataPoint.month),
-                datasets: [{
-                    label: "Crédits collectés (par mois)",
-                    data: monthlyData.map(dataPoint => parseFloat(dataPoint.total)),
-                    backgroundColor: "rgba(25, 135, 84, 0.2)",
-                    borderColor: "rgba(25, 135, 84, 1)",
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return value + " crédits";
-                            }
-                        }
-                    }
-                }
-            }
-        });
     }
 }
-
-/**
- * Initialise le graphique des trajets par jour
- */
-function initializeTripsChart() {
-    const tripsChartCanvas = document.getElementById("chartTripsByDay");
-
-    if (tripsChartCanvas && typeof tripsByDay !== "undefined") {
-        new Chart(tripsChartCanvas, {
-            type: "bar",
-            data: {
-                labels: tripsByDay.map(dataPoint => dataPoint.day),
-                datasets: [
-                    {
-                        label: "Trajets actifs",
-                        data: tripsByDay.map(dataPoint => parseInt(dataPoint.valid_trips)),
-                        backgroundColor: "rgba(25, 135, 84, 0.7)"
-                    },
-                    {
-                        label: "Trajets annulés",
-                        data: tripsByDay.map(dataPoint => parseInt(dataPoint.cancelled_trips)),
-                        backgroundColor: "rgba(220, 53, 69, 0.7)"
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: "Nombre de trajets"
-                        }
-                    }
-                }
-            }
-        });
-    }
-}
-
 /**
  * ===== FONCTIONS UTILITAIRES =====
  */
 
 /**
- * Convertit un code de rôle en libellé
- * @param {number|string} role - Code du rôle
+ * Obtient le libellé du rôle utilisateur
+ * @param {number} role - Numéro du rôle
  * @returns {string} Libellé du rôle
  */
 function getUserRoleLabel(role) {
@@ -693,221 +661,543 @@ function getUserRoleLabel(role) {
         2: 'Gestionnaire',
         3: 'Administrateur'
     };
-    return roleLabels[role] || 'Inconnu';
+    return roleLabels[role] || 'Rôle inconnu';
 }
 
 /**
  * Formate une date pour l'affichage
  * @param {string} dateString - Date au format ISO
- * @returns {string} Date formatée en français
- */
-function formatDateForDisplay(dateString) {
-    if (!dateString) return '';
-    try {
-        return new Date(dateString).toLocaleDateString('fr-FR');
-    } catch (error) {
-        console.error('Erreur de formatage de date:', error);
-        return dateString;
-    }
-}
-
-/**
- * ===== FONCTIONS GLOBALES (compatibilité HTML) =====
- */
-
-/**
- * Édite un utilisateur (appelée depuis le HTML)
- * @param {number} userId - ID de l'utilisateur à éditer
- */
-window.editUser = function (userId) {
-    fetch(`api/get_user_full_details.php?id=${userId}`)
-        .then(response => {
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            return response.json();
-        })
-        .then(userDetails => {
-            if (userDetails.error) throw new Error(userDetails.error);
-
-            fillEditUserForm(userDetails);
-            new bootstrap.Modal(document.getElementById('editUserModal')).show();
-        })
-        .catch(error => {
-            console.error('Erreur édition utilisateur:', error);
-            alert(`Erreur: ${error.message}`);
-        });
-};
-
-/**
- * Remplit le formulaire d'édition avec les données utilisateur (VERSION FINALE)
- * @param {Object} userDetails - Détails de l'utilisateur
- */
-function fillEditUserForm(userDetails) {
-    console.log('Remplissage du formulaire avec:', userDetails);
-
-    // Remplir les champs de base
-    document.getElementById('editUserId').value = userDetails.user_id;
-    document.getElementById('editFirstName').value = userDetails.firstname;
-    document.getElementById('editLastName').value = userDetails.lastname;
-    document.getElementById('editEmail').value = userDetails.email;
-    document.getElementById('editStatus').value = userDetails.status;
-
-    // Gestion du rôle avec permissions
-    const editRoleSelect = document.getElementById('editRole');
-    if (userDetails.permissions && !userDetails.permissions.can_edit_role) {
-        editRoleSelect.innerHTML = `
-            <option value="${userDetails.role}" selected disabled>
-                ${getUserRoleLabel(userDetails.role)} (lecture seule)
-            </option>
-        `;
-        editRoleSelect.disabled = true;
-
-        // Ajouter un champ hidden pour envoyer le rôle actuel
-        const hiddenRoleInput = document.createElement('input');
-        hiddenRoleInput.type = 'hidden';
-        hiddenRoleInput.name = 'role';
-        hiddenRoleInput.value = userDetails.role;
-        editRoleSelect.parentNode.appendChild(hiddenRoleInput);
-    } else {
-        editRoleSelect.disabled = false;
-        loadEditableRoleOptions(userDetails.role);
-    }
-
-    // Gestion de l'affichage d'informations sur le changement de statut
-    const statusSelect = document.getElementById('editStatus');
-    const statusInfo = document.getElementById('statusChangeInfo');
-    const statusText = document.getElementById('statusChangeText');
-
-    if (statusSelect && statusInfo && statusText) {
-        // Supprimer les anciens listeners
-        statusSelect.removeEventListener('change', statusChangeHandler);
-
-        // Ajouter le nouveau listener
-        statusSelect.addEventListener('change', statusChangeHandler);
-
-        function statusChangeHandler() {
-            const newStatus = this.value;
-            const currentStatus = userDetails.status;
-
-            if (newStatus !== currentStatus) {
-                if (newStatus === 'inactif') {
-                    statusText.textContent = 'Désactiver cet utilisateur l\'empêchera de se connecter à l\'application.';
-                    statusInfo.classList.remove('d-none');
-                } else if (newStatus === 'actif' && currentStatus === 'inactif') {
-                    statusText.textContent = 'Réactiver cet utilisateur lui permettra de se reconnecter à l\'application.';
-                    statusInfo.classList.remove('d-none');
-                } else {
-                    statusInfo.classList.add('d-none');
-                }
-            } else {
-                statusInfo.classList.add('d-none');
-            }
-        }
-    }
-}
-
-/**
- * Charge les options de rôles pour l'édition
- * @param {number} currentRole - Rôle actuel
- */
-function loadEditableRoleOptions(currentRole) {
-    fetch('api/get_allowed_roles.php')
-        .then(response => response.json())
-        .then(rolesData => {
-            if (rolesData.success) {
-                const editRoleSelect = document.getElementById('editRole');
-                editRoleSelect.innerHTML = '';
-                editRoleSelect.disabled = false;
-
-                if (Array.isArray(rolesData.allowed_roles)) {
-                    rolesData.allowed_roles.forEach((roleLabel, roleIndex) => {
-                        const optionElement = document.createElement('option');
-                        optionElement.value = roleIndex;
-                        optionElement.textContent = roleLabel;
-                        if (roleIndex === currentRole) optionElement.selected = true;
-                        editRoleSelect.appendChild(optionElement);
-                    });
-                } else {
-                    Object.entries(rolesData.allowed_roles).forEach(([roleValue, roleLabel]) => {
-                        const optionElement = document.createElement('option');
-                        optionElement.value = roleValue;
-                        optionElement.textContent = roleLabel;
-                        if (parseInt(roleValue) === currentRole) optionElement.selected = true;
-                        editRoleSelect.appendChild(optionElement);
-                    });
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Erreur chargement rôles édition:', error);
-        });
-}
-
-/**
- * Réinitialise un mot de passe (appelée depuis le HTML)
- * @param {number} userId - ID de l'utilisateur
- * @param {string} userName - Nom complet
- */
-window.resetPassword = function(userId, userName) {
-    if (confirm(`Confirmer la réinitialisation du mot de passe de ${userName} ?`)) {
-        console.log(`Réinitialisation mot de passe - User ID: ${userId}`);
-        alert('Fonctionnalité de réinitialisation à implémenter');
-    }
-};
-
-/**
- * Renvoie un email d'activation (appelée depuis le HTML)
- * @param {number} userId - ID de l'utilisateur
- */
-window.retryEmailActivation = function(userId) {
-    console.log(`Renvoi email activation - User ID: ${userId}`);
-    alert('Fonctionnalité de renvoi d\'email à implémenter');
-};
-
-/**
- * Retour à la recherche (appelée depuis le HTML - ancienne fonctionnalité)
- */
-window.retourRecherche = function() {
-    const userDetails = document.getElementById("userDetails");
-    if (userDetails) {
-        userDetails.style.display = 'none';
-    }
-};
-
-/**
- * Fonction utilitaire globale pour formater les dates (utilisée dans le HTML généré)
- * @param {string} dateString - Date à formater
  * @returns {string} Date formatée
  */
-window.formatDateFr = formatDateForDisplay;
+function formatDateForDisplay(dateString) {
+    if (!dateString) return 'Non défini';
+    
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('fr-FR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    } catch (error) {
+        console.error('Erreur formatage date:', error);
+        return 'Date invalide';
+    }
+}
 
 /**
- * FONCTION DE DEBUG : Testez cette fonction dans la console pour diagnostiquer
+ * Affiche un message de succès
+ * @param {string} message - Message à afficher
  */
-function debugEditUserForm() {
-    const form = document.getElementById('editUserForm');
-    if (!form) {
-        console.error('❌ Formulaire editUserForm non trouvé');
+function showSuccessMessage(message) {
+    // Vous pouvez utiliser Bootstrap Toast ou une simple alerte
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    alertDiv.innerHTML = `
+        <i class="bi bi-check-circle-fill"></i> ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alertDiv);
+    
+    // Suppression automatique après 5 secondes
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+/**
+ * Affiche un message d'erreur
+ * @param {string} message - Message à afficher
+ */
+function showErrorMessage(message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    alertDiv.innerHTML = `
+        <i class="bi bi-exclamation-triangle-fill"></i> ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alertDiv);
+    
+    // Suppression automatique après 7 secondes
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 7000);
+}
+
+/**
+ * Affiche la modal de résultat de création d'utilisateur
+ * @param {Object} result - Résultat de la création
+ */
+function showUserCreationResultModal(result) {
+    // Implémentation basique - vous pouvez l'améliorer selon vos besoins
+    showSuccessMessage(`Utilisateur créé avec succès ! ${result.message || ''}`);
+}
+
+/**
+ * Édite un utilisateur (ouverture de la modal)
+ * @param {number} userId - ID de l'utilisateur
+ */
+function editUser(userId) {
+    console.log('Édition utilisateur:', userId);
+    // TODO: Charger les données utilisateur et ouvrir la modal
+    // Cette fonction devra être complétée selon vos besoins
+}
+
+/**
+ * Réinitialise le mot de passe d'un utilisateur
+ * @param {number} userId - ID de l'utilisateur
+ * @param {string} userName - Nom complet de l'utilisateur
+ */
+function resetPassword(userId, userName) {
+    if (confirm(`Voulez-vous vraiment réinitialiser le mot de passe de ${userName} ?`)) {
+        // TODO: Appel API pour réinitialiser le mot de passe
+        console.log('Réinitialisation mot de passe pour:', userId);
+    }
+}
+
+/**
+ * ===== FONCTION PRINCIPALE MANQUANTE =====
+ * Affiche le tableau des commentaires
+ */
+function displayCommentsTable(comments) {
+    console.log('🎯 Affichage du tableau avec', comments.length, 'commentaires');
+    
+    const container = document.getElementById("commentsTableContainer");
+    if (!container) {
+        console.error('❌ Conteneur commentsTableContainer non trouvé');
         return;
     }
 
-    console.log('✅ Formulaire trouvé');
+    if (!Array.isArray(comments) || comments.length === 0) {
+        container.innerHTML = `
+            <div class="text-center p-4">
+                <i class="bi bi-chat-dots text-muted" style="font-size: 2rem;"></i>
+                <p class="text-muted mt-2">Aucun commentaire trouvé avec ces critères</p>
+            </div>
+        `;
+        return;
+    }
 
-    // Vérifier tous les champs
-    const fields = ['editUserId', 'editFirstName', 'editLastName', 'editEmail', 'editRole', 'editStatus'];
-    fields.forEach(fieldId => {
-        const field = document.getElementById(fieldId);
-        if (field) {
-            console.log(`✅ Champ ${fieldId}: "${field.value}"`);
-        } else {
-            console.error(`❌ Champ ${fieldId} non trouvé`);
-        }
+    // Création du tableau
+    let tableHTML = `
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID Trajet</th>
+                        <th>Passager</th>
+                        <th>Chauffeur</th>
+                        <th>Trajet</th>
+                        <th>Note</th>
+                        <th>Commentaire</th>
+                        <th>Date trajet</th>
+                        <th>Date avis</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    comments.forEach(comment => {
+        const statusBadge = getStatusBadge(comment.status_review);
+        const ratingStars = generateStarsHTML(comment.rating);
+        
+        tableHTML += `
+            <tr>
+                <td>
+                    <span class="badge bg-primary">#${comment.trip_id}</span>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <div class="fw-bold">${escapeHtml(comment.voyager_firstname)} ${escapeHtml(comment.voyager_lastname)}</div>
+                            <small class="text-muted">Ranking: ${comment.voyager_ranking}/5</small>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <div class="fw-bold">${escapeHtml(comment.driver_firstname)} ${escapeHtml(comment.driver_lastname)}</div>
+                            <small class="text-muted">Ranking: ${comment.driver_ranking}/5</small>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="small">
+                        <strong>${escapeHtml(comment.start_city)} → ${escapeHtml(comment.end_city)}</strong><br>
+                        <span class="text-muted">${escapeHtml(comment.marque)} ${escapeHtml(comment.modele)}</span><br>
+                        <span class="text-success">${comment.price_per_passenger}€/personne</span>
+                    </div>
+                </td>
+                <td class="text-center">
+                    <div class="rating">
+                        ${ratingStars}
+                    </div>
+                    <small class="text-muted">${comment.rating}/5</small>
+                </td>
+                <td>
+                    <div class="comment-cell" style="max-width: 200px;">
+                        <div class="comment-preview" title="${escapeHtml(comment.commentaire)}">
+                            ${comment.commentaire ? truncateText(escapeHtml(comment.commentaire), 60) : '<em class="text-muted">Aucun commentaire</em>'}
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <small>${formatDateForDisplay(comment.trip_date)}</small>
+                </td>
+                <td>
+                    <small>${formatDateForDisplay(comment.date_review)}</small>
+                </td>
+                <td>
+                    ${statusBadge}
+                </td>
+                <td>
+                    <div class="btn-group" role="group">
+                        ${generateActionButtons(comment)}
+                    </div>
+                </td>
+            </tr>
+        `;
     });
 
-    // Vérifier les gestionnaires d'événements
-    const submitButton = form.querySelector('button[type="submit"]');
-    if (submitButton) {
-        console.log('✅ Bouton submit trouvé');
-    } else {
-        console.error('❌ Bouton submit non trouvé');
+    tableHTML += `
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    container.innerHTML = tableHTML;
+    
+    console.log('✅ Tableau affiché avec succès');
+}
+
+/**
+ * Fonctions utilitaires pour l'affichage des commentaires
+ */
+function getStatusBadge(status) {
+    const statusConfig = {
+        'approved': { class: 'bg-success', text: 'Approuvé', icon: 'bi-check-circle' },
+        'pending': { class: 'bg-warning', text: 'En attente', icon: 'bi-clock' },
+        'rejected': { class: 'bg-danger', text: 'Rejeté', icon: 'bi-x-circle' }
+    };
+    
+    const config = statusConfig[status] || statusConfig['pending'];
+    return `<span class="badge ${config.class}"><i class="bi ${config.icon}"></i> ${config.text}</span>`;
+}
+
+function generateStarsHTML(rating) {
+    let starsHTML = '';
+    for (let i = 1; i <= 5; i++) {
+        if (i <= rating) {
+            starsHTML += '<i class="bi bi-star-fill text-warning"></i>';
+        } else {
+            starsHTML += '<i class="bi bi-star text-muted"></i>';
+        }
     }
+    return starsHTML;
+}
+
+function generateActionButtons(comment) {
+    let buttons = '';
+    
+    if (comment.status_review === 'pending') {
+        buttons += `
+            <button class="btn btn-sm btn-success me-1" onclick="approveComment(${comment.review_id})" title="Approuver">
+                <i class="bi bi-check"></i>
+            </button>
+            <button class="btn btn-sm btn-danger me-1" onclick="rejectComment(${comment.review_id})" title="Rejeter">
+                <i class="bi bi-x"></i>
+            </button>
+        `;
+    }
+    
+    // Bouton pour envoyer un email au chauffeur
+    buttons += `
+        <button class="btn btn-sm btn-primary" onclick="sendEmailToDriver(${comment.trip_id}, '${escapeHtml(comment.driver_firstname)} ${escapeHtml(comment.driver_lastname)}', '${escapeHtml(comment.voyager_firstname)} ${escapeHtml(comment.voyager_lastname)}')" title="Envoyer email au chauffeur">
+            <i class="bi bi-envelope"></i>
+        </button>
+    `;
+    
+    return buttons;
+}
+
+/**
+ * Ouvre la modal pour envoyer un email au chauffeur
+ * @param {number} tripId - ID du trajet
+ * @param {string} driverName - Nom complet du chauffeur
+ * @param {string} passengerName - Nom complet du passager
+ */
+function sendEmailToDriver(tripId, driverName, passengerName) {
+    // Créer la modal dynamiquement si elle n'existe pas
+    let modal = document.getElementById('emailDriverModal');
+    if (!modal) {
+        createEmailDriverModal();
+        modal = document.getElementById('emailDriverModal');
+    }
+
+    // Remplir les champs
+    document.getElementById('emailTripId').value = tripId;
+    document.getElementById('emailDriverName').value = driverName;
+    document.getElementById('emailPassengerName').value = passengerName;
+    
+    // Pré-remplir le sujet avec des informations du trajet
+    document.getElementById('emailSubject').value = `EcoRide - Concernant votre trajet #${tripId}`;
+    
+    // Vider le message précédent
+    document.getElementById('emailMessage').value = '';
+    
+    // Afficher la modal
+    const modalInstance = new bootstrap.Modal(modal);
+    modalInstance.show();
+}
+
+
+// === AJOUTS POUR MODÉRATION DES COMMENTAIRES ET ENVOI D'EMAILS ===
+// Ces définitions viennent compléter/écraser certaines fonctions précédentes pour répondre aux exigences.
+
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function truncateText(str, maxLen) {
+    if (!str) return '';
+    return str.length > maxLen ? str.substring(0, maxLen - 1) + '…' : str;
+}
+
+// Redéfinition pour afficher uniquement les colonnes demandées
+function displayCommentsTable(comments) {
+    const container = document.getElementById("commentsTableContainer");
+    if (!container) return;
+
+    if (!Array.isArray(comments) || comments.length === 0) {
+        container.innerHTML = `
+            <div class="text-center p-4">
+                <i class="bi bi-chat-dots text-muted" style="font-size: 2rem;"></i>
+                <p class="text-muted mt-2">Aucun commentaire trouvé avec ces critères</p>
+            </div>
+        `;
+        return;
+    }
+
+    let tableHTML = `
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID Voyage</th>
+                        <th>Date du commentaire</th>
+                        <th>Note</th>
+                        <th>Commentaire</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    comments.forEach(c => {
+        const statusBadge = getStatusBadge(c.status_review);
+        const rating = c.rating ? `${c.rating}/5` : '-';
+
+        tableHTML += `
+            <tr>
+                <td><span class="badge bg-primary">#${c.trip_id}</span></td>
+                <td><small>${formatDateForDisplay(c.date_review)}</small></td>
+                <td class="text-center">${rating}</td>
+                <td style="white-space: pre-wrap; max-width: 600px">${c.commentaire ? escapeHtml(c.commentaire) : '<em class="text-muted">Aucun commentaire</em>'}</td>
+                <td>${statusBadge}</td>
+                <td>
+                    <div class="btn-group" role="group">
+                        ${generateActionButtonsSimple(c)}
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+
+    tableHTML += `
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    container.innerHTML = tableHTML;
+}
+
+function generateActionButtonsSimple(comment) {
+    let buttons = '';
+    if (comment.status_review === 'pending') {
+        buttons += `
+            <button class="btn btn-sm btn-success me-1" onclick="approveComment(${comment.review_id})" title="Valider">
+                <i class="bi bi-check"></i>
+            </button>
+            <button class="btn btn-sm btn-danger me-1" onclick="rejectComment(${comment.review_id})" title="Refuser">
+                <i class="bi bi-x"></i>
+            </button>
+        `;
+    }
+    buttons += `
+        <button class="btn btn-sm btn-primary" onclick="sendEmailToDriver(${comment.trip_id}, '${escapeHtml(comment.driver_firstname)} ${escapeHtml(comment.driver_lastname)}', '${escapeHtml(comment.voyager_firstname)} ${escapeHtml(comment.voyager_lastname)}')" title="Envoyer un email au chauffeur">
+            <i class="bi bi-envelope"></i>
+        </button>
+    `;
+    return buttons;
+}
+
+function approveComment(reviewId) {
+    if (!reviewId) return;
+    if (!confirm('Confirmer la validation de ce commentaire ?')) return;
+
+    const formData = new FormData();
+    formData.append('review_id', reviewId);
+    formData.append('action', 'approve');
+
+    fetch('api/moderate_review.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.success) {
+            showSuccessMessage(res.message || 'Commentaire approuvé');
+            loadCommentsWithFilters(extractFiltersFromForm());
+        } else {
+            showErrorMessage(res.message || 'Erreur lors de l\'approbation');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showErrorMessage('Erreur de communication avec le serveur');
+    });
+}
+
+function rejectComment(reviewId) {
+    if (!reviewId) return;
+    if (!confirm('Confirmer le refus de ce commentaire ?')) return;
+
+    const formData = new FormData();
+    formData.append('review_id', reviewId);
+    formData.append('action', 'reject');
+
+    fetch('api/moderate_review.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.success) {
+            showSuccessMessage(res.message || 'Commentaire rejeté');
+            loadCommentsWithFilters(extractFiltersFromForm());
+        } else {
+            showErrorMessage(res.message || 'Erreur lors du refus');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showErrorMessage('Erreur de communication avec le serveur');
+    });
+}
+
+// Redéfinition propre des fonctions d'email pour garantir une modal complète et un envoi fonctionnel
+function sendEmailToDriver(tripId, driverName, passengerName) {
+    ensureEmailDriverModal();
+    document.getElementById('emailTripId').value = tripId;
+    document.getElementById('emailDriverName').value = driverName;
+    document.getElementById('emailPassengerName').value = passengerName;
+    document.getElementById('emailSubject').value = `EcoRide - Concernant votre trajet #${tripId}`;
+    document.getElementById('emailMessage').value = '';
+    const modal = new bootstrap.Modal(document.getElementById('emailDriverModal'));
+    modal.show();
+}
+
+function ensureEmailDriverModal() {
+    if (document.getElementById('emailDriverModal')) return; // déjà créée
+
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = `
+        <div class="modal fade" id="emailDriverModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="bi bi-envelope-fill text-primary"></i>
+                            Envoyer un email au chauffeur
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form id="emailDriverForm">
+                        <div class="modal-body">
+                            <input type="hidden" id="emailTripId" name="trip_id">
+                            <input type="hidden" id="emailDriverName" name="driver_name">
+                            <input type="hidden" id="emailPassengerName" name="passenger_name">
+                            <div class="mb-3">
+                                <label for="emailSubject" class="form-label">Objet</label>
+                                <input type="text" id="emailSubject" name="subject" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="emailMessage" class="form-label">Message</label>
+                                <textarea id="emailMessage" name="message" class="form-control" rows="8" required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send"></i> Envoyer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(wrapper.firstElementChild);
+
+    const form = document.getElementById('emailDriverForm');
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const original = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Envoi...';
+
+        const formData = new FormData(form);
+        fetch('api/send_email_driver.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                showSuccessMessage(res.message || 'Email envoyé');
+                const modalEl = document.getElementById('emailDriverModal');
+                const instance = bootstrap.Modal.getInstance(modalEl);
+                if (instance) instance.hide();
+                form.reset();
+            } else {
+                showErrorMessage(res.message || 'Échec de l\'envoi de l\'email');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            showErrorMessage('Erreur de communication avec le serveur');
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = original;
+        });
+    });
 }
