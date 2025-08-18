@@ -145,24 +145,26 @@ $pageTitle = 'Mon profil - EcoRide';
                         $role = $item['role'];
                         ?>
                         <div class="col-12 col-md-6 col-lg-4">
-                            <div class="card h-100 border-0 shadow">
-                                <div class="card-body d-flex flex-column">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <small class="text-muted"><?= $t->getDepartureDateFr() ?> · <?= $t->getDepartureTime() ?></small>
-                                        <span class="badge <?= $role==='chauffeur' ? 'bg-primary' : 'bg-success' ?>">
-                                            <?= $role==='chauffeur' ? 'Je conduis' : 'Passager' ?>
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <span class="fw-semibold"><?= htmlspecialchars($t->getStartCity()) ?></span>
-                                        <i class="bi bi-arrow-right mx-1"></i>
-                                        <span class="fw-semibold"><?= htmlspecialchars($t->getEndCity()) ?></span>
-                                    </div>
-                                    <div class="mt-auto text-end">
-                                        <span class="fw-bold"><?= $t->getPricePerPassenger() ?> crédits</span>
+                            <a href="historique.php" class="text-decoration-none">
+                                <div class="card h-100 border-0 shadow">
+                                    <div class="card-body d-flex flex-column">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <small class="text-muted"><?= $t->getDepartureDateFr() ?> · <?= $t->getDepartureTime() ?></small>
+                                            <span class="badge <?= $role==='chauffeur' ? 'bg-primary' : 'bg-success' ?>">
+                                                <?= $role==='chauffeur' ? 'Je conduis' : 'Passager' ?>
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span class="fw-semibold"><?= htmlspecialchars($t->getStartCity()) ?></span>
+                                            <i class="bi bi-arrow-right mx-1"></i>
+                                            <span class="fw-semibold"><?= htmlspecialchars($t->getEndCity()) ?></span>
+                                        </div>
+                                        <div class="mt-auto text-end">
+                                            <span class="fw-bold"><?= $t->getPricePerPassenger() ?> crédits</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            </a>
                         </div>
                     <?php endforeach; ?>
                 </div>

@@ -14,6 +14,7 @@ if (isAuthenticated()) {
 }
 
 require_once __DIR__ . '/../src/Helpers/helpers.php';
+require_once __DIR__ . '/components/_trip_modal.php';
 
 // Récupération des critères de recherche (GET)
 $startCity     = trim($_GET['startCity'] ?? '');
@@ -337,7 +338,7 @@ $pageTitle = 'Rechercher un voyage';
         $nameLabel  = htmlspecialchars($driver->getFirstName() . ' ' . strtoupper(substr($driver->getLastName(),0,1)));
         $stars      = renderStars($driver->getRanking());
         $ranking    = htmlspecialchars($driver->getRanking());
-        $energy     = htmlspecialchars($car->getCarburant());;
+        $energy     = htmlspecialchars($car->getCarburant());
         $startCity  = htmlspecialchars($trip->getStartCity());
         $endCity    = htmlspecialchars($trip->getEndCity());
         $time       = htmlspecialchars($trip->getDepartureTime());
@@ -386,37 +387,39 @@ $pageTitle = 'Rechercher un voyage';
                                 <?= $flashError['message']; ?>
                             </div>
                         <?php endif; ?>
-                        <?php if (isAuthenticated()) : ?>
-                            <!-- Bouton détails modal si non connecté -->
+                        <?php if (isAuthenticated()): ?>
+                            <!-- Bouton détails (modale) -->
+                            <button type="button" class="btn btn-outline-secondary me-2" data-bs-toggle="modal"
+                                    data-bs-target="#tripModal-<?= $trip->getTripId(); ?>">
+                                Détails
+                            </button>
                         <?php else: ?>
-                            <button type="button" class="btn btn-outline-secondary me-2" onclick="alert('Connectez-vous pour voir les détails du trajet.'); window.location.href='login.php';">
+                            <!-- Non connecté : renvoi vers login -->
+                            <button type="button" class="btn btn-outline-secondary me-2" onclick="window.location.href='login.php';">
                                 Détails
                             </button>
                         <?php endif; ?>
-                        <!-- Bouton détails trajets -->
-                        <button type="button" class="btn btn-outline-secondary me-2" data-bs-toggle="modal"
-                                data-bs-target="#tripModal-<?= $trip->getTripId(); ?>">Détails
-                        </button>
 
+                        <!-- Réserver -->
                         <form method="post" action="reserve.php" style="display:inline">
                             <input type="hidden" name="trip_id" value="<?= htmlspecialchars($trip->getTripId()) ?>">
                             <input type="hidden" name="seats_reserved" value="1">
                             <?php if ($remainingSeats > 0 && !$showError): ?>
-                            <button type="button"
-                                class="btn btn-primary"
-                                data-bs-toggle="modal"
-                                data-bs-target="#reservationModal"
-                                data-trip-id="<?= $trip->getTripId() ?>"
-                                data-start-city="<?= $startCity ?>"
-                                data-end-city="<?= $endCity ?>"
-                                data-departure="<?= $trip->getDepartureDateFr() ?> à <?= $trip->getDepartureTime() ?>"
-                                data-price="<?= $trip->getPricePerPassenger() ?>">
-                                Réserver
-                            </button>
+                                <button type="button"
+                                    class="btn btn-primary"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#reservationModal"
+                                    data-trip-id="<?= $trip->getTripId() ?>"
+                                    data-start-city="<?= $startCity ?>"
+                                    data-end-city="<?= $endCity ?>"
+                                    data-departure="<?= $trip->getDepartureDateFr() ?> à <?= $trip->getDepartureTime() ?>"
+                                    data-price="<?= $trip->getPricePerPassenger() ?>">
+                                    Réserver
+                                </button>
                             <?php elseif ($showError): ?>
-                            <button type="button" class="btn btn-secondary disabled" disabled>Réservé</button>
+                                    <button type="button" class="btn btn-secondary disabled" disabled>Réservé</button>
                             <?php else: ?>
-                            <button type="button" class="btn btn-secondary disabled" disabled>Complet</button>
+                                    <button type="button" class="btn btn-secondary disabled" disabled>Complet</button>
                             <?php endif; ?>
                         </form>
                     </div>
@@ -424,41 +427,15 @@ $pageTitle = 'Rechercher un voyage';
             </div>
 
         <!-- Modale infos trajets (Bouton détails) -->
-            <?php
-            $arrivalTime = clone $trip->getDepartureAt();
-            $interval = $trip->getEstimatedDurationAsInterval();
-            if ($interval) {
-                $arrivalTime->add($interval);
-            }
-            $arrivalFormatted = $arrivalTime->format('H:i');
-            ?>
-            <div class="modal fade" id="tripModal-<?= $trip->getTripId(); ?>" tabindex="-1" aria-labelledby="tripModalLabel-<?= $trip->getTripId(); ?>" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header bg-success text-white">
-                            <h5 class="modal-title" id="tripModalLabel-<?= $trip->getTripId(); ?>">Détails du trajet</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p><strong>Conducteur :</strong> <?= htmlspecialchars($driver->getFirstName()) ?> (<?= renderStars($driver->getRanking()) ?>)</p>
-                            <p><strong>Départ :</strong> <?= $trip->getStartCity() ?>, <?= $trip->getStartLocation() ?></p>
-                            <p><strong>Arrivée :</strong> <?= $trip->getEndCity() ?>, <?= $trip->getEndLocation() ?></p>
-                            <p><strong>Départ prévu :</strong> <?= $trip->getDepartureDateFr() ?> à <?= $trip->getDepartureTime() ?></p>
-                            <p><strong>Arrivée estimée :</strong> <?= $arrivalFormatted ?></p>
-                            <p><strong>Places disponibles :</strong> <?= $trip->getRemainingSeats() ?></p>
-                            <p><strong>Prix :</strong> <?= $trip->getPricePerPassenger() ?> crédits</p>
-                            <p><strong>Commentaire :</strong> <?= nl2br(htmlspecialchars($trip->getComment())) ?></p>
-                            <p><strong>Préférences :</strong>
-                                <?= $trip->getNoSmoking() ? '🚭 Non-fumeur, ' : '' ?>
-                                <?= $trip->getMusicAllowed() ? '🎵 Musique autorisée, ' : '' ?>
-                                <?= $trip->getDiscussAllowed() ? '💬 Discussion autorisée' : '' ?>
-                            </p>
-                            <p><strong>Véhicule :</strong> <?= htmlspecialchars($car->getMarque() . ' ' . $car->getModele()) ?></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Modale de confirmation de voyage -->
+            <?php renderTripModal($trip, $driver, $car); ?>
+        <?php endforeach; ?>
+        <!-- Load More Button -->
+        <?php if ($countTrip > 10): ?>
+            <button class="btn btn-light w-100 mb-3 border rounded">Voir plus de trajets</button>
+        <?php endif; ?>
+    </section>
+
+        <!-- Modale de confirmation de voyage -->
             <div class="modal fade" id="reservationModal" tabindex="-1" aria-labelledby="reservationModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -486,16 +463,9 @@ $pageTitle = 'Rechercher un voyage';
                                 </div>
                             </form>
                         </div>
-
                     </div>
                 </div>
             </div>
-        <?php endforeach; ?>
-        <!-- Load More Button -->
-        <?php if ($countTrip > 10): ?>
-            <button class="btn btn-light w-100 mb-3 border rounded">Voir plus de trajets</button>
-        <?php endif; ?>
-    </section>
 
     <!-- Eco Impact Banner -->
     <section class="bg-primary-light rounded p-3 mb-5">

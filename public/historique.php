@@ -12,9 +12,11 @@ requireAuth();
 updateActivity();
 
 require_once __DIR__ . '/../src/Helpers/helperBookingStatus.php';
+require_once __DIR__ . '/components/_trip_modal.php';
 
 $userId = getUserId();
 $allTrips = [];
+
 
 // Trajets avec un role chauffeur
 $driverTrips = Trip::findTripsByDriver($userId);
