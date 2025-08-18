@@ -50,21 +50,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Vérifie si l'email existe déjà
             $sql = 'SELECT user_id FROM users WHERE email = :email';
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([trim($_POST['email'])]);
+            $stmt->execute([':email' => $email]);
 
             if ($stmt->fetchColumn() > 0) {
                 $error[] = "Un compte avec cette adresse existe déjà";
             } else {
                 $user = new Users([
-                    'firstname' => $firstName,
-                    'lastname'  => $lastName,
-                    'email'     => $email,
-                    'password'  => $password
+                        'firstname' => $firstName,
+                        'lastname'  => $lastName,
+                        'email'     => $email,
+                        'password'  => $password
                 ]);
                 $user->setPassword();
                 $user_id = $user->saveUserToDatabase($pdo);
 
                 if ($user_id) {
+
+                    startSession();
+                    session_regenerate_id(true);
+
                     $_SESSION['user_id']    = $user_id;
                     $_SESSION['connecte']   = true;
                     $_SESSION['email']      = $user->getEmail();
@@ -77,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['profilePicture'] = $user->getProfilePicture();
                     $_SESSION['success_registration'] = true;
 
-                    header('Location: /profil.php');
+                    header('Location: /index.php');
                     exit;
                 } else {
                     $error[] = 'Erreur lors de la création du compte';
@@ -101,87 +105,84 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title><?php if (isset($pageTitle)) { echo $pageTitle; } else { echo 'EcoRide - Covoiturage écologique';} ?></title>
 </head>
 <body>
-    <header>
-        <nav class="navbar fixed-top bg-white shadow-sm">
-            <div class="container" style="max-width: 900px">
-                <a class="navbar-brand" href="/index.php">
-                    <img src="assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="d-inline-block align-text-center rounded" width="60">
-                    EcoRide
-                </a>
-                <a class="btn btn-success" role="button" href="/login.php">Connexion</a>
+<header>
+    <nav class="navbar fixed-top bg-white shadow-sm">
+        <div class="container" style="max-width: 900px">
+            <a class="navbar-brand" href="index.php">
+                <img src="assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="d-inline-block align-text-center rounded" width="60">
+                EcoRide
+            </a>
+            <a class="btn btn-success" role="button" href="login.php">Connexion</a>
+        </div>
+    </nav>
+    <div class="<?= (isset($error) || ini_get('display_errors')) ? 'has-error' : '' ?>"></div>
+</header>
+<main>
+    <!-- Formulaire nouvelle inscription -->
+    <section class="mt-5">
+        <h2 class="fw-bold mb-4">Votre inscription</h2>
+        <?php if (!empty($error)) : ?>
+            <div class="alert alert-danger">
+                <?= implode('<br>', array_map('htmlspecialchars', $error)) ?>
             </div>
-        </nav>
-        <div class="<?= (isset($erreur) || ini_get('display_errors')) ? 'has-error' : '' ?>">
-    </header>
-    <main>
-        <!-- Formulaire nouvelle inscription -->
-        <section class="mt-5">
-            <h2 class="fw-bold mb-4">Votre inscription</h2>
-            <?php if (!empty($error)) : ?>
-                <div class="alert alert-danger">
-                    <?= implode('<br>', array_map('htmlspecialchars', $error)) ?>
-                </div>
-            <?php endif; ?>
-            <div class="alert alert-success" role="alert">
-            <form action="" method="post" id="formNewUser" class="p-4 bg-white rounded-4 shadow-sm">
+        <?php endif; ?>
 
-                <!-- Prénom utilisateur -->
-                <div class="input-group mb-3 bg-light rounded-3">
+        <form action="" method="post" id="formNewUser" class="p-4 bg-white rounded-4 shadow-sm">
+
+            <!-- Prénom utilisateur -->
+            <div class="input-group mb-3 bg-light rounded-3">
                         <span class="input-group-text bg-transparent border-0">
                            <i class="bi bi-person text-secondary"></i>
                        </span>
-                    <input type="text" name="firstName" class="form-control border-0 bg-transparent" id="firstName"
-                           placeholder="Prénom" required minlength="2" value="<?= isset($_POST['firstName']) ? htmlspecialchars($_POST['firstName'], ENT_QUOTES, 'UTF-8') : '' ?>">
-                </div>
+                <input type="text" name="firstName" class="form-control border-0 bg-transparent" id="firstName"
+                       placeholder="Prénom" required minlength="2" value="<?= isset($_POST['firstName']) ? htmlspecialchars($_POST['firstName'], ENT_QUOTES, 'UTF-8') : '' ?>">
+            </div>
 
-                <!-- Nom utilisateur -->
-                <div class="input-group mb-3 bg-light rounded-3">
+            <!-- Nom utilisateur -->
+            <div class="input-group mb-3 bg-light rounded-3">
                 <span class="input-group-text bg-transparent border-0">
                     <i class="bi bi-person text-secondary"></i>
                 </span>
-                    <input type="text" name="lastName" class="form-control border-0 bg-transparent" id="lastName"
-                           placeholder="Nom" required minlength="2" value="<?=isset($_POST['lastName']) ? htmlspecialchars($_POST['lastName'], ENT_QUOTES, 'UTF-8') : '' ?>">
-                </div>
+                <input type="text" name="lastName" class="form-control border-0 bg-transparent" id="lastName"
+                       placeholder="Nom" required minlength="2" value="<?=isset($_POST['lastName']) ? htmlspecialchars($_POST['lastName'], ENT_QUOTES, 'UTF-8') : '' ?>">
+            </div>
 
-                <!-- Email utilisateur -->
-                <div class="input-group mb-4 bg-light rounded-3">
+            <!-- Email utilisateur -->
+            <div class="input-group mb-4 bg-light rounded-3">
                 <span class="input-group-text bg-transparent border-0">
                     <i class="bi bi-envelope-at text-secondary"></i>
                 </span>
-                    <input type="email" name="email" class="form-control border-0 bg-transparent" id="email"
-                           placeholder="Email" required value="<?=isset($_POST['email']) ? htmlspecialchars($_POST['email'], ENT_QUOTES, 'UTF-8') : '' ?>">
-                </div>
+                <input type="email" name="email" class="form-control border-0 bg-transparent" id="email"
+                       placeholder="Email" required value="<?=isset($_POST['email']) ? htmlspecialchars($_POST['email'], ENT_QUOTES, 'UTF-8') : '' ?>">
+            </div>
 
-                <!-- Mot de passe utilisateur -->
-                <div class="input-group mb-4 bg-light rounded-3">
+            <!-- Mot de passe utilisateur -->
+            <div class="input-group mb-4 bg-light rounded-3">
                 <span class="input-group-text bg-transparent border-0">
                     <i class="bi bi-lock text-secondary"></i>
                 </span>
-                    <input type="password" name="password" class="form-control border-0 bg-transparent" id="password" placeholder="Mot de passe" required minlength="6">
-                </div>
+                <input type="password" name="password" class="form-control border-0 bg-transparent" id="password" placeholder="Mot de passe" required minlength="6">
+            </div>
 
-                <!-- Confirmation mot de passe utilisateur -->
-                <div class="input-group mb-4 bg-light rounded-3">
+            <!-- Confirmation mot de passe utilisateur -->
+            <div class="input-group mb-4 bg-light rounded-3">
                 <span class="input-group-text bg-transparent border-0">
                     <i class="bi bi-lock text-secondary"></i>
                 </span>
-                    <input type="password" name="confirmPassword" class="form-control border-0 bg-transparent" id="confirmPassword" placeholder="Confirmer le mot de passe" required>
-                </div>
+                <input type="password" name="confirmPassword" class="form-control border-0 bg-transparent" id="confirmPassword" placeholder="Confirmer le mot de passe" required>
+            </div>
 
+            <!-- Bouton s'inscrire -->
+            <div class="d-grid">
+                <button type="submit" class="btn btn-success d-flex justify-content-center align-items-center gap-2 rounded-3">
+                    S'inscrire
+                </button>
+            </div>
+        </form>
+    </section>
+</main>
 
-                <!-- Bouton s'inscrire -->
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-success d-flex justify-content-center align-items-center gap-2 rounded-3">
-                        S'inscrire
-                    </button>
-                </div>
-            </form>
-        </section>
-    </main>
-
-    <footer>
+<footer>
     <?php include 'footer.php'; ?>
-    </footer>
+</footer>
 </body>
-
-
