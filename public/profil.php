@@ -33,6 +33,28 @@ $passengerTrips = Trip::findTripsUpcoming($userId);
 $driverTrips = Trip::findUpcomingByDriver($userId);
 $passengerTrips = Trip::findTripsUpcomingByPassenger($userId);
 $allTrips = array_merge(array_map(fn($t)=>['trip'=>$t, 'role'=>'chauffeur'], $driverTrips), array_map(fn($t)=>['trip'=>$t, 'role'=>'passager'], $passengerTrips));
+$allTrips = array_filter($allTrips, function($item) use ($userId) {
+   $trip = $item['trip'];
+   $role = $item['role'];
+   // Trajets futurs toujours affichés
+   if($trip->isTripUpcoming()) return true;
+   // Trajets passés : vérifie les commentaires
+    $pdo = \Olivierguissard\EcoRide\Config\Database::getConnection();
+    if($role === 'passager') {
+        // Passager : cacher si commentaire soumis
+        $sql = "SELECT COUNT(*) FROM reviews WHERE trip_id = ? AND user_id = ? 
+                       AND status_review = 'pending' OR status_review = 'rejected' OR status_review = 'approved'";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$trip->getTripId(), $userId]);
+        return $stmt->fetchColumn() > 0;
+    }
+    // Chauffeur : cacher si tous les passagers ont commenté
+    $sql = "SELECT COUNT(*) FROM bookings b WHERE b.trip_id = ? AND b.status != 'annule' 
+            AND NOT EXISTS (SELECT 1 FROM reviews r WHERE r.trip_id = b.trip_id AND r.user_id = b.user_id AND r.status_review = 'pending')";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$trip->getTripId()]);
+    return $stmt->fetchColumn() > 0;
+});
 $credits = Users::getUsersCredits($userId);
 $completedTrips = Bookings::countUserCompletedTrips($userId);
 $pageTitle = 'Mon profil - EcoRide';
