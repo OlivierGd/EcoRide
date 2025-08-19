@@ -13,7 +13,8 @@ function startSession(): void {
             'lifetime' => 0,
             'path' => '/',
             'domain' => '',
-            'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+            'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+                || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https'),
             'httponly' => true,
             'samesite' => 'Lax'
         ]);
@@ -91,6 +92,18 @@ function loginUserComplete(array $user, bool $remember = false): void {
         createRememberToken($user['user_id']);
     }
 }
+function setInvalidRememberCookie(): void {
+    $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+    setcookie('ecoride_remember', '', [
+        'expires' => time() - 3600,
+        'path' => '/',
+        'domain' => '',
+        'secure' => $isSecure,
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
+}
 
 // Vérifie le token "Remember Me"
 function checkRememberToken(): void {
@@ -145,14 +158,7 @@ function checkRememberToken(): void {
 
         } else {
             // Token invalide, supprime le cookie
-            setcookie('ecoride_remember', '', [
-                'expires' => time() - 3600,
-                'path' => '/',
-                'domain' => '',
-                'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
-                'httponly' => true,
-                'samesite' => 'Lax'
-            ]);
+            setInvalidRememberCookie();
         }
 
     } catch (Exception $e) {
@@ -167,7 +173,7 @@ function getDeviceInfo(): string {
     // Détection de l'appareil
     if (preg_match('/Mobile|Android|iPhone/', $userAgent)) {
         $deviceType = 'Mobile';
-    } elseif (preg_match('/Tablet|iPad/', $userAgent)) { // CORRECTION: Tablet au lieu de Tablettet
+    } elseif (preg_match('/Tablet|iPad/', $userAgent)) {
         $deviceType = 'Tablet';
     } else {
         $deviceType = 'Desktop';
@@ -224,14 +230,7 @@ function logoutUser(): void {
             }
 
             // Supprime le cookie
-            setcookie('ecoride_remember', '', [
-                'expires' => time() - 3600,
-                'path' => '/',
-                'domain' => '',
-                'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
-                'httponly' => true,
-                'samesite' => 'Lax'
-            ]);
+            setInvalidRememberCookie();
         }
     }
 
@@ -307,12 +306,15 @@ function createRememberToken(int $userId): void {
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$userId, $tokenHash, $tokenExpiry, $deviceInfo, $ipAdresse]);
 
+        $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+
         // Cookie de 6 mois
         setcookie('ecoride_remember', $token, [
             'expires' => strtotime($tokenExpiry),
             'path' => '/',
             'domain' => '',
-            'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+            'secure' => $isSecure,
             'httponly' => true,
             'samesite' => 'Lax'
         ]);

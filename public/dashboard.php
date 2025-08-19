@@ -414,7 +414,9 @@ error_log('tripByDay: ' . print_r($tripsByDay, true));
                     ?>
                 </div>
 
-                <canvas id="chartTripsByDay" height="80"></canvas>
+                <div style="height: 300px;">
+                    <canvas id="chartTripsByDay" height="100px"></canvas>
+                </div>
 
                 <div class="d-flex justify-content-between mb-3 pt-5">
                     <h2 class="text-success">Commissions (publication de trajets)</h2>
@@ -432,7 +434,9 @@ error_log('tripByDay: ' . print_r($tripsByDay, true));
                 </div>
 
                 <!-- Graphique financier -->
-                <canvas id="chartCommissions" height="80"></canvas>
+                <div style="height: 300px">
+                    <canvas id="chartCommissionsMonthly" ></canvas>
+                </div>
 
                 <!-- Tableau -->
                 <h2 class="text-success mt-5">Historique des commissions</h2>
