@@ -162,6 +162,7 @@ $pageTitle = 'Accueil - EcoRide';
                         <img src="assets/pictures/paris.jpg" class="card-img-top" alt="Picture of Paris">
                         <div class="card-body">
                             <h5 class="card-title">Paris</h5>
+                            <a href="rechercher.php?endCity=Paris" class="stretched-link" aria-label="Voir les trajets vers Paris"></a>
                         </div>
                     </div>
                 </div>
@@ -170,6 +171,7 @@ $pageTitle = 'Accueil - EcoRide';
                         <img src="assets/pictures/lyon.jpg" class="card-img-top" alt="Picture of Lyon">
                         <div class="card-body">
                             <h5 class="card-title">Lyon</h5>
+                            <a href="rechercher.php?endCity=Lyon" class="stretched-link" aria-label="Voir les trajets vers Lyon"></a>
                         </div>
                     </div>
                 </div>
@@ -178,6 +180,7 @@ $pageTitle = 'Accueil - EcoRide';
                         <img src="assets/pictures/marseille.jpg" class="card-img-top" alt="Picture of Marseille">
                         <div class="card-body">
                             <h5 class="card-title">Marseille</h5>
+                            <a href="rechercher.php?endCity=Marseille" class="stretched-link" aria-label="Voir les trajets vers Marseille"></a>
                         </div>
                     </div>
                 </div>
@@ -186,6 +189,7 @@ $pageTitle = 'Accueil - EcoRide';
                         <img src="assets/pictures/bordeaux.jpg" class="card-img-top" alt="Picture of Bordeaux">
                         <div class="card-body">
                             <h5 class="card-title">Bordeaux</h5>
+                            <a href="rechercher.php?endCity=Bordeaux" class="stretched-link" aria-label="Voir les trajets vers Bordeaux"></a>
                         </div>
                     </div>
                 </div>
