@@ -4,6 +4,22 @@ use Olivierguissard\EcoRide\Config\Database;
 
 function startSession(): void {
     if (session_status() === PHP_SESSION_NONE) {
+        // Défini le nom de la session -> Evite les conflits avec d'autres applications'
+        session_name('ecoride_session');
+
+        // Récupère le nom de base dynamiquement
+        $domain = $_SERVER['HTTP_HOST'] ?? 'ecoride-holy-wind-5414.fly.dev';
+        // S'assure que le domaine n'inclut pas www
+        if (strpos($domain, 'www.') === 0) {
+            $domain = substr($domain, 4);
+        }
+        // couvre les sous-domaines -> ajout du .
+        $domain = '.' . $domain;
+
+        // Détermine si la connexion est sécurisée
+        $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+
         // Session courte pour la sécurité (2 heures)
         ini_set('session.gc_maxlifetime', 7200);
         ini_set('session.cookie_lifetime', 0); // Se ferme avec le navigateur
@@ -12,18 +28,12 @@ function startSession(): void {
         session_set_cookie_params([
             'lifetime' => 0,
             'path' => '/',
-            'domain' => '',
-            'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-                || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https'),
+            'domain' => $domain,  // Utilise le nom de domaine complet
+            'secure' => $isSecure,
             'httponly' => true,
             'samesite' => 'Lax'
         ]);
         session_start();
-
-        // Vérification auto-login SEULEMENT si pas connecté
-        if (!isAuthenticated()) {
-            checkRememberToken();
-        }
 
         // Régénération périodique de l'ID de session
         if (!isset($_SESSION['last_regeneration'])) {
@@ -31,6 +41,10 @@ function startSession(): void {
         } elseif (time() - $_SESSION['last_regeneration'] > 300) {  // 5 minutes
             session_regenerate_id(true);
             $_SESSION['last_regeneration'] = time();
+        }
+        // Vérification auto-login SEULEMENT si pas connecté
+        if (!isAuthenticated()) {
+            checkRememberToken();
         }
     }
 }
