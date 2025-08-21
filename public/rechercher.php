@@ -470,8 +470,8 @@ $pageTitle = 'Rechercher un voyage';
     <!-- Eco Impact Banner -->
     <section class="bg-primary-light rounded p-3 mb-5">
         <div class="d-flex align-items-start">
-            <div class="bg-primary rounded-circle me-3 p-2 text-white" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                <i class="ri-leaf-line"></i>
+            <div class="rounded-circle me-3 p-2 text-success">
+                <i class="bi bi-recycle me-2" style="font-size: 1.5em"></i>
             </div>
             <div>
                 <h3 class="small fw-medium mb-1">

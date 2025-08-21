@@ -9,12 +9,7 @@ services:
     ports:
       - "8081:80"
     volumes:
-      - ../:/var/www/html/public   # hot-reload public/
-      - ../src:/var/www/html/src   # hot-reload src/
-      - ../vendor:/var/www/html/vendor
-      - ../composer.json:/var/www/html/composer.json
-      - ../composer.lock:/var/www/html/composer.lock
-      - ../.env:/var/www/html/.env
+      - ../:/var/www/html
     networks:
       - ecoride_net
 
