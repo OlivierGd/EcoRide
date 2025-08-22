@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * API des détails utilisateurs pour édition depuis le dashboard
+ */
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 use Olivierguissard\EcoRide\Config\Database;

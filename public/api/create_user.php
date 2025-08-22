@@ -1,5 +1,5 @@
 <?php
-
+// crée un utiliseur depuis le dashboard
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 // Charger les variables d'environnement

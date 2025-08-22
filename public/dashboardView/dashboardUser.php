@@ -15,7 +15,7 @@ updateActivity();
     <section id="users" class="mb-5">
         <div class="d-flex align-items-center mb-4">
             <h2 class="text-success">Gestion des utilisateurs</h2>
-            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createUserModal">
+            <button class="btn btn-success" onclick="createUser()">
                 <i class="bi bi-person-plus"></i> Créer un utilisateur
             </button>
         </div>
@@ -65,7 +65,6 @@ updateActivity();
                 <thead class="table-dark">
                 <tr>
                     <th>Nom</th>
-                    <th>Email</th>
                     <th>Rôle</th>
                     <th>Statut</th>
                     <th>Crédits</th>
@@ -85,7 +84,7 @@ updateActivity();
     </section>
 
     <!-- Modal Édition d'utilisateur -->
-    <div class="modal fade" id="editUserModal" tabindex="-1">
+    <div class="modal fade" id="userModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">

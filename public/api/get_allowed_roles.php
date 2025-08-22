@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * API pour les rôles connectés et rôles authorisés depuis le dashboard
+ */
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 use Olivierguissard\EcoRide\Model\Users;

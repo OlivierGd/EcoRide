@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Récupère les informations user pour le dashboard + recherche avec filtres
+ */
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 use Olivierguissard\EcoRide\Config\Database;

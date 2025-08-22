@@ -1,6 +1,6 @@
 <?php
 /**
- * API pour la mise à jour d'un utilisateur depuis la console d'administration
+ * API pour la mise à jour d'un utilisateur depuis le dashboard
  * Permet de modifier le profil, le rôle et le statut selon les permissions
  */
 
