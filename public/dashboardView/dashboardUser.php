@@ -14,7 +14,7 @@ updateActivity();
     <!-- SECTION UTILISATEURS -->
     <section id="users" class="mb-5">
         <div class="d-flex align-items-center mb-4">
-            <h2 class="text-success">Gestion des utilisateurs</h2>
+            <h2 class="text-success me-3">Gestion des utilisateurs</h2>
             <button class="btn btn-success" onclick="createUser()">
                 <i class="bi bi-person-plus"></i> Créer un utilisateur
             </button>
