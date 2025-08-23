@@ -24,6 +24,7 @@ if (!$isManagerOrAdmin) {
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="assets/pictures/logoEcoRide.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
@@ -63,75 +64,15 @@ if (!$isManagerOrAdmin) {
 <main class="main-with-sidebar">
     <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Console d’administration</h1>
+        <h1>Console d'administration</h1>
     </div>
-<!-- SECTION UTILISATEURS -->
+
+    <!-- SECTION UTILISATEURS -->
     <?php include 'dashboardView/dashboardUser.php'; ?>
 
-<!-- SECTION FINANCIER -->
+    <!-- SECTION FINANCIER -->
     <?php if ($isAdmin): ?>
-        <section class="mb-5" id="revenus">
-            <!-- Graphique historique trajets +7 jours -->
-            <div class="d-flex justify-content-between mb-3 pt-3">
-                <h2 class="text-success">Trajets sur 7 jours</h2>
-                <?php
-                $filterId = 'filter_trips';
-                $namePrefix = 'trips';
-                include __DIR__ . '/components/_filter_date.php';
-                ?>
-            </div>
-
-            <div style="height: 300px;">
-                <canvas id="chartTripsByDay" height="100px"></canvas>
-            </div>
-
-            <div class="d-flex justify-content-between mb-3 pt-5">
-                <h2 class="text-success">Commissions (publication de trajets)</h2>
-                <?php
-                $filterId = 'filter_commissions';
-                $namePrefix = 'commissions';
-                include __DIR__ . '/components/_filter_date.php';
-                ?>
-            </div>
-
-            <div class="alert alert-success fw-bold">
-                Gain total collecté : <?= (fmod($totalGagne, 1) == 0 ?
-                    number_format($totalGagne,0, ',','') :
-                    number_format($totalGagne,2, ',','')) ?> crédits
-            </div>
-
-            <!-- Graphique financier -->
-            <div style="height: 300px">
-                <canvas id="chartCommissionsMonthly" ></canvas>
-            </div>
-
-            <!-- Tableau -->
-            <h2 class="text-success mt-5">Historique des commissions</h2>
-            <div class="table-responsive mt-4">
-                <table class="table table-striped">
-                    <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Chauffeur</th>
-                        <th>Montant</th>
-                        <th>Solde avant</th>
-                        <th>Solde après</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <?php foreach ($commissions as $c): ?>
-                        <tr>
-                            <td><?= date('d/m/Y H:i', strtotime($c['created_at'])) ?></td>
-                            <td><?= htmlspecialchars($c['firstname'] . ' ' . $c['lastname']) ?></td>
-                            <td><?= abs((float)$c['amounts']) ?> crédits</td>
-                            <td><?= $c['balance_before'] ?></td>
-                            <td><?= $c['balance_after'] ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+        <?php include 'dashboardView/dashboardFinance.php'; ?>
     <?php endif; ?>
 
     <!-- SECTION COMMENTAIRES -->
@@ -140,7 +81,6 @@ if (!$isManagerOrAdmin) {
             <h2 class="text-success">Commentaires et avis des utilisateurs</h2>
         </div>
 
-        <!-- Filtres -->
         <!-- Filtres -->
         <div class="card mb-4">
             <div class="card-body">
@@ -252,14 +192,15 @@ if (!$isManagerOrAdmin) {
     </section>
 </main>
 
-
 <footer>
-
 </footer>
 
-
+<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="assets/js/dashboard2.js"></script>
 <script src="assets/js/modules/dashboardUser.js"></script>
+<script src="assets/js/modules/dashboardFinance.js"></script>
+
 </body>
 </html>

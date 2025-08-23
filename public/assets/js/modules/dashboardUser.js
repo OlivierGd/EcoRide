@@ -68,7 +68,7 @@ const UserSearch = {
             status: document.getElementById('status')
         };
 
-        // Modal d'édition (correspond aux IDs de votre HTML)
+        // Modal d'édition (correspond aux IDs du HTML)
         this.editModal = {
             element: document.getElementById('userModal'),
             form: document.getElementById('editUserForm'),
@@ -156,7 +156,7 @@ const UserSearch = {
     },
 
     /**
-     * 3. Recherche AJAX avec filtres - UTILISE L'API EXISTANTE get_users.php
+     * 3. Recherche AJAX avec filtres - UTILISE L'API get_users.php
      */
     async performSearch(query, isExplicitSearch = false) {
         console.log('[UserSearch] Recherche AJAX en cours');
@@ -178,7 +178,7 @@ const UserSearch = {
             // Afficher Loading
             this.showLoading();
 
-            // Construire l'URL avec les filtres - UTILISE L'API EXISTANTE
+            // Construire l'URL avec les filtres
             const params = new URLSearchParams();
 
             // Ajouter la query seulement si elle est suffisamment longue
@@ -510,7 +510,7 @@ const UserSearch = {
     // ===== GESTION DES MODALS =====
 
     /**
-     * Charger le rôle de l'utilisateur connecté - UTILISE L'API EXISTANTE
+     * Charger le rôle de l'utilisateur connecté : API get_allowed_roles.php
      */
     async loadCurrentUserRole() {
         try {
@@ -556,7 +556,7 @@ const UserSearch = {
     },
 
     /**
-     * Ouvrir la modal pour éditer un utilisateur - UTILISE L'API EXISTANTE
+     * Ouvrir la modal pour éditer un utilisateur : API get_user_full_details.php
      */
     async openEditUserModal(userId) {
         console.log('[UserSearch] Ouverture modal édition utilisateur:', userId);
@@ -567,7 +567,7 @@ const UserSearch = {
         }
 
         try {
-            // Charger les données de l'utilisateur - UTILISE L'API EXISTANTE
+            // Charger les données de l'utilisateur
             const response = await fetch(`api/get_user_full_details.php?id=${userId}`);
             const data = await response.json();
 
@@ -659,7 +659,7 @@ const UserSearch = {
     },
 
     /**
-     * Gérer la création d'utilisateur - UTILISE L'API EXISTANTE
+     * Gérer la création d'utilisateur : API admin_create_user.php
      */
     async handleUserCreate() {
         console.log('[UserSearch] Traitement création utilisateur');
@@ -714,7 +714,7 @@ const UserSearch = {
     },
 
     /**
-     * Gérer l'édition d'utilisateur - UTILISE L'API EXISTANTE
+     * Gérer l'édition d'utilisateur : API update_user.php
      */
     async handleUserEdit() {
         console.log('[UserSearch] Traitement modification utilisateur');
