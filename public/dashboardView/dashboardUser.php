@@ -11,7 +11,7 @@ updateActivity();
 
 ?>
 
-    <!-- SECTION UTILISATEURS -->
+    <!-- === SECTION UTILISATEURS === -->
     <section id="users" class="mb-5">
         <div class="d-flex align-items-center mb-4">
             <h2 class="text-success me-3">Gestion des utilisateurs</h2>
@@ -201,6 +201,8 @@ updateActivity();
                 </div>
                 <form id="createUserForm">
                     <div class="modal-body">
+                        <!-- Affiche les messages d'erreurs -->
+                        <div id="createUserErrors" class="mb-3"></div>
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="firstName" class="form-label">Prénom *</label>

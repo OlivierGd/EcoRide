@@ -11,11 +11,12 @@ services:
     volumes:
       - ../:/var/www/html
     networks:
+      - default
       - ecoride_net
 
     # env_file seulement si le fichier existe (dev local)
-    env_file:
-      - ../.env
+    # env_file:
+      # - ../.env
 
     environment:
       # Mode avec Supabase
@@ -38,4 +39,6 @@ services:
       # DB_PASSWORD: password123
 
 networks:
+  default:
   ecoride_net:
+    driver: bridge

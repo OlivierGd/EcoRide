@@ -15,7 +15,7 @@
     flex-direction: column;
     justify-content: space-between;
     padding: 1rem;
-    z-index: 1000;
+    z-index: 1050;
 }
 
 /* Liens visibles sur fond sombre */

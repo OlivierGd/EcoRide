@@ -18,7 +18,7 @@ function displayInitialsButton(): string
         . '</a>';
     } else {
     // Non connecté : bouton Connexion
-    return '<a href="/login.php" class="btn btn-success" role="button">Connexion</a>';
+    return '<a href="login.php" class="btn btn-success" role="button">Connexion</a>';
     }
 }
 

@@ -82,6 +82,22 @@ class Users
 
     public function getInitials(): string {return $this->firstName[0] . $this->lastName[0];}
 
+    public static function getCurrentUser(): ?self
+    {
+        if (!isset($_SESSION['user_id'])) {
+            return null;
+        }
+        return self::findUser((int)$_SESSION['user_id']);
+    }
+
+    public static function getCurrentUserRole(): ?int
+    {
+        if (!isset($_SESSION['user_id'])) {
+            return null;
+        }
+        return self::findUser((int)$_SESSION['user_id'])->getRole();
+    }
+
     public function saveUserToDatabase($pdo): int|false
     {
         try {

@@ -15,7 +15,7 @@ class Mailer
 
     public function __construct()
     {
-        // ✅ CORRECTION: Gestion robuste des variables d'environnement
+        // Gestion des variables d'environnement
         $this->apiKey = $_ENV['MAILJET_API_KEY'] ?? getenv('MAILJET_API_KEY') ?? '';
         $this->apiSecret = $_ENV['MAILJET_API_SECRET'] ?? getenv('MAILJET_API_SECRET') ?? '';
         $this->fromEmail = $_ENV['MAILJET_FROM_EMAIL'] ?? getenv('MAILJET_FROM_EMAIL') ?? '';

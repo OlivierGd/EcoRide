@@ -1,11 +1,11 @@
 <?php
 /**
- * Création d'un nouvel utilisateur par un administrateur'
+ * Création d'un nouvel utilisateur par un administrateur depuis la modale'
  */
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 // Charger les variables d'environnement
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../../');
 $dotenv->load();
 
 use Olivierguissard\EcoRide\Config\Database;
@@ -25,6 +25,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
+    // Récupère l'utilisateur connecté
+    $currentUserId = getUserId();
+    if (!$currentUserId) {
+        throw new Exception('Utilisateur non authentifié');
+    }
+
     $firstName = trim($_POST['firstName'] ?? '');
     $lastName = trim($_POST['lastName'] ?? '');
     $email = trim($_POST['email'] ?? '');
@@ -41,7 +47,11 @@ try {
     }
 
     // VÉRIFICATION DES PERMISSIONS DE RÔLE
-    $currentUserRole = (int)$_SESSION['role'];
+    $currentUserRole = Users::getCurrentUserRole();
+    if (!$currentUserRole) {
+        throw new Exception('Impossible de déterminer votre rôle');
+    }
+
     if (!Users::canCreateUserWithRole($currentUserRole, $role)) {
         $roleLabels = [
             0 => 'Passager',
@@ -116,4 +126,11 @@ try {
         'success' => false,
         'message' => $e->getMessage()
     ]);
+} catch (Error $e) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Erreur serveur : ' . $e->getMessage()
+    ]);
 }
+?>

@@ -446,6 +446,51 @@ const UserSearch = {
     },
 
     /**
+     * Afficher un message de succès avec un Toast Bootstrap
+     */
+    showSuccessMessage(message) {
+        console.log('[UserSearch] Message de succès:', message);
+
+        const toastContainer = document.querySelector('.toast-container');
+        if (!toastContainer) {
+            console.error('Conteneur de toast non trouvé !');
+            alert(message); // Solution de repli
+            return;
+        }
+
+        // Créer l'élément Toast
+        const toastEl = document.createElement('div');
+        toastEl.classList.add('toast', 'align-items-center', 'text-bg-success', 'border-0');
+        toastEl.setAttribute('role', 'alert');
+        toastEl.setAttribute('aria-live', 'assertive');
+        toastEl.setAttribute('aria-atomic', 'true');
+
+        toastEl.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    ${this.escapeHtml(message)}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+
+        // Ajouter le toast au conteneur
+        toastContainer.appendChild(toastEl);
+
+        // Initialiser et afficher le toast
+        const toast = new bootstrap.Toast(toastEl, {
+            delay: 5000 // Le toast disparaîtra après 5 secondes
+        });
+        toast.show();
+
+        // Nettoyer le DOM après la disparition du toast
+        toastEl.addEventListener('hidden.bs.toast', () => {
+            toastEl.remove();
+        });
+    },
+
+    /**
      * Afficher message vide avec icône Bootstrap
      */
     showEmpty() {
@@ -542,6 +587,11 @@ const UserSearch = {
         if (!this.createModal.element) {
             console.error('Modal de création non disponible');
             return;
+        }
+        // Vide le contener lorsque la modale est ouverte
+        const errorContainer = document.getElementById('createUserErrorContainer');
+        if (errorContainer) {
+            errorContainer.innerHTML = ''; // Vider les erreurs précédentes
         }
 
         // Réinitialiser le formulaire
@@ -680,15 +730,27 @@ const UserSearch = {
                 body: formData
             });
 
+            console.log('[UserSearch] Status de la réponse:', response.status);
+
+            // Lire et parser la réponse JSON
             const result = await response.json();
+            console.log('[UserSearch] Réponse JSON:', result);
 
             if (result.success) {
                 // Fermer la modal
                 const modalInstance = bootstrap.Modal.getInstance(this.createModal.element);
-                modalInstance.hide();
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+
+                // Afficher un message de succès
+                this.showSuccessMessage(result.message || 'Utilisateur créé avec succès');
 
                 // Rafraîchir si nécessaire
                 this.refreshSearchIfNeeded();
+
+                // Réinitialiser le formulaire
+                this.createModal.form.reset();
 
             } else {
                 throw new Error(result.message || 'Erreur lors de la création');
@@ -705,13 +767,26 @@ const UserSearch = {
             const submitBtn = this.createModal.form.querySelector('button[type="submit"]');
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Créer et envoyer l\'email';
+                submitBtn.innerHTML = '<i class="bi bi-person-plus"></i> Créer et envoyer l\'email';
             }
-
-            // Afficher l'erreur mais pas en popup
-            this.showError('Erreur lors de la création : ' + error.message);
+            // Gestion d'erreur dans la modale
+            const errorContainer = document.getElementById('createUserErrorContainer');
+            if (errorContainer) {
+                errorContainer.innerHTML = `
+                <div class="alert alert-danger d-flex align-items-center" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <div>
+                        ${this.escapeHtml(error.message)}
+                    </div>
+                </div>
+                `;
+            } else {
+                // Solution si le conteneur n'est pas trouvé
+                alert('Erreur : ' + error.message);
+            }
         }
     },
+
 
     /**
      * Gérer l'édition d'utilisateur : API update_user.php
