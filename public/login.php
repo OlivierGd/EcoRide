@@ -36,6 +36,7 @@ if (!empty($_POST['emailUser']) && !empty($_POST['passwordUser'])) {
         if ($user && !empty($user['password']) && password_verify($password, $user['password'])) {
             // Connecter l'utilisateur avec toutes ses données
             loginUserComplete($user, $remember);
+            session_write_close();
             header('Location: rechercher.php');
             exit;
 
