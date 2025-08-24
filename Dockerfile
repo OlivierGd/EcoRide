@@ -23,10 +23,23 @@ RUN sed -ri "s!DocumentRoot /var/www/html!DocumentRoot ${APACHE_DOCUMENT_ROOT}!g
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-      libpq-dev unzip zip git curl \
+      libpq-dev \
+      unzip \
+      zip \
+      git \
+      curl \
+      # Dépendances pour PECL et la compilation
+      build-essential \
+      libssl-dev \
+      librdkafka-dev \
  && docker-php-ext-install pdo_pgsql \
+ # Installer et activer redis via PECL
+ && pecl install -o -f redis \
+ && docker-php-ext-enable redis \
+ # Installer Composer
  && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer \
- && apt-get purge -y --auto-remove curl \
+ # Nettoyer les paquets de compilation
+ && apt-get purge -y --auto-remove build-essential librdkafka-dev \
  && rm -rf /var/lib/apt/lists/*
 
 COPY composer.json composer.lock ./

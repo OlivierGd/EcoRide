@@ -28,6 +28,11 @@ function startSession(): void {
         return;
     }
 
+    // Configuration Redis pour les sessions
+    $redisUrl = "redis://default:2ef2ce77ce904842b61644b1db5ed9cb@fly-withered-glitter-9761.upstash.io:6379";
+    ini_set("session.save_handler", "redis");
+    ini_set("session.save_path", $redisUrl);
+
     // Garde un nom unique (ne pas le changer ailleurs)
     session_name('ecoride_session');
 
