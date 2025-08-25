@@ -32,6 +32,7 @@ RUN apt-get update \
       build-essential \
       libssl-dev \
       librdkafka-dev \
+      ca-certificates \
  && docker-php-ext-install pdo_pgsql \
  # Installer et activer redis via PECL
  && pecl install -o -f redis \
