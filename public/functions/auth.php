@@ -29,15 +29,19 @@ function startSession(): void {
         return;
     }
 
-    // Configuration Redis pour les sessions avec Predis
-    ini_set('session.save_handler', 'redis');
-    ini_set(
-        'session.save_path',
-        'tlsv1.2://fly-withered-glitter-9761.upstash.io:6379?' .
-        'auth[user]=default&auth[pass]=2ef2ce77ce904842b61644b1db5ed9cb' .
-        '&stream[cafile]=/etc/ssl/certs/ca-certificates.crt' .        // chemin vers les CAs
-        '&stream[verify_peer]=1&stream[verify_peer_name]=1'
-    );
+    // Connexion Redis en TCP (non TLS)
+    $redis = new Client([
+        'scheme'   => 'tcp',
+        'host'     => 'fly-withered-glitter-9761.upstash.io',
+        'port'     => 6379,
+        'password' => '2ef2ce77ce904842b61644b1db5ed9cb',
+        'timeout'  => 10.0,
+        'read_write_timeout' => 10.0,
+    ]);
+
+    // Définir le gestionnaire de session avec Predis
+    $handler = new Predis\Session\Handler($redis);
+    $handler->register();
 
 
     // Garde un nom unique
