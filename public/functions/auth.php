@@ -35,7 +35,7 @@ function startSession(): void {
         'host'   => 'fly-withered-glitter-9761.upstash.io',
         'port'   => 6379,
         'password' => '2ef2ce77ce904842b61644b1db5ed9cb',
-        'ssl' => ['verify_peer' => false, 'verify_peer_name' => false]
+        'ssl' => ['verify_peer' => false]
     ]);
 
     // Définir le gestionnaire de session avec Predis
