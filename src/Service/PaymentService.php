@@ -267,4 +267,21 @@ class PaymentService
     {
         return self::getUserBalance($userId) >= $amount;
     }
+
+    /**
+     * Ajoute les crédits de bienvenue lors de l'inscription
+     */
+    public static function addWelcomeCredits(int $userId): bool
+    {
+        return self::processPayment(
+            $userId,
+            20, // crédits offerts
+            'credit_offerts',  //Nouveau type de transaction
+            "Crédit de bienvenue", // Description
+            null,  // Pas de trip_id
+            null, // Pas de booking_id
+            'credite', // Statut
+            0 // Pas de commission
+        );
+    }
 }

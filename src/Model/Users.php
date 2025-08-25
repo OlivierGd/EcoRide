@@ -33,7 +33,7 @@ class Users
         $this->password = trim($data['password'] ?? '');
         $this->profilePicture = $data['profile_picture'] ?? null;
         $this->ranking = (float)($data['ranking'] ?? 5);
-        $this->credits = (int)($data['credits'] ?? 20);
+        $this->credits = (int)($data['credits'] ?? 0);
         $this->status = $data['status'] ?? 'actif';
         $this->role = (int)($data['role'] ?? 0);
         $this->created_at = new DateTime('now', new DateTimeZone('Europe/Paris'));
@@ -66,6 +66,11 @@ class Users
 
     public function getPassword(): string {return $this->password;}
 
+    /**
+     * Définit le mot de passe de l'utilisateur en procédant à un hachage sécurisé.
+     *
+     * @return void
+     */
     public function setPassword(): void {$this->password = password_hash($this->password, PASSWORD_DEFAULT);}
 
     public function getProfilePicture(): ?string {return $this->profilePicture;}

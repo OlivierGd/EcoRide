@@ -4,6 +4,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use Olivierguissard\EcoRide\Config\Database;
 use Olivierguissard\EcoRide\Model\Users;
+use Olivierguissard\EcoRide\Service\PaymentService;
 
 require_once 'functions/auth.php';
 startSession();
@@ -59,36 +60,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'firstname' => $firstName,
                         'lastname'  => $lastName,
                         'email'     => $email,
-                        'password'  => $password
+                        'password'  => $password,
+                        'credits'   => 0, // Démarre avec 0 crédits
                 ]);
                 $user->setPassword();
                 $user_id = $user->saveUserToDatabase($pdo);
 
                 if ($user_id) {
+                    // Ajoute les crédits de bienvenue via PaymentsService
+                    if (PaymentService::addWelcomeCredits($user_id)) {
+                        $pdo->commit();  // Confirmer la transaction
 
-                    startSession();
-                    session_regenerate_id(true);
 
-                    $_SESSION['user_id']    = $user_id;
-                    $_SESSION['connecte']   = true;
-                    $_SESSION['email']      = $user->getEmail();
-                    $_SESSION['firstName']  = $user->getFirstName();
-                    $_SESSION['lastName']   = $user->getLastName();
-                    $_SESSION['status']     = $user->getStatus();
-                    $_SESSION['role']       = $user->getRole();
-                    $_SESSION['credits']    = $user->getCredits();
-                    $_SESSION['ranking']    = $user->getRanking();
-                    $_SESSION['profilePicture'] = $user->getProfilePicture();
-                    $_SESSION['success_registration'] = true;
+                        // Récupère les crédits mis à jour
+                        $updatedUser = Users::findUser($user_id);
 
-                    header('Location: /index.php');
-                    exit;
+                        startSession();
+                        session_regenerate_id(true);
+
+                        $_SESSION['user_id']    = $user_id;
+                        $_SESSION['connecte']   = true;
+                        $_SESSION['email']      = $updatedUser->getEmail();
+                        $_SESSION['firstName']  = $updatedUser->getFirstName();
+                        $_SESSION['lastName']   = $updatedUser->getLastName();
+                        $_SESSION['status']     = $updatedUser->getStatus();
+                        $_SESSION['role']       = $updatedUser->getRole();
+                        $_SESSION['credits']    = $updatedUser->getCredits();
+                        $_SESSION['ranking']    = $updatedUser->getRanking();
+                        $_SESSION['profilePicture'] = $updatedUser->getProfilePicture();
+                        $_SESSION['success_registration'] = true;
+
+                        header('Location: /index.php');
+                        exit;
+                    } else {
+                        $pdo->rollBack();
+                        $error[] = "Erreur lors de l'attribution des crédits de bienvenue.";
+                    }
                 } else {
+                    $pdo->rollBack();
                     $error[] = 'Erreur lors de la création du compte';
                 }
             }
         } catch (PDOException $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             $error[] = 'Erreur lors de l\'inscription : ' . $e->getMessage();
+        } catch (Exception $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            $error[] = 'Erreur lors de l\'attribution des crédits : ' . $e->getMessage();
         }
     }
 }
