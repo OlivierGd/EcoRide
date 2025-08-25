@@ -33,7 +33,10 @@ function startSession(): void {
     ini_set('session.save_handler', 'redis');
     ini_set(
         'session.save_path',
-        'tls://fly-withered-glitter-9761.upstash.io:6379?auth[user]=default&auth[pass]=2ef2ce77ce904842b61644b1db5ed9cb'
+        'tlsv1.2://fly-withered-glitter-9761.upstash.io:6379?' .
+        'auth[user]=default&auth[pass]=2ef2ce77ce904842b61644b1db5ed9cb' .
+        '&stream[cafile]=/etc/ssl/certs/ca-certificates.crt' .        // chemin vers les CAs
+        '&stream[verify_peer]=1&stream[verify_peer_name]=1'
     );
 
 
