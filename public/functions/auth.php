@@ -2,6 +2,7 @@
 
 use Olivierguissard\EcoRide\Config\Database;
 use Predis\Client;
+use Dotenv\Dotenv;
 
 // --- Helpers cookie ---
 function isHttps(): bool {
@@ -24,25 +25,37 @@ function cookieDomain(): string {
     return '.' . $host;
 }
 
+/**
+ * Initializes and starts a PHP session with additional configurations for security and performance.
+ * The method checks if a session is already active, determines the environment for Redis usage
+ * (enabled in production), sets secure cookie parameters, and periodically regenerates the session ID.
+ * Additionally, it handles an auto-login mechanism if the user is not authenticated.
+ *
+ * @return void
+ */
 function startSession(): void {
     if (session_status() === PHP_SESSION_ACTIVE) {
         return;
     }
 
+    // Détermine l'environnement
+    $environment = $_ENV['APP_ENV'] ?? getenv('APP_ENV') ?? 'production';
+
+    // Active Redis uniquement en prod
     // Connexion Redis en TCP (non TLS)
-    $redis = new Client([
-        'scheme'   => 'tcp',
-        'host'     => 'fly-withered-glitter-9761.upstash.io',
-        'port'     => 6379,
-        'password' => '2ef2ce77ce904842b61644b1db5ed9cb',
-        'timeout'  => 10.0,
-        'read_write_timeout' => 10.0,
-    ]);
-
-    // Définir le gestionnaire de session avec Predis
-    $handler = new Predis\Session\Handler($redis);
-    $handler->register();
-
+    if (!str_contains(strtolower($environment), 'development')) {
+        $redis = new Client([
+            'scheme'   => 'tcp',
+            'host'     => 'fly-withered-glitter-9761.upstash.io',
+            'port'     => 6379,
+            'password' => '2ef2ce77ce904842b61644b1db5ed9cb',
+            'timeout'  => 10.0,
+            'read_write_timeout' => 10.0,
+        ]);
+        // Définir le gestionnaire de session avec Predis
+        $handler = new Predis\Session\Handler($redis);
+        $handler->register();
+    }
 
     // Garde un nom unique
     session_name('ecoride_session');
