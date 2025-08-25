@@ -132,14 +132,16 @@ $pageTitle = 'Mes paiements - EcoRide';
                                                 'reservation' => 'Réservation',
                                                 'gain_course' => 'Gain trajet',
                                                 'publication_trajet' => 'Publication',
-                                                'remboursement' => 'Remboursement'
+                                                'remboursement' => 'Remboursement',
+                                                'credits_offerts' => 'Crédits offerts'
                                         ];
                                         $typeColors = [
                                                 'achat' => 'bg-success',
                                                 'reservation' => 'bg-warning text-dark',
                                                 'gain_course' => 'bg-primary',
                                                 'publication_trajet' => 'bg-info text-dark',
-                                                'remboursement' => 'bg-warning text-dark'
+                                                'remboursement' => 'bg-warning text-dark',
+                                                'credits_offerts' => 'bg-success'
                                         ];
                                         $typeLabel = $typeLabels[$tx['type']] ?? $tx['type'];
                                         $badgeClass = $typeColors[$tx['type']] ?? 'bg-secondary';
