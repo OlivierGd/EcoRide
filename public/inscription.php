@@ -56,6 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stmt->fetchColumn() > 0) {
                 $error[] = "Un compte avec cette adresse existe déjà";
             } else {
+                // Crée l'utilisateur avec 0 crédit
                 $user = new Users([
                         'firstname' => $firstName,
                         'lastname'  => $lastName,
@@ -69,9 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($user_id) {
                     // Ajoute les crédits de bienvenue via PaymentsService
                     if (PaymentService::addWelcomeCredits($user_id)) {
-                        $pdo->commit();  // Confirmer la transaction
-
-
                         // Récupère les crédits mis à jour
                         $updatedUser = Users::findUser($user_id);
 
