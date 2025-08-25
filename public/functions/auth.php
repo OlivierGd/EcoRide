@@ -1,6 +1,7 @@
 <?php
 
 use Olivierguissard\EcoRide\Config\Database;
+use Predis\Client;
 
 // --- Helpers cookie ---
 function isHttps(): bool {
@@ -28,12 +29,20 @@ function startSession(): void {
         return;
     }
 
-    // Configuration Redis pour les sessions
-    $redisUrl = "redis://default:2ef2ce77ce904842b61644b1db5ed9cb@fly-withered-glitter-9761.upstash.io:6379";
-    ini_set("session.save_handler", "redis");
-    ini_set("session.save_path", $redisUrl);
+    // Configuration Redis pour les sessions avec Predis
+    $redis = new Predis\Client([
+        'scheme' => 'tls',
+        'host'   => 'fly-withered-glitter-9761.upstash.io',
+        'port'   => 6379,
+        'password' => '2ef2ce77ce904842b61644b1db5ed9cb',
+        'ssl' => ['verify_peer' => false, 'verify_peer_name' => false]
+    ]);
 
-    // Garde un nom unique (ne pas le changer ailleurs)
+    // Définir le gestionnaire de session avec Predis
+    $handler = new Predis\Session\Handler($redis);
+    $handler->register();
+
+    // Garde un nom unique
     session_name('ecoride_session');
 
     // Sécurité de base
@@ -44,7 +53,7 @@ function startSession(): void {
 
     $secure = isHttps();
 
-    // Paramètres cohérents dev/prod
+    // Paramètres dev/prod
     session_set_cookie_params([
         'lifetime' => 0,
         'path'     => '/',
@@ -69,7 +78,6 @@ function startSession(): void {
         checkRememberToken();
     }
 }
-
 
 // Vérifie si l'utilisateur est connecté
 function isAuthenticated(): bool {

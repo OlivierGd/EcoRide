@@ -1,4 +1,3 @@
-
 <?php
 /** @var array $item contient: 'trip', 'booking', 'role' */
 

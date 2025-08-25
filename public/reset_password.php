@@ -1,5 +1,4 @@
 <?php
-// reset_password.php
 
 require __DIR__ . '/../vendor/autoload.php';
 
