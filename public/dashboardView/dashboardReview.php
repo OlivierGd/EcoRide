@@ -111,7 +111,6 @@
                 <small class="text-muted">
                     <i class="bi bi-info-circle"></i>
                     Cliquez sur l'ID du trajet pour voir tous les détails du voyage.
-                    Les dates affichées correspondent au départ du trajet et à la date du commentaire.
                 </small>
             </div>
         </section>

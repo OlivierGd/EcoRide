@@ -272,6 +272,12 @@ class Trip
         }
     }
 
+    /**
+     * Retrieves a trip by its unique trip ID.
+     *
+     * @param int $tripId The unique identifier of the trip to retrieve.
+     * @return self|null The trip instance if found, or null if no trip matches the provided ID.
+     */
     public static function findTripsByTripId(int $tripId): ?self
     {
         $pdo = Database::getConnection();

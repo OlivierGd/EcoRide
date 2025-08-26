@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
  * ===== MODULE DE GESTION DES COMMENTAIRES =====
  */
 function initializeCommentsModule() {
-    console.log('Initialisation du module commentaires amélioré');
+    console.log('Initialisation du module commentaires');
 
     // Chargement initial des commentaires
     loadCommentsWithFilters();
@@ -363,7 +363,7 @@ function displayCommentsTable(comments) {
 
         tableHTML += `
             <tr>
-                <td><button class="badge bg-primary" onclick="viewTripDetails(c.trip_id)">#${c.trip_id}</button></td>
+                <td><button class="badge bg-primary" onclick="viewTripDetails(${c.trip_id})">#${c.trip_id}</button></td>
                 <td><small>${formatDateForDisplay(c.date_review)}</small></td>
                 <td class="text-center">${rating}</td>
                 <td style="white-space: pre-wrap; max-width: 600px">${c.commentaire ? escapeHtml(c.commentaire) : '<em class="text-muted">Aucun commentaire</em>'}</td>

@@ -84,15 +84,6 @@ if ($preset) {
 $rating = isset($_GET['rating']) ? intval($_GET['rating']) : null;
 $status = $_GET['comment_status'] ?? null;
 
-// Debug
-error_log('=== FILTRES COMMENTAIRES ===');
-error_log('Paramètres GET reçus: ' . print_r($_GET, true));
-error_log('Period preset: ' . ($preset ?: 'none'));
-error_log('Date min: ' . ($date_min ?: 'none'));
-error_log('Date max: ' . ($date_max ?: 'none'));
-error_log('Rating: ' . ($rating ?: 'none'));
-error_log('Status: ' . ($status ?: 'none'));
-
 try {
     $pdo = Database::getConnection();
 
