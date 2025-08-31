@@ -13,6 +13,7 @@ updateActivity();
 
 require_once __DIR__ . '/../src/Helpers/helperBookingStatus.php';
 require_once __DIR__ . '/components/_trip_modal.php';
+require_once __DIR__ . '/../src/Helpers/helpers.php';
 
 $userId = getUserId();
 $allTrips = [];
@@ -37,7 +38,7 @@ foreach ($passengerTrips as $trip) {
     // Vérifier et mettre à jour le statut si nécessaire
     $trip->checkAndUpdateStatusIfExpired();
 
-    $booking = \Olivierguissard\EcoRide\Model\Bookings::findByTripAndUser($trip->getTripId(), $userId);
+    $booking = Bookings::findByTripAndUser($trip->getTripId(), $userId);
     $allTrips[] = [
             'trip'      => $trip,
             'booking'   => $booking,
@@ -98,17 +99,18 @@ $pageTitle = 'Historique des trajets';
 
 <body>
 <main>
+    <header>
+        <nav class="navbar bg-body-tertiary">
+            <div class="container" style="max-width: 900px;">
+                <a class="navbar-brand" href="index.php">
+                    <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="60" class="d-inline-block align-text-center rounded">
+                </a>
+                <h2 class="fw-bold mb-1 text-success">Mon historique</h2>
+                <?= displayInitialsButton(); ?>
+            </div>
+        </nav>
+    </header>
     <div class="container my-4 main-content">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <button class="btn btn-link text-dark p-0">
-                <a href="profil.php"><i class="bi bi-chevron-left fs-5"></i></a>
-            </button>
-            <h5 class="fw-bold m-0">Historique des trajets</h5>
-            <button class="btn btn-link text-success p-0" data-bs-toggle="modal" data-bs-target="#">
-                <i class="bi bi-filter fs-4"></i>
-            </button>
-        </div>
-
         <?php if (empty($allTrips)): ?>
             <div class="alert alert-info">Aucun trajet trouvé.</div>
         <?php else: ?>

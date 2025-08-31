@@ -6,8 +6,6 @@
             return;
         }
 
-        console.log('Données véhicules:', vehiclesData); // Debug
-
         // === ÉLÉMENTS DOM ===
         // Formulaire principal de création de trajet
         let tripForm = document.getElementById("suggestedTripForm");

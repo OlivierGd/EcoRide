@@ -2,8 +2,11 @@
 
 namespace Olivierguissard\EcoRide\Model;
 
+use DateInterval;
 use DateTime;
+use Exception;
 use Olivierguissard\EcoRide\Config\Database;
+use PDO;
 use PDOException;
 class Trip
 {
@@ -159,7 +162,7 @@ class Trip
     {
         return $this->endLocation;
     }
-    public function getEstimatedDuration(): ?\DateInterval
+    public function getEstimatedDuration(): ?DateInterval
     {
         return $this->estimatedDuration;
     }
@@ -168,7 +171,7 @@ class Trip
         $this->estimatedDuration = $duration;
     }
 
-    public function getEstimatedDurationAsInterval(): ?\DateInterval
+    public function getEstimatedDurationAsInterval(): ?DateInterval
     {
         if (is_string($this->estimatedDuration) && $this->estimatedDuration !== '') {
             try {
@@ -178,18 +181,18 @@ class Trip
                     $minutes = $matches[2];
                     $seconds = $matches[3];
                     $isoFormat = "PT{$hours}H{$minutes}M{$seconds}S";
-                    return new \DateInterval($isoFormat);
+                    return new DateInterval($isoFormat);
                 }
 
                 // Si déjà au format ISO 8601 (PT1H30M)
                 if (str_starts_with($this->estimatedDuration, 'PT')) {
-                    return new \DateInterval($this->estimatedDuration);
+                    return new DateInterval($this->estimatedDuration);
                 }
 
                 // Sinon, essayer le format original
-                return new \DateInterval($this->estimatedDuration);
+                return new DateInterval($this->estimatedDuration);
 
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 error_log("Erreur DateInterval: " . $e->getMessage() . " pour durée: " . $this->estimatedDuration);
                 return null;
             }
@@ -205,7 +208,7 @@ class Trip
         if ($this->endCity === '') {
             $this->errors['end_city'] = 'Ville de destination requise.';
         }
-        if ($this->departureAt < new \DateTime('now')) {
+        if ($this->departureAt < new DateTime('now')) {
             $this->errors['departure_at'] = 'La date/heure doit être dans le futur.';
         }
         if ($this->pricePerPassenger < 1) {
@@ -267,8 +270,8 @@ class Trip
                 $this->tripId = (int)$stmt->fetchColumn();
                 return true;
             }
-        } catch (\PDOException $e) {
-            throw new \Exception("Erreur lors de l'enregistrement : " . $e->getMessage());
+        } catch (PDOException $e) {
+            throw new Exception("Erreur lors de l'enregistrement : " . $e->getMessage());
         }
     }
 
@@ -303,7 +306,7 @@ class Trip
     public static function findUpcomingByDriver(int $driverId): array
     {
         $pdo = Database::getConnection();
-        $sql = "SELECT * FROM trips WHERE driver_id = ? AND departure_at > now() ORDER BY departure_at ASC";
+        $sql = "SELECT * FROM trips WHERE driver_id = ? AND departure_at > now() ORDER BY departure_at";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$driverId]);
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -393,7 +396,7 @@ class Trip
      */
     public function checkAndUpdateStatusIfExpired(): void
     {
-        $now = new \DateTime('now', new \DateTimeZone('Europe/Paris') );
+        $now = new DateTime('now', new \DateTimeZone('Europe/Paris') );
         if ($this->departureAt < $now && $this->tripStatus === 'a_venir') {
             $this->updateTripStatus('termine');
         }
@@ -406,7 +409,7 @@ class Trip
      */
     public function isPastTrip(): bool
     {
-        $now = new \DateTime('now', new \DateTimeZone('Europe/Paris') );
+        $now = new \DateTime('now', new DateTimeZone('Europe/Paris') );
         return $this->departureAt < $now;
     }
 
@@ -433,7 +436,7 @@ class Trip
             $stmt = $pdo->prepare($sql);
             $stmt->execute();
             return (int)$stmt->fetchColumn();
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             error_log("Erreur Trip::countCompletedTrips : " . $e->getMessage());
             return 0;
         }
@@ -450,7 +453,7 @@ class Trip
             $stmt = $pdo->prepare($sql);
             $stmt->execute();
             return (int)$stmt->fetchColumn();
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             error_log("Erreur Trip::countAllTrips : " . $e->getMessage());
             return 0;
         }
@@ -471,10 +474,10 @@ class Trip
                 LIMIT 3";
             $stmt = $pdo->prepare($sql);
             $stmt->execute();
-            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             return array_map(fn($r) => new self($r), $rows);
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             error_log("Erreur Trip::findNext3UpcomingTrips : " . $e->getMessage());
             return [];
         }
@@ -524,7 +527,7 @@ class Trip
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
-        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         return array_map(fn($r) => new self($r), $rows);
     }
@@ -552,7 +555,7 @@ class Trip
                 error_log("Mis à jour $updatedCount trajets expirés vers le statut 'termine'");
             }
 
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             error_log("Erreur lors de la mise à jour des statuts expirés: " . $e->getMessage());
         }
     }

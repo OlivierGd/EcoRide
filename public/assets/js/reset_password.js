@@ -1,4 +1,4 @@
-// Toggle password visibility
+// Affiche / Masque le mot de passe
 function togglePasswordVisibility(inputId, iconId, buttonId) {
     const input = document.getElementById(inputId);
     const icon = document.getElementById(iconId);

@@ -8,6 +8,7 @@ $dotenv->load();
 
 use Olivierguissard\EcoRide\Config\Database;
 use Olivierguissard\EcoRide\Model\Mailer;
+use Olivierguissard\EcoRide\Model\Users;
 
 require_once '../functions/auth.php';
 startSession();
@@ -23,10 +24,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
-    $currentUserRole = (int)($_SESSION['role'] ?? 0);
+    $user = Users::getCurrentUser();
+    $currentUserRole = $user->getRole();
 
     // Vérifier les permissions (gestionnaire ou admin)
-    if ($currentUserRole < 2) {
+    if ($currentUserRole <= 2) {
         throw new Exception('Permissions insuffisantes pour envoyer des emails');
     }
 

@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+use Olivierguissard\EcoRide\Config\Database;
 use Olivierguissard\EcoRide\Model\Trip;
 use Olivierguissard\EcoRide\Model\Users;
 use Olivierguissard\EcoRide\Model\Bookings;
@@ -39,7 +40,7 @@ $allTrips = array_filter($allTrips, function($item) use ($userId) {
    // Trajets futurs toujours affichés
    if($trip->isTripUpcoming()) return true;
    // Trajets passés : vérifie les commentaires
-    $pdo = \Olivierguissard\EcoRide\Config\Database::getConnection();
+    $pdo = Database::getConnection();
     if($role === 'passager') {
         // Passager : cacher si commentaire soumis
         $sql = "SELECT COUNT(*) FROM reviews WHERE trip_id = ? AND user_id = ? 
@@ -123,7 +124,7 @@ $pageTitle = 'Mon profil - EcoRide';
     <section class="bg-light py-4">
         <div class="container">
             <div class="row text-center">
-                <a href="historique.php" class="col-4">
+                <a href="historique.php" class="text-decoration-none col-4">
                     <div class="card border-0 shadow-sm">
                         <div class="card-body">
                             <i class="bi bi-ev-front text-success fs-2"></i>
@@ -141,7 +142,7 @@ $pageTitle = 'Mon profil - EcoRide';
                         </div>
                     </div>
                 </div>
-                <a href="paiements.php" class="col-4">
+                <a href="paiements.php" class="text-decoration-none col-4">
                     <div class="card border-0 shadow-sm">
                         <div class="card-body">
                             <i class="bi bi-currency-euro text-success fs-2"></i>
@@ -265,8 +266,8 @@ $pageTitle = 'Mon profil - EcoRide';
                 <a href="paiements.php" class="list-group-item list-group-item-action d-flex align-items-center">
                     <i class="bi bi-credit-card-2-front-fill fs-4 me-2 text-warning"></i>
                     <div>
-                        <strong>Paiements</strong>
-                        <div class="small text-muted">Mes transactions</div>
+                        <strong>Mes crédits</strong>
+                        <div class="small text-muted">Mes transactions, acheter des crédits</div>
                     </div>
                 </a>
                 <?php if (isset($_SESSION['role']) && $_SESSION['role'] > 1): ?>
@@ -278,7 +279,8 @@ $pageTitle = 'Mon profil - EcoRide';
                         </div>
                     </a>
                 <?php endif; ?>
-                <!-- ESPACE pour le footer -->
+
+                <!-- Déconnexion -->
                 <div style="height: 1.5rem;"></div>
                 <a href="logout.php" class="list-group-item list-group-item-action d-flex align-items-center bg-danger text-white rounded mb-3 mt-auto">
                     <i class="bi bi-box-arrow-right fs-4 me-2"></i>
@@ -286,7 +288,7 @@ $pageTitle = 'Mon profil - EcoRide';
                 </a>
             </div>
             <!-- Ajoute une marge basse supplémentaire pour dégager le bouton du footer -->
-            <div style="height: 4em;"></div>
+            <div class="pushFooter""></div>
         </div>
     </section>
 

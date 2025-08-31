@@ -1,88 +1,134 @@
-#ECORIDE
+# 🚗🌱 ECORIDE - Plateforme de covoiturage écologique
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-black)](https://github.com/OlivierGd/EcoRide)\
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue)](https://hub.docker.com/r/oliviergd/ecoride)
 
-Drive Sustainable Journeys, Empower Communities, Transform Travel
+# 📖 Description
 
-last-commit repo-top-language repo-language-count
-Built with the tools and technologies:
+EcoRide est une application web de covoiturage écologique qui facilite le partage de trajets entre particuliers, avec un focus particulier sur les véhicule électriques et l'impact environnemental.
+La plateforme permet aux conducteurs de proposer leurs trajets et aux passagers de les réserver facilement.
 
-JSON Markdown npm TOML Composer
-esbuild Docker GitHub%20Actions PHP
+>Projet réalisé dans le cadre du titre Professionnel Développeur Web et Web Mobile (DWWM) - Session 2025.
 
-Table of Contents
+## 🎯 Objectif du projet
 
-Overview
-Getting Started
-Prerequisites
-Installation
-Usage
-Testing
-Overview
+* Faciliter la mobilité partagée et réduire l'empreinte carbone
+* Promouvoir l'utilisation de véhicules électriques
+* Créer une communauté engagée pour l'environnement
 
-EcoRide is an open-source platform tailored for building sustainable ride-sharing applications, combining robust backend architecture with streamlined deployment workflows. It provides essential tools for database setup, asset compilation, and seamless deployment on Fly.io, ensuring your app is production-ready with minimal hassle.
+## ⭐️ Fonctionnalités
+### 👤 Gestion des utilisateurs
 
-Why EcoRide?
+* Visiteur : Consulter les trajets proposés
+* Passager : Rechercher et réserver des trajets
+* Chauffeur : Proposer des trajets, gérer leurs annonces
+* Employé : Modérateur de la plateforme
+* Administrateur : Gestion comlète de la plateforme
 
-This project aims to facilitate the development of eco-friendly transportation solutions. The core features include:
+## Fonctionnalités principales
 
-🛠️ 🔧 Database Initialization: Ensures consistent environment setup across deployments.
-🚀 🎨 Asset Build Process: Automates frontend asset compilation for optimized delivery.
-🌐 🛠️ Deployment Configuration: Simplifies hosting with flexible Fly.io setup.
-📦 🧩 Modular Data Models: Supports scalable management of users, trips, bookings, and payments.
-⚙️ 🤖 CI/CD Automation: Enables reliable, continuous deployment workflows.
-Getting Started
+* Rechercher des trajets avec filtres avancés
+* Réservation de places avec système de crédits
+* Notation et commentaires des trajets
+* Mise en avant des véhicules électriques
+* Interface responsive
+* Système de feedback utilisateur
+* Tableau de bord administrateur
 
-Prerequisites
+## 🏗️ Technologies utilisées
 
-This project requires the following dependencies:
+* HTML5
+* CSS3
+* JavaScript
+* PHP
+* PostgreSQL
+* Bootstrap
+* JQuery
+* AJAX
+* JSON
+* Git/Github
+* Docker
+* Jira
 
-Programming Language: PHP
-Package Manager: Npm, Composer
-Container Runtime: Docker
-Installation
+## Prérequis
 
-Build EcoRide from the source and install dependencies:
+Avant d'installer le projet, assurez-vous d'avoir : 
+* PHP >= 8.3
+* PostgreSQL >= 13
+* Composer
+* Docker
+* Docker Compose
+* Git
 
-Clone the repository:
+##  👷‍♂️Installation
 
-❯ git clone https://github.com/OlivierGd/EcoRide
-Navigate to the project directory:
+Image Docker pré-construite
 
-❯ cd EcoRide
-Install the dependencies:
+*# Lancer l'application (identique à la production)*
 
-Using docker:
+`docker run -d -p 8081:80 --name ecoride oliviergd/ecoride:latest`
 
-❯ docker build -t OlivierGd/EcoRide .
-Using npm:
+*# Accéder à l'application sur*\
+`http://localhost:8081/`
 
-❯ npm install
-Using composer:
+*# Arrêter l'application*
 
-❯ composer install
-Usage
+`docker stop ecoride && docker rm ecoride`
 
-Run the project with:
+## 🧑‍💻 Utilisation
+### **Pour les chauffeurs**
+1. Créer un compte et se connecter
+2. Ajouter un véhicule
+3. Aller dans "proposer" un trajet
+4. Renseigner les détails (départ, arrivée, date, prix, places)
+5. Publier l'annonce
 
-Using docker:
+### **Pour les passagers**
+1. Rechercher un trajet via la page d'accueil
+2. Filtrer par lieu, type de véhicule
+3. Réserver en utilisant ses crédits
+4. Noter le trajet après utilisation
 
-docker run -it {image_name}
-Using npm:
+### **Comptes de test**
+###   # Administrateur
+Email : `admin@ecoride.com`\
+Mot de passe : `admin123`
 
-npm start
-Using composer:
+### # Chauffeur
+Email : `chauffeur@ecoride.com`\
+Mot de passe : `chauffeur123`
 
-php {entrypoint}
-Testing
+### # Passager
+Email : `passager@ecoride.com`\
+Mot de passe : `passager123`
 
-Ecoride uses the {test_framework} test framework. Run the test suite with:
+## Points forts du développement
 
-Using docker:
+* Code maintenable : séparation des responsabilités
+* Sécurité : Protection contre injection SQL, validation des données
+* UI/UX : Interface ergonomique et accessible
+* Responsive : Adaptation mobile et desktop
 
-echo 'INSERT-TEST-COMMAND-HERE'
-Using npm:
+## Evolutions futures
 
-npm test
-Using composer:
+* Application mobile
+* Notification en temps réel
+* Système de paiement réel
+* Tests automatisés
+* Geolocalisation
+* Chat intégré entre utilisateurs
 
-vendor/bin/phpunit
-⬆ Return
+## Licence
+
+Ce projet est sous licence MIT
+
+## Auteur
+
+Olivier Guissard
+* GitHub : @oliviergd
+* Projet : EcoRide
+
+## Remerciements
+
+* Centre de formation Studi
+* Formateurs du titre Professionnel DWWM
+* La communauté open source

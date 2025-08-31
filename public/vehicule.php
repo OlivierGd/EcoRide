@@ -45,11 +45,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($voiture->saveVehicleToDatabase()) {
                 $_SESSION['flash_success'] = 'Véhicule ajouté avec succès !';
             } else {
-                $_SESSION['flash_error'] = implode('<br>', $voiture->getErrors());;
+                $_SESSION['flash_error'] = implode('<br>', $voiture->getErrors());
                 $_SESSION['form_data'] = $_POST;
             }
         } else {
-            $_SESSION['flash_error'] = implode('<br>', $voiture->getErrors());;
+            $_SESSION['flash_error'] = implode('<br>', $voiture->getErrors());
             $_SESSION['form_data'] = $_POST;
         }
         header('Location: vehicule.php');
@@ -80,7 +80,7 @@ $pageTitle = 'Mes véhicules';
         <nav class="navbar bg-body-tertiary">
             <div class="container" style="max-width: 900px;">
                 <a class="navbar-brand" href="index.php">
-                    <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="60" class="d-inline-block align-text-center rounded">
+                    <img src="assets/pictures/logoEcoRide.webp" alt="Logo EcoRide" width="60" class="d-inline-block align-text-center rounded">
                 </a>
                 <h2 class="fw-bold mb-1 text-success">Mes véhicules</h2>
                 <?= displayInitialsButton(); ?>
@@ -121,7 +121,7 @@ $pageTitle = 'Mes véhicules';
                     <h6 class="mb-1 fw-semibold"><?= htmlspecialchars($vehicule->getMarque() . ' ' . $vehicule->getModele()) ?></h6>
                     <div class="d-flex align-items-center flex-wrap">
                         <span class="badge bg-success-subtle text-success border border-success me-2"><?= htmlspecialchars($vehicule->getCarburant()) ?></span>
-                        <small class="text-muted me-2">Places disponibles max : <?= htmlspecialchars($vehicule->getPlaces()) ?></small>
+                        <small class="text-muted me-2">Places max disponibles : <?= htmlspecialchars($vehicule->getPlaces()) ?></small>
                         <small class="text-muted">Immatriculation : <?= htmlspecialchars($vehicule->getImmatriculation()) ?></small>
                     </div>
                 </div>

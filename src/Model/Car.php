@@ -298,6 +298,12 @@ public static function findActiveVehiclesByUser(int $userId): array
         return array_map(fn($r) => new self($r), $rows);
     }
 
+    /**
+     * Finds a car by its unique identifier.
+     *
+     * @param int $carId The unique identifier of the car.
+     * @return self|null The car object if found, or null if not found.
+     */
     public static function findCarById(int $carId): ?self
     {
         $pdo = Database::getConnection();

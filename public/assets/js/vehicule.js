@@ -1,1 +1,27 @@
-(()=>{(()=>{var m=document.getElementById("editVehiculeModal");m.addEventListener("show.bs.modal",function(n){let e=n.relatedTarget,t=e.getAttribute("data-id"),a=e.getAttribute("data-marque"),d=e.getAttribute("data-modele"),u=e.getAttribute("data-carburant"),l=e.getAttribute("data-places"),i=e.getAttribute("data-immatriculation");console.log({id:t,marque:a,modele:d,carburant:u,places:l,immatriculation:i}),document.getElementById("edit-id").value=t,document.getElementById("edit-marque").value=a,document.getElementById("edit-modele").value=d,document.getElementById("edit-carburant").value=u,document.getElementById("edit-places").value=l,document.getElementById("edit-immatriculation").value=i})})();})();
+(() => {
+    (() => {
+        // Récupère l'évènement de la modale d'édition
+        const editVehiculemodal = document.getElementById("editVehiculeModal");
+        // On ajoute un listener pour l'ouverture de la modale'
+        editVehiculemodal.addEventListener("show.bs.modal", function (event) {
+            // Bouton qui déclenche l'ouverture de la modale
+            let triggerButton = event.relatedTarget;
+
+            // Récupère les attributs data du bouton cliqué
+            let vehiculeId = triggerButton.getAttribute("data-id");
+            let vehiculeMarque = triggerButton.getAttribute("data-marque");
+            let vehiculeModele= triggerButton.getAttribute("data-modele");
+            let vehiculeCarburant = triggerButton.getAttribute("data-carburant");
+            let vehiculePlaces = triggerButton.getAttribute("data-places");
+            let vehiculeImmatriculation = triggerButton.getAttribute("data-immatriculation");
+
+            // Remplissage du formulaire de la modale
+            document.getElementById("edit-id").value = vehiculeId;
+            document.getElementById("edit-marque").value = vehiculeMarque;
+            document.getElementById("edit-modele").value = vehiculeModele;
+            document.getElementById("edit-carburant").value = vehiculeCarburant;
+            document.getElementById("edit-places").value = vehiculePlaces;
+            document.getElementById("edit-immatriculation").value = vehiculeImmatriculation
+        });
+    })();
+})();

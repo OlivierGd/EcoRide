@@ -724,6 +724,7 @@ function displayTripModal(trip, driver, car) {
                         <div class="row g-3">
                             <div class="col-12">
                                 <p><strong>Conducteur :</strong> ${escapeHtml(driver.firstname)} ${escapeHtml(driver.lastname)} (⭐ ${driver.ranking}/5)</p>
+                                <p class="text-muted small">Email : ${escapeHtml(driver.email)}</p>
                             </div>
                             <div class="col-md-6">
                                 <p><strong>Départ :</strong></p>
