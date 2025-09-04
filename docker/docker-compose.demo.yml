@@ -1,0 +1,49 @@
+# Configuration DÉMO pour Docker Hub - N'affecte pas dev/prod
+
+services:
+  app:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    container_name: ecoride_demo
+    restart: unless-stopped
+    ports:
+      - "8082:80"  # Port différent
+    environment:
+      # Configuration autonome pour démo
+      APP_ENV: demo
+      DB_HOST: demo_postgres
+      DB_PORT: 5432
+      DB_NAME: ecoride_demo
+      DB_USER: demo_user
+      DB_PASSWORD: demo123
+      
+      # Variables Mailjet factices pour démo
+      MAILJET_API_KEY: demo_key
+      MAILJET_API_SECRET: demo_secret
+      MAILJET_FROM_EMAIL: demo@ecoride.com
+      MAILJET_FROM_NAME: EcoRide Demo
+    
+    depends_on:
+      - demo_postgres
+    networks:
+      - demo_network
+
+  demo_postgres:
+    image: postgres:15
+    container_name: ecoride_demo_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ecoride_demo
+      POSTGRES_USER: demo_user
+      POSTGRES_PASSWORD: demo123
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    volumes:
+      # Données de test automatiquement chargées
+      - ../sql/init_db.sql:/docker-entrypoint-initdb.d/01-init.sql
+    networks:
+      - demo_network
+
+networks:
+  demo_network:
+    driver: bridge

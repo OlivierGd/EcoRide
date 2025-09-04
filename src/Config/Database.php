@@ -25,7 +25,7 @@ class Database
         $databaseUrl = $_ENV['DATABASE_URL'] ?? getenv('DATABASE_URL');
 
         if (!empty($databaseUrl)) {
-            // === MODE avec DATABASE_URL (Supabase/Production) ===
+            // === MODE avec DATABASE_URL (Supabase/Dev) ===
             $modeLabel = (str_contains($environment, 'development')) ? 'DÉVELOPPEMENT (Supabase)' : 'PRODUCTION';
             error_log("Mode $modeLabel détecté (DATABASE_URL présent)");
 

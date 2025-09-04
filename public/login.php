@@ -51,7 +51,6 @@ if (!empty($_POST['emailUser']) && !empty($_POST['passwordUser'])) {
         }
 
     } catch (Exception $e) {
-        $debug_info[] = "ERREUR: " . $e->getMessage();
         $erreur = 'Erreur de connexion à la base de données';
     }
 }

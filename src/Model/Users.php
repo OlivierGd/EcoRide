@@ -67,9 +67,10 @@ class Users
     public function getPassword(): string {return $this->password;}
 
     /**
-     * Définit le mot de passe de l'utilisateur en procédant à un hachage sécurisé.
+     * Hashes the user's password and sets it to the object.
+     * Utilizes a secure hashing algorithm for password storage.
      *
-     * @return void
+     * @return void No return value
      */
     public function setPassword(): void {$this->password = password_hash($this->password, PASSWORD_DEFAULT);}
 

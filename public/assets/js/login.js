@@ -1,1 +1,19 @@
-(()=>{document.getElementById("togglePassword").addEventListener("click",function(){let s=document.getElementById("password"),e=document.getElementById("passwordIcon");s.type==="password"?(s.type="text",e.classList.remove("bi-eye"),e.classList.add("bi-eye-slash")):(s.type="password",e.classList.remove("bi-eye-slash"),e.classList.add("bi-eye"))});})();
+(function() {
+    document.getElementById("togglePassword").addEventListener("click", function () {
+        let passwordInput = document.getElementById("password");
+        let passwordToggleIcon = document.getElementById("passwordIcon");
+
+        if (passwordInput.type === "password") {
+            // Affiche le texte du mot de passe
+            passwordInput.type = "text";
+            passwordToggleIcon.classList.remove("bi-eye");
+            passwordToggleIcon.classList.add("bi-eye-slash");
+
+        } else {
+            // Cacher le texte du mot de passe
+            passwordInput.type = "password";
+            passwordToggleIcon.classList.remove("bi-eye-slash");
+            passwordToggleIcon.classList.add("bi-eye");
+        }
+    });
+})();

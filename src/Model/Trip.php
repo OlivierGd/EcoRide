@@ -200,6 +200,11 @@ class Trip
         return null;
     }
 
+    /**
+     * Valide les informations d'un voyage et vérifie si toutes les conditions sont remplies.
+     *
+     * @return bool Retourne true si le voyage est valide, false si des erreurs sont détectées.
+     */
     public function validateTrip(): bool
     {
         if ($this->startCity === '') {

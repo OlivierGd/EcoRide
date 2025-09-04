@@ -97,3 +97,25 @@ function displayFlash(string $key, string $type = 'info'): void {
     }
 }
 
+/**
+ * Génère l'url d'une route nommée
+ */
+function urlRoute(string $routeName, array $params = []): string
+{
+    return match($routeName) {
+        'index' => '/',
+        'login' => '/login',
+        'inscription' => '/inscription',
+        'profil' => '/profil',
+        'logout' => '/logout',
+        'recherche' => '/recherche',
+        'proposer' => '/proposer',
+        'paiement' => '/paiement',
+        'reserver' => '/reserver',
+        'cgu' => '/cgu',
+        'cgv' => '/cgv',
+        'dashboard' => '/dashboard',
+        default => '/index',
+    };
+}
+
