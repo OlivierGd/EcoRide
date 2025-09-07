@@ -1,4 +1,4 @@
--- init_db.sql - EcoRide Demo Database
+-- init_db.sql - EcoRide Database
 -- Version pour Docker Hub
 BEGIN;
 

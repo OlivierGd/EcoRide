@@ -487,6 +487,7 @@ $pageTitle = 'Proposer un trajet - EcoRide';
         </div>
     </div>
 </main>
+<div class="pb-5"></div>
 
 <footer>
     <?php include 'footer.php'; ?>

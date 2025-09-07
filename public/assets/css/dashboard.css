@@ -25,7 +25,7 @@
 }
 .sidebar-fixed .nav-link:hover,
 .sidebar-fixed .nav-link:focus {
-    color: #fff;
+    color: white;
     opacity: 1;
     text-decoration: none;
 }

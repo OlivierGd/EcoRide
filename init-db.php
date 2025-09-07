@@ -6,7 +6,7 @@ use Olivierguissard\EcoRide\Config\Database;
 
 try {
     $pdo = Database::getConnection();
-    $sql = file_get_contents(__DIR__ . '/sql/init_db_old.sql');
+    $sql = file_get_contents(__DIR__ . '/sql/init_db.sql');
     $pdo->exec($sql);
     echo "✅ Schéma appliqué ou déjà à jour.\n";
 } catch (Throwable $e) {
