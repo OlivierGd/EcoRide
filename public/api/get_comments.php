@@ -15,7 +15,7 @@ function calculatePeriodDates($period) {
         case 'today':
             return [
                 'start' => $today->format('Y-m-d'),
-                'end' => $today->format('Y-m-d')
+                'end'   => $today->format('Y-m-d')
             ];
 
         case 'yesterday':
@@ -39,13 +39,13 @@ function calculatePeriodDates($period) {
             $month->modify('-30 days');
             return [
                 'start' => $month->format('Y-m-d'),
-                'end' => $today->format('Y-m-d')
+                'end'   => $today->format('Y-m-d')
             ];
 
         case 'this_month':
             return [
                 'start' => $today->format('Y-m-01'),
-                'end' => $today->format('Y-m-d')
+                'end'   => $today->format('Y-m-d')
             ];
 
         case 'last_month':
@@ -55,13 +55,13 @@ function calculatePeriodDates($period) {
             $endLastMonth->modify('last day of last month');
             return [
                 'start' => $lastMonth->format('Y-m-d'),
-                'end' => $endLastMonth->format('Y-m-d')
+                'end'   => $endLastMonth->format('Y-m-d')
             ];
 
         case 'this_year':
             return [
                 'start' => $today->format('Y-01-01'),
-                'end' => $today->format('Y-m-d')
+                'end'   => $today->format('Y-m-d')
             ];
 
         default:

@@ -44,17 +44,24 @@ function startSession(): void {
     // Active Redis uniquement en prod
     // Connexion Redis en TCP (non TLS)
     if (!str_contains(strtolower($environment), 'development')) {
-        $redis = new Client([
-            'scheme'   => 'tcp',
-            'host'     => 'fly-withered-glitter-9761.upstash.io',
-            'port'     => 6379,
-            'password' => '2ef2ce77ce904842b61644b1db5ed9cb',
-            'timeout'  => 10.0,
-            'read_write_timeout' => 10.0,
-        ]);
-        // Définir le gestionnaire de session avec Predis
-        $handler = new Predis\Session\Handler($redis);
-        $handler->register();
+        // Récupère le mot de passe depuis les variables d'environnement
+        $redisPassword = $_ENV['REDIS_PASSWORD'] ?? getenv('REDIS_PASSWORD');
+        
+        if (!$redisPassword) {
+            error_log('REDIS_PASSWORD non défini - session par défaut utilisée');
+        } else {
+            $redis = new Client([
+                'scheme'   => 'tcp',
+                'host'     => 'fly-withered-glitter-9761.upstash.io',
+                'port'     => 6379,
+                'password' => $redisPassword,
+                'timeout'  => 10.0,
+                'read_write_timeout' => 10.0,
+            ]);
+            // Définir le gestionnaire de session avec Predis
+            $handler = new Predis\Session\Handler($redis);
+            $handler->register();
+        }
     }
 
     // Garde un nom unique
