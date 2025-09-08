@@ -255,7 +255,7 @@ $pageTitle = 'Accueil - EcoRide';
                     </div>
                 </div>
                 <div class="bg-white rounded px-3 mx-2 p-1">
-                    <p class="mt-4 mb-1 fw-semibold">Trajets verts ce mois : <span>325 trajets</span></p>
+                    <p class="mt-4 mb-1 fw-semibold">Trajets verts ce mois : <span><?= $totalGreenTrips ?> trajets</span></p>
                     <div class="progress" role="progressbar" aria-label="Animated striped example" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100">
                         <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 80%"></div>
                     </div>
