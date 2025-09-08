@@ -34,21 +34,26 @@ if ($tripsPreset) {
 
 // Récupération des commissions pour le tableau
 $pdo = Database::getConnection();
-$sql = "SELECT ch.*, u.firstname, u.lastname
-        FROM credits_history ch
-        JOIN users u ON u.user_id = ch.user_id
-        WHERE ch.status = 'trajet_propose'";
+$sql = "SELECT p.date_transaction AS created_at,
+        p.user_id,
+        u.firstname, u.lastname,
+        p.commission_plateforme AS amounts,
+        p.balance_before, p.balance_after
+        FROM payments p
+        JOIN users u ON u.user_id = p.user_id
+        WHERE p.type_transaction = 'publication_trajet'
+        AND p.commission_plateforme > 0";
 
 $params = [];
 if ($dateMin) {
-    $sql .= " AND ch.created_at >= :date_min";
+    $sql .= " AND p.date_transaction >= :date_min";
     $params[':date_min'] = $dateMin;
 }
 if ($dateMax) {
-    $sql .= " AND ch.created_at <= :date_max";
+    $sql .= " AND p.date_transaction <= :date_max";
     $params[':date_max'] = $dateMax;
 }
-$sql .= " ORDER BY ch.created_at DESC";
+$sql .= " ORDER BY p.date_transaction DESC";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
@@ -61,18 +66,18 @@ $totalGagne = array_reduce($commissions, function ($carry, $item) {
 
 // Graphique (groupées par mois)
 $sqlGraph = "
-    SELECT TO_CHAR(created_at, 'MM-YYYY') AS month,
-           SUM(ABS(amounts)) AS total
-    FROM credits_history
-    WHERE status = 'trajet_propose'
-";
+    SELECT TO_CHAR(p.date_transaction, 'MM-YYYY') AS month,
+           SUM(p.commission_plateforme) AS total
+    FROM payments p
+    WHERE p.type_transaction = 'publication_trajet'
+    AND p.commission_plateforme > 0";
 
 if ($dateMin) {
-    $sqlGraph .= " AND created_at >= :date_min_graph";
+    $sqlGraph .= " AND p.date_transaction >= :date_min_graph";
     $params[':date_min_graph'] = $dateMin;
 }
 if ($dateMax) {
-    $sqlGraph .= " AND created_at <= :date_max_graph";
+    $sqlGraph .= " AND p.date_transaction <= :date_max_graph";
     $params[':date_max_graph'] = $dateMax;
 }
 
