@@ -252,7 +252,7 @@ class Trip
                     $this->estimatedDuration
                 ]);
             } else {
-                $sql = "INSERT INTO trips (driver_id, vehicle_id, start_city, end_city, departure_at, available_seats, price_per_passenger, comment, no_smoking, music_allowed, discuss_allowed, created_at, status, start_location, end_location, estimated_duration) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING trip_id";
+                $sql = "INSERT INTO trips (driver_id, vehicle_id, start_city, end_city, departure_at, available_seats, price_per_passenger, comment, no_smoking, music_allowed, discuss_allowed, created_at, status, start_location, end_location, estimated_duration) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING trip_id";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([
                     $this->driverId,
