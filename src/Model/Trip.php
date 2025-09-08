@@ -4,6 +4,7 @@ namespace Olivierguissard\EcoRide\Model;
 
 use DateInterval;
 use DateTime;
+use DateTimeZone;
 use Exception;
 use Olivierguissard\EcoRide\Config\Database;
 use PDO;
@@ -415,7 +416,7 @@ class Trip
      */
     public function isPastTrip(): bool
     {
-        $now = new \DateTime('now', new DateTimeZone('Europe/Paris') );
+        $now = new \DateTime('now', new \DateTimeZone('Europe/Paris') );
         return $this->departureAt < $now;
     }
 
