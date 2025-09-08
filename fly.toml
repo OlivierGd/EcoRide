@@ -32,5 +32,5 @@ protocol     = "http"
   [services.concurrency]
     type = "connections"
 
-[deploy]
-release_command = "php init-db.php"
+# [deploy]
+# release_command = "php init-db.php"
