@@ -24,7 +24,7 @@ function initializeCommentsModule() {
     if (commentsFilterForm) {
         commentsFilterForm.addEventListener("submit", function (event) {
             event.preventDefault();
-            console.log('🔍 Soumission du formulaire de filtres');
+            console.log('Soumission du formulaire de filtres');
 
             const filtersData = extractFiltersFromForm();
             console.log('Filtres extraits:', filtersData);

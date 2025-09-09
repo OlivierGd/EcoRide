@@ -8,6 +8,9 @@ $end    = $_GET[$namePrefix . '_end'] ?? '';
 ?>
 
 <form method="get" id="<?= $filterId ?>" class="d-flex flex-wrap align-items-center gap-2">
+    <?php if (isset($_GET['section'])): ?>
+        <input type="hidden" name="section" value="financier">
+    <?php endif; ?>
     <!-- Presets -->
     <select name="<?= $namePrefix ?>_preset" class="form-select form-select-sm w-auto">
         <option value="">Périodes</option>
