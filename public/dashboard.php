@@ -21,7 +21,7 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'users';
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="assets/pictures/logoEcoRide.png">
+    <link rel="icon" type="image/webp" href="assets/pictures/logoEcoRide.webp">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="assets/css/dashboard.css">
@@ -32,7 +32,7 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'users';
 <nav class="sidebar-fixed bg-dark text-white">
     <div>
         <div class="container">
-            <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" class="img-fluid mb-3 rounded-1" style="width: 4em;">
+            <img src="assets/pictures/logoEcoRide.webp" alt="Logo EcoRide" class="img-fluid mb-3 rounded-1" style="width: 4em;">
             <h3 class="mb-3">EcoRide v2</h3>
         </div>
         <ul class="nav flex-column mt-2">

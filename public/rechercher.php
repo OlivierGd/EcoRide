@@ -180,7 +180,7 @@ $pageTitle = 'Rechercher un voyage';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="assets/pictures/logoEcoRide.png">
+    <link rel="icon" type="image/webp" href="assets/pictures/logoEcoRide.webp">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="assets/css/rechercher.css">
@@ -191,7 +191,7 @@ $pageTitle = 'Rechercher un voyage';
         <nav class="navbar bg-body-tertiary">
             <div class="container" style="max-width: 900px;">
                 <a class="navbar-brand" href="index.php">
-                    <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="60" class="d-inline-block align-text-center rounded">
+                    <img src="assets/pictures/logoEcoRide.webp" alt="Logo EcoRide" width="60" class="d-inline-block align-text-center rounded">
                 </a>
                 <h2 class="fw-bold mb-1 text-success">Trouver un voyage</h2>
                 <?= displayInitialsButton(); ?>

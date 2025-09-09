@@ -118,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="assets/pictures/logoEcoRide.png">
+    <link rel="icon" type="image/webp" href="assets/pictures/logoEcoRide.webp">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <title>Mot de passe oublié - EcoRide</title>
@@ -131,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a href="login.php" class="btn btn-light p-2 rounded-circle">
                 <i class="bi bi-arrow-left"></i>
             </a>
-            <img src="assets/pictures/logoEcoRide.png" alt="logo EcoRide" class="logo rounded" width="90em">
+            <img src="assets/pictures/logoEcoRide.webp" alt="logo EcoRide" class="logo rounded" width="90em">
             <div style="width: 40px;"></div>
         </header>
 

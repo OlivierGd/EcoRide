@@ -28,7 +28,7 @@ $pageTitle = 'Mes paiements - EcoRide';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="assets/pictures/logoEcoRide.png">
+    <link rel="icon" type="image/webp" href="assets/pictures/logoEcoRide.webp">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="assets/css/paiements.css">
@@ -39,7 +39,7 @@ $pageTitle = 'Mes paiements - EcoRide';
     <nav class="navbar bg-body-tertiary mb-3">
         <div class="container px-2" style="max-width: 900px;">
             <a class="navbar-brand" href="index.php">
-                <img src="assets/pictures/logoEcoRide.png" alt="Logo EcoRide" width="45" class="rounded">
+                <img src="assets/pictures/logoEcoRide.webp" alt="Logo EcoRide" width="45" class="rounded">
             </a>
             <h2 class="fw-bold text-success fs-4 mb-0">Mes paiements</h2>
             <?= displayInitialsButton(); ?>
