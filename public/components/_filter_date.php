@@ -5,6 +5,13 @@ if (!isset($filterId) || !isset($namePrefix)) {
 $preset = $_GET[$namePrefix . '_preset'] ?? '';
 $start  = $_GET[$namePrefix . '_start'] ?? '';
 $end    = $_GET[$namePrefix . '_end'] ?? '';
+
+// Construire l'url de reset
+$resetUrl = strtok($_SERVER['REQUEST_URI'], '?');
+if (isset($_GET['section'])) {
+    // Si on a une section, on préserve la section
+    $resetUrl .= '?section=' . htmlspecialchars($_GET['section']);
+}
 ?>
 
 <form method="get" id="<?= $filterId ?>" class="d-flex flex-wrap align-items-center gap-2">
@@ -33,5 +40,5 @@ $end    = $_GET[$namePrefix . '_end'] ?? '';
     </div>
 
     <button class="btn btn-sm btn-primary">Filtrer</button>
-    <a href="<?= strtok($_SERVER['REQUEST_URI'], '?') ?>" class="btn btn-sm btn-outline-secondary">Réinitialiser</a>
+    <a href="<?= htmlspecialchars($resetUrl) ?>" class="btn btn-sm btn-outline-secondary">Réinitialiser</a>
 </form>

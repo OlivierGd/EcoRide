@@ -33,7 +33,7 @@ $currentSection = $_GET['section'] ?? 'users';
     <div>
         <div class="container">
             <img src="assets/pictures/logoEcoRide.webp" alt="Logo EcoRide" class="img-fluid mb-3 rounded-1" style="width: 4em;">
-            <h3 class="mb-3">EcoRide</h3>
+            <h3 class="mb-3">EcoRide:</h3>
         </div>
         <ul class="nav flex-column mt-2">
             <li class="nav-item">

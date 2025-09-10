@@ -30,7 +30,7 @@ class DateFilterService
                 break;
 
             case 'this_week':
-                $start = $today->modify('this monday');
+                $start = $today->modify('monday this week');
                 $end = $start->modify('+6 days');
                 break;
 

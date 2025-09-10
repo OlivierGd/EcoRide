@@ -139,6 +139,7 @@ if ($departureDate !== '' && count($trips) === 0) {
     }
 }
 
+
 // Initialise les tableaux pour chaque filtre
 $energies = [];
 $places = [];
@@ -361,7 +362,11 @@ $pageTitle = 'Rechercher un voyage';
                             <div class="fw-bold me-2"><?= $nameLabel ?></div>
                             <div class="d-flex align-items-center small text-warning me-2">
                                 <?= $stars ?>
-                                <span class="ms-1 text-secondary">(<?= $ranking?>)</span>
+                                <span class="ms-1 text-secondary ranking-clickable"
+                                      style="cursor: pointer; text-decoration: underline;"
+                                      onclick="showDriverComments(<?= $driver->getUserId() ?>, '<?= htmlspecialchars($driver->getFirstName()) ?>')">
+                                            (<?= number_format($driver->getRanking(), 1) ?>)
+                                </span>
                             </div>
                             <span class="badge rounded-pill bg-success ms-auto"><?= $energy ?></span>
                         </div>
@@ -493,6 +498,156 @@ $pageTitle = 'Rechercher un voyage';
 <script src="assets/js/cities-autocomplete.js"></script>
 <script src="assets/js/rechercher.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
+<script>
+    function showDriverComments(driverId, driverName) {
+    <?php if (isAuthenticated()): ?>
+        // Utilisateur connecté : charger les commentaires
+        loadDriverComments(driverId, driverName);
+    <?php else: ?>
+        // Utilisateur non connecté : afficher message
+        showLoginRequiredMessage();
+    <?php endif; ?>
+    }
 
+    <?php if (isAuthenticated()): ?>
+        function loadDriverComments(driverId, driverName) {
+        // Afficher un indicateur de chargement
+        const modalContent = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Chargement...</span>
+            </div>
+            <p class="mt-2">Chargement des commentaires...</p>
+        </div>
+        `;
+        showCommentsModal(driverName, modalContent);
+
+        // Charger les commentaires
+        fetch(`api/get_driver_comments.php?driver_id=${driverId}`)
+        .then(response => {
+        if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+        }
+        return response.json();
+        })
+        .then(comments => {
+        displayDriverComments(driverName, comments);
+        })
+        .catch(error => {
+        console.error('Erreur:', error);
+        const errorContent = `
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle"></i>
+            Impossible de charger les commentaires.
+        </div>
+        `;
+        showCommentsModal(driverName, errorContent);
+        });
+        }
+
+        function displayDriverComments(driverName, comments) {
+        let content = '';
+
+        if (comments.length === 0) {
+        content = `
+        <div class="text-center text-muted py-4">
+            <i class="bi bi-chat-dots fs-1"></i>
+            <p class="mt-2">Aucun commentaire disponible pour ce chauffeur.</p>
+        </div>
+        `;
+        } else {
+        content = comments.map(comment => `
+        <div class="border-bottom pb-3 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="fw-bold">${comment.passenger_name}</div>
+                <div>
+                        <span class="text-warning">
+                            ${'★'.repeat(comment.rating)}${'☆'.repeat(5 - comment.rating)}
+                        </span>
+                    <small class="text-muted ms-2">
+                        ${new Date(comment.date_review).toLocaleDateString('fr-FR')}
+                    </small>
+                </div>
+            </div>
+            ${comment.commentaire ? `<p class="text-secondary mb-0">${comment.commentaire}</p>` : '<em class="text-muted">Aucun commentaire écrit</em>'}
+        </div>
+        `).join('');
+        }
+
+        showCommentsModal(driverName, content);
+        }
+    <?php endif; ?>
+
+    <?php if (!isAuthenticated()): ?>
+        function showLoginRequiredMessage() {
+        const content = `
+        <div class="text-center py-4">
+            <i class="bi bi-lock fs-1 text-warning"></i>
+            <h5 class="mt-3">Connexion requise</h5>
+            <p class="text-muted">Pour voir les commentaires de ce chauffeur, vous devez être connecté.</p>
+            <a href="connexion.php" class="btn btn-success">
+                <i class="bi bi-box-arrow-in-right"></i> Se connecter
+            </a>
+        </div>
+        `;
+        showCommentsModal('Connexion requise', content);
+        }
+    <?php endif; ?>
+
+    function showCommentsModal(title, content) {
+        // Nettoyer toute modale existante
+        const existingModal = document.getElementById('commentsModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Nettoyer les backdrops restants
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(backdrop => backdrop.remove());
+
+        // Retirer la classe modal-open du body
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+
+        // Créer la nouvelle modale
+        const modal = document.createElement('div');
+        modal.innerHTML = `
+        <div class="modal fade" id="commentsModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="commentsModalTitle"></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" id="commentsModalBody">
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+        document.body.appendChild(modal);
+
+        // Remplir le contenu
+        document.getElementById('commentsModalTitle').textContent = `Commentaires de ${title}`;
+        document.getElementById('commentsModalBody').innerHTML = content;
+
+        // Créer l'instance Bootstrap
+        const bootstrapModal = new bootstrap.Modal(document.getElementById('commentsModal'));
+
+        // Ajouter un événement pour nettoyer après fermeture
+        document.getElementById('commentsModal').addEventListener('hidden.bs.modal', function () {
+            this.remove();
+            // Double vérification du nettoyage
+            const remainingBackdrops = document.querySelectorAll('.modal-backdrop');
+            remainingBackdrops.forEach(backdrop => backdrop.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+        });
+
+        bootstrapModal.show();
+    }
+</script>
 </body>
 </html>
