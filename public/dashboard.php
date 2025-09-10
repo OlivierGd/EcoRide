@@ -14,7 +14,7 @@ $isAdmin = $currentUserRole === 3;
 $isManagerOrAdmin = $currentUserRole >= 2;
 
 // Variable pour déterminer quelle section afficher
-$currentSection = isset($_GET['section']) ? $_GET['section'] : 'users';
+$currentSection = $_GET['section'] ?? 'users';
 
 ?>
 <!DOCTYPE html>
@@ -33,7 +33,7 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'users';
     <div>
         <div class="container">
             <img src="assets/pictures/logoEcoRide.webp" alt="Logo EcoRide" class="img-fluid mb-3 rounded-1" style="width: 4em;">
-            <h3 class="mb-3">EcoRide v2</h3>
+            <h3 class="mb-3">EcoRide</h3>
         </div>
         <ul class="nav flex-column mt-2">
             <li class="nav-item">
